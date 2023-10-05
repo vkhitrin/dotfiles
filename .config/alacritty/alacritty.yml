@@ -1,0 +1,135 @@
+---
+env:
+  TERM: xterm-256color
+colors:
+  # Default colors
+  primary:
+    background: "#0e1415"
+    foreground: "#cecece"
+  # Cursor colors
+  cursor:
+    text: "#0e1415"
+    cursor: "#cd974b"
+  # Selection colors
+  selection:
+    text: "#ffffff"
+    background: "#293334"
+  # Normal colors
+  normal:
+    black: "#000000"
+    red: "#d2322d"
+    green: "#6abf40"
+    yellow: "#cd974b"
+    blue: "#217EBC"
+    magenta: "#9B3596"
+    cyan: "#178F79"
+    white: "#cecece"
+  # Bright colors
+  bright:
+    black: "#333333"
+    red: "#c33c33"
+    green: "#95cb82"
+    yellow: "#dfdf8e"
+    blue: "#71aed7"
+    magenta: "#cc8bc9"
+    cyan: "#47BEA9"
+    white: "#ffffff"
+    # Colors (Alabaster)
+    # colors:
+    #   name: Alabaster
+    #   author: tonsky
+    #   primary:
+    #     background: "#f0f0f0"
+    #     foreground: "#434343"
+    #   cursor:
+    #     text: "#f0f0f0"
+    #     cursor: "#434343"
+    #   normal:
+    #     black: "#000000"
+    #     red: "#AA3731"
+    #     green: "#448C27"
+    #     yellow: "#CB9000"
+    #     blue: "#325CC0"
+    #     magenta: "#7A3E9D"
+    #     cyan: "#0083B2"
+    #     white: "#BBBBBB"
+    #   bright:
+    #     black: "#777777"
+    #     red: "#F05050"
+    #     green: "#60CB00"
+    #     yellow: "#FFBC5D"
+    #     blue: "#007ACC"
+    #     magenta: "#E64CE6"
+    #     cyan: "#00AACB"
+    #     white: "#FFFFFF"
+  # Keyboard regex hints
+  hints:
+    enabled:
+      - regex: "(mailto:|https:|http:|file:|git:|ssh:|ftp:)[^\0-\x1F\x7F-\x9F<>\"\\s{-}\\^⟨⟩`]+"
+        hyperlinks: true
+        command: open
+        post_processing: true
+        mouse:
+          enabled: true
+          mods: None
+font:
+  normal:
+    family: SF Mono
+    style: Regular
+  bold:
+    family: SF Mono
+    style: Bold
+  italic:
+    family: SF Mono
+    style: Italic
+  size: 15
+dynamic_title: true
+window:
+  opacity: 0.999 # Workaround for https://github.com/alacritty/alacritty/issues/4410
+  decorations: buttonless
+  padding:
+    x: 5
+    y: 5
+  dynamic_padding: false
+  startup_mode: Windowed
+# scrolling:
+#   history: 10000
+#   multiplier: 3
+# auto_scroll: false
+scrolling:
+  multiplier: 0
+tabspaces: 4
+draw_bold_text_with_bright_colors: true
+debug:
+  render_timer: false
+  persistent_logging: false
+  log_level: Warn
+  print_events: false
+visual_bell:
+  animation: EaseOutExpo
+  duration: 0
+url:
+  launcher: open
+selection:
+  semantic_escape_chars: ',│`|:"'' ()[]{}<>'
+  save_to_clipboard: true
+cursor:
+  style: Block
+  unfocused_hollow: true
+live_config_reload: true
+key_bindings:
+  - { key: Left, mods: Alt, chars: "\eb" } # One word left
+  - { key: Right, mods: Alt, chars: "\ef" } # One word right
+  - { key: Left, mods: super, chars: "\x01\x01" } # Start of line, workaround for tmux to send the sequence twice
+  - { key: Right, mods: super, chars: "\x05" } # Start of line
+  - { key: Back, mods: Command, chars: "\x15" } # Delete line
+# shell:
+#   program: /opt/homebrew/bin/tmux
+#   args:
+#     - -f
+#     - /Users/vkhitrin/.tmux.conf
+#     - new-session
+#     - -A
+#     - -D
+#     - -s
+#     - local
