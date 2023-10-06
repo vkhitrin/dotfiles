@@ -14,13 +14,6 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_REDUCE_BLANKS
 setopt EXTENDED_HISTORY
 
-# Source zsh-completion
-if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
-    FPATH="/opt/homebrew/share/zsh-completions:$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-    autoload -Uz compinit promptipnit
-    compinit
-fi
-
 # Enable rtx
 [ -f "/opt/homebrew/bin/rtx" ] && eval "$(rtx activate zsh)"
 
@@ -37,31 +30,42 @@ select-word-style bash
 
 # macOS configuration
 if [[ $(uname) == "Darwin" ]];then
-  ## If ggrep is installed, 'use' it instead of grep
-  if which ggrep > /dev/null 2>&1; then
-      alias grep='ggrep --color'
-  else
-      alias grep='grep --color'
-  fi
-  
-  if [[ $(which subl) ]] 2>/dev/null; then
-      alias subl='subl --add'
-  fi
-  
-  # Terminal Editor Discovery
-  which vim > /dev/null 2>&1 && alias vi='vim'
-  which nvim > /dev/null 2>&1 && alias vim='nvim'
-  
-  # System aliases
-  alias ll='ls -l'
-  alias less='less -rf'
-  alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
-  
-  # Custom aliases
-  alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf $HOME/Library/Preferences/ByHost $HOME/.iCloudDrive/Mackup/Library/Preferences; open raycast://extensions/raycast/raycast/export-settings-data"
-  alias system_python="/usr/bin/python3"
-  alias system_pip="/usr/bin/python3 -m pip"
-  alias dotfiles='git --git-dir=$HOME/Projects/Automation/Setup/dotfiles --work-tree=$HOME'
+
+    export PATH=/opt/homebrew/bin/:/opt/homebrew/sbin/:/usr/local/sbin:$HOME/.local/bin:$PATH
+
+    # Source zsh-completion
+    if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
+        FPATH="/opt/homebrew/share/zsh-completions:$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+        autoload -Uz compinit promptipnit
+        compinit
+    fi
+
+
+    ## If ggrep is installed, 'use' it instead of grep
+    if which ggrep > /dev/null 2>&1; then
+        alias grep='ggrep --color'
+    else
+        alias grep='grep --color'
+    fi
+
+    if [[ $(which subl) ]] 2>/dev/null; then
+        alias subl='subl --add'
+    fi
+
+    # Terminal Editor Discovery
+    which vim > /dev/null 2>&1 && alias vi='vim'
+    which nvim > /dev/null 2>&1 && alias vim='nvim'
+
+    # System aliases
+    alias ll='ls -l'
+    alias less='less -rf'
+    alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
+
+    # Custom aliases
+    alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf $HOME/Library/Preferences/ByHost $HOME/.iCloudDrive/Mackup/Library/Preferences; open raycast://extensions/raycast/raycast/export-settings-data"
+    alias system_python="/usr/bin/python3"
+    alias system_pip="/usr/bin/python3 -m pip"
+    alias dotfiles='git --git-dir=$HOME/Projects/Automation/Setup/dotfiles --work-tree=$HOME'
 fi
 
 # Using mcfly if it is installed
@@ -77,14 +81,14 @@ fi
 # Snipkit widget bind only if config file exists
 if [[ -d "/Users/vkhitrin/Library/Application Support/snipkit" ]]; then
     snipkit-snippets-copy-widget () {
-            echoti rmkx
-            exec </dev/tty
-            local snipkit_output=$(mktemp ${TMPDIR:-/tmp}/snipkit.output.XXXXXXXX)
-            snipkit print -o "${snipkit_output}"
-            echoti smkx
-            cat $snipkit_output | pbcopy
-            rm -f $snipkit_output
+        echoti rmkx
+        exec </dev/tty
+        local snipkit_output=$(mktemp ${TMPDIR:-/tmp}/snipkit.output.XXXXXXXX)
+        snipkit print -o "${snipkit_output}"
+        echoti smkx
+        cat $snipkit_output | pbcopy
+        rm -f $snipkit_output
     }
-        zle -N snipkit-snippets-copy-widget
-        bindkey "^Xc" snipkit-snippets-copy-widget
+    zle -N snipkit-snippets-copy-widget
+    bindkey "^Xc" snipkit-snippets-copy-widget
 fi
