@@ -27,6 +27,13 @@ zstyle ':completion:*' group-name ''
 # Make deletion behave similar to bash
 autoload -U select-word-style
 select-word-style bash
+    
+# Terminal Editor Discovery
+which vim > /dev/null 2>&1 && alias vi='vim'; export EDITOR=vim
+which nvim > /dev/null 2>&1 && alias vim='nvim'; export EDITOR=nvim
+# Set default editor
+export VISUAL=$EDITOR
+
 
 # macOS configuration
 if [[ $(uname) == "Darwin" ]];then
@@ -52,10 +59,6 @@ if [[ $(uname) == "Darwin" ]];then
         alias subl='subl --add'
     fi
 
-    # Terminal Editor Discovery
-    which vim > /dev/null 2>&1 && alias vi='vim'
-    which nvim > /dev/null 2>&1 && alias vim='nvim'
-
     # System aliases
     alias ll='ls -l'
     alias less='less -rf'
@@ -69,7 +72,7 @@ if [[ $(uname) == "Darwin" ]];then
 fi
 
 # Using mcfly if it is installed
-if [[ $(which mcfly) ]];then
+if which mcfly > /dev/null 2>&1;then
     export MCFLY_FUZZY=0
     export MCFLY_RESULTS=50
     export MCFLY_RESULTS_SORT=LAST_RUN
