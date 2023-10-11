@@ -13,7 +13,7 @@ colors:
   # Selection colors
   selection:
     text: "#ffffff"
-    background: "#293334"
+    background: "#d2322d"
   # Normal colors
   normal:
     black: "#000000"
@@ -23,7 +23,7 @@ colors:
     blue: "#217EBC"
     magenta: "#9B3596"
     cyan: "#178F79"
-    white: "#cecece"
+    white: "#8f8f8f"
   # Bright colors
   bright:
     black: "#333333"
@@ -84,7 +84,7 @@ url:
   launcher: open
 selection:
   semantic_escape_chars: ',│`|:"'' ()[]{}<>'
-  save_to_clipboard: true
+  save_to_clipboard: false
 cursor:
   style: Block
   unfocused_hollow: true
@@ -95,13 +95,3 @@ key_bindings:
   - { key: Left, mods: super, chars: "\x01\x01" } # Start of line, workaround for tmux to send the sequence twice
   - { key: Right, mods: super, chars: "\x05" } # Start of line
   - { key: Back, mods: Command, chars: "\x15" } # Delete line
-# shell:
-#   program: /opt/homebrew/bin/tmux
-#   args:
-#     - -f
-#     - /Users/vkhitrin/.tmux.conf
-#     - new-session
-#     - -A
-#     - -D
-#     - -s
-#     - local
