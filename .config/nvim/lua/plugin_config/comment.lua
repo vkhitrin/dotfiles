@@ -1,1 +1,1 @@
-require('Comment').setup()
+require("mini.surround").setup({})

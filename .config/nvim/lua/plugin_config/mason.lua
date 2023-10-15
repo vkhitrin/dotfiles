@@ -3,7 +3,38 @@ require("mason").setup({
         icons = {
             package_installed = "✓",
             package_pending = "➜",
-            package_uninstalled = "✗"
+            package_uninstalled = "✗",
         },
-    }
+    },
+})
+require("mason-tool-installer").setup({
+    ensure_installed = {
+        "ansible-language-server",
+        "ansible-lint",
+        "autopep8",
+        "bash-language-server",
+        "black",
+        "esbonio",
+        "flake8",
+        "glow",
+        "gopls",
+        "jq",
+        "json-lsp",
+        "lua-language-server",
+        "markdownlint",
+        "prettier",
+        "pyright",
+        "shellcheck",
+        "sonarlint-language-server",
+        "stylua",
+        "terraform-ls",
+        "tflint",
+        "tfsec",
+        "typescript-language-server",
+        "yaml-language-server",
+        "yamllint",
+        "yq",
+    },
+    auto_update = false,
+    run_on_start = true,
 })

@@ -1,117 +1,79 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 local plugins = {
-    -- theme (alabaster)
+    --- theme
     {
-        "https://git.sr.ht/~p00f/alabaster.nvim",
+        "Shatur/neovim-ayu",
         lazy = false,
         config = function()
             vim.cmd([[
-      colorscheme alabaster
-      highlight BufTabLineFill guibg=#1a2022
-      highlight BufTabLineCurrent guibg=#d2322d guifg=#cecece gui=bold
-      highlight BufTabLineActive guibg=#1b2022
-      highlight BufTabLineHidden guibg=#1b2022
-      ]])
-        end,
-    },
-    -- buffer
+          colorscheme ayu-dark]])
+            vim.cmd([[
+          highlight LineNr guibg=transparent guifg=#545454]])
+            vim.cmd([[
+          highlight GitSignsCurrentLineBlame guibg=transparent guifg=#545454]])
+        end
+    }, --- dashboard
     {
-        "ap/vim-buftabline",
+        "goolord/alpha-nvim",
+        event = "VimEnter",
+        config = function() require("plugin_config.alpha") end
+    }, {
+        --- buffer
+        {
+            "akinsho/bufferline.nvim",
+            config = function() require("plugin_config.bufferline") end
+        }, --- lualine
         {
             "nvim-lualine/lualine.nvim",
             event = "VeryLazy",
-            config = function()
-                require("plugin_config.lualine")
-            end,
-        },
+            config = function() require("plugin_config.lualine") end
+        }, --- treesitter
         {
             "nvim-treesitter/nvim-treesitter",
-            config = function()
-                require("plugin_config.treesitter")
-            end,
-        },
-        -- telescope
+            config = function() require("plugin_config.treesitter") end,
+            dependencies = {"JoosepAlviste/nvim-ts-context-commentstring"}
+        }, --- telescope
         {
             "nvim-telescope/telescope.nvim",
             dependencies = {
                 "nvim-lua/plenary.nvim",
+                "nvim-telescope/telescope-ui-select.nvim", "BurntSushi/ripgrep"
             },
-            config = function()
-                require("plugin_config/telescope")
-            end,
-        },
-        "BurntSushi/ripgrep",
+            config = function() require("plugin_config/telescope") end
+        }, --- gitsigns
         {
             "lewis6991/gitsigns.nvim",
-            config = function()
-                require("plugin_config.gitsigns")
-            end,
-        },
-        -- null-ls.nvim is deprecated https://github.com/jose-elias-alvarez/null-ls.nvim/issues/1621
-        {
-            "jose-elias-alvarez/null-ls.nvim",
-            config = function()
-                require("plugin_config.mason-null-ls")
-            end,
-        },
-        {
-            "folke/trouble.nvim",
-            config = function()
-                require("plugin_config.trouble")
-            end,
-        },
-        {
-            "folke/todo-comments.nvim",
-            config = function()
-                require("plugin_config.todo-comments")
-            end,
-        },
-        "christoomey/vim-tmux-navigator",
+            config = function() require("plugin_config.gitsigns") end
+        }, --- mason + lsp
         {
             "williamboman/mason.nvim",
             dependencies = {
-                "jose-elias-alvarez/null-ls.nvim",
+                "WhoIsSethDaniel/mason-tool-installer.nvim",
+                "williamboman/mason-lspconfig.nvim", "neovim/nvim-lspconfig"
             },
             build = ":MasonUpdate",
             config = function()
                 require("plugin_config.mason")
-            end,
-        },
-        {
-            "williamboman/mason-lspconfig.nvim",
-            config = function()
                 require("plugin_config.mason-lsp")
-            end,
-        },
-        {
-            "neovim/nvim-lspconfig",
-            config = function()
                 require("plugin_config.lsp")
-            end,
+            end
         },
+        ---- null-ls.nvim is deprecated https://github.com/jose-elias-alvarez/null-ls.nvim/issues/1621
         {
             "jay-babu/mason-null-ls.nvim",
-            event = { "BufReadPre", "BufNewFile" },
-            dependencies = {
-                "williamboman/mason.nvim",
-                "jose-elias-alvarez/null-ls.nvim",
-            },
-        },
+            event = {"BufReadPre", "BufNewFile"},
+            dependencies = {"jose-elias-alvarez/null-ls.nvim"}
+        }, -- misc
         {
-            "WhoIsSethDaniel/mason-tool-installer.nvim",
-            depencdencies = { "williamboman/mason.nvim" },
+            "folke/trouble.nvim",
+            config = function() require("plugin_config.trouble") end
+        }, {
+            "folke/todo-comments.nvim",
             config = function()
-                require("plugin_config.mason-tool-installer")
-            end,
-        },
-        {
-            "goolord/alpha-nvim",
-            event = "VimEnter",
-            config = function()
-                require("plugin_config.alpha")
-            end,
-        },
+                require("plugin_config.todo-comments")
+            end
+        }, -- "christoomey/vim-tmux-navigator",
         {
             "folke/which-key.nvim",
             event = "VeryLazy",
@@ -119,56 +81,55 @@ local plugins = {
                 vim.o.timeout = true
                 vim.o.timeoutlen = 300
             end,
-            config = function()
-                require("plugin_config.which-key")
-            end,
-        },
-        {
-            "windwp/nvim-autopairs",
-            event = "InsertEnter",
-            opts = {}, -- this is equalent to setup({}) function
-        },
-        { "https://github.com/mfussenegger/nvim-ansible.git" },
-        {
-            "numToStr/Comment.nvim",
-            config = function()
-                require("plugin_config.comment")
-            end,
-        },
-        { "romainl/vim-cool" },
-        {
+            config = function() require("plugin_config.which-key") end
+        }, {"echasnovski/mini.pairs", event = "InsertEnter", opts = {}},
+        {"https://github.com/mfussenegger/nvim-ansible.git"},
+        {"echasnovski/mini.surround", opts = {}}, {
             "b0o/schemastore.nvim",
-            config = function()
-                require("plugin_config.schemastore")
-            end,
-        },
+            config = function() require("plugin_config.schemastore") end
+        }, --- completion
         {
             "hrsh7th/nvim-cmp",
             dependencies = {
-                "hrsh7th/cmp-nvim-lsp",
-                "hrsh7th/cmp-buffer",
-                "hrsh7th/cmp-path",
-                "hrsh7th/cmp-cmdline",
-                "hrsh7th/cmp-vsnip",
-                "hrsh7th/vim-vsnip",
+                "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer",
+                "hrsh7th/cmp-path", "hrsh7th/cmp-cmdline", "hrsh7th/cmp-vsnip",
+                "rafamadriz/friendly-snippets", "onsails/lspkind.nvim",
+                "saadparwaiz1/cmp_luasnip"
             },
+            config = function() require("plugin_config.nvim-cmp") end
+        }, {"L3MON4D3/LuaSnip", build = "make install_jsregexp"}, --- misc: editor
+        {
+            "lukas-reineke/indent-blankline.nvim",
             config = function()
-                require("plugin_config.nvim-cmp")
-            end,
-        },
-    },
+                require("plugin_config.indent-blankline")
+            end
+        }, {
+            "echasnovski/mini.comment",
+            opts = {
+                options = {
+                    custom_commentstring = function()
+                        return
+                            require("ts_context_commentstring.internal").calculate_commentstring() or
+                                vim.bo.commentstring
+                    end
+                }
+            }
+        }, {"romainl/vim-cool"}, {
+            "RRethy/vim-illuminate",
+            config = function()
+                require("plugin_config.vim-illuminate")
+            end
+        }
+    }
 }
 
 local opts = {}
 
 if not vim.loop.fs_stat(lazypath) then
     vim.fn.system({
-        "git",
-        "clone",
-        "--filter=blob:none",
-        "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable", -- latest stable release
-        lazypath,
+        "git", "clone", "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git", "--branch=stable", -- latest stable release
+        lazypath
     })
 end
 vim.opt.rtp:prepend(lazypath)

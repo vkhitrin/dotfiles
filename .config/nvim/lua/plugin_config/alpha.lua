@@ -13,11 +13,9 @@ dashboard.section.header.val = {
     "                                                     ",
     "                                                     ",
     "                                                     ",
-    " TODO(vkhitrin): Actually configure neovim:          ",
-    " - Fix mason + null-ls overrides                     ",
-    " - Fix LSP and auto completion                       ",
-    " - Fix go LSP and formatting                         ",
-    " - Completion (using nvim-cmp)                       ",
+    " TODO(vkhitrin): Keep configuring nvim               ",
+    "   ● Fix `go` LSP                                    ",
+    "   ● Remap keybindings                               ",
 }
 
 -- Set menu
