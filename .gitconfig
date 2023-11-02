@@ -1,6 +1,5 @@
 [user]
     name = Vadim Khitrin
-    email = me@vkhitrin.com
 [alias]
     graph = log --stat --graph --pretty=fuller --date=relative
     amend = commit --amend
@@ -37,3 +36,15 @@
     conflictstyle = diff3
 [diff]
     colorMoved = default
+# Include work related configuration - HTTPS
+[includeIf "hasconfig:remote.*.url:**github-work.com:*/**"]
+    path = ~/.config/git/.gitconfig.work
+# Include work related configuration - SSH
+[includeIf "hasconfig:remote.*.url:ssh://github-work.com:*/**"]
+    path = ~/.config/git/.gitconfig.work
+# Include private related configuration - HTTPS
+[includeIf "hasconfig:remote.*.url:**github.com:*/**"]
+    path = ~/.config/git/.gitconfig.private
+# Include private related configuration - SSH
+[includeIf "hasconfig:remote.*.url:ssh://github.com:*/**"]
+    path = ~/.config/git/.gitconfig.private
