@@ -47,6 +47,7 @@ if [[ $(uname) == "Darwin" ]];then
         compinit
     fi
 
+    [ -S "$HOME/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock" ] && export SSH_AUTH_SOCK="$HOME/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock"
 
     # If ggrep is installed, 'use' it instead of grep
     if which ggrep > /dev/null 2>&1; then
@@ -64,6 +65,7 @@ if [[ $(uname) == "Darwin" ]];then
     [ -f "/Users/vadimk/Library/Python/3.9/bin/mackup" ] && alias mackup="/Users/vadimk/Library/Python/3.9/bin/mackup"
 
     # System aliases
+    alias sudoedit='sudo -e'
     alias ll='ls -l'
     alias less='less -rf'
     alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
