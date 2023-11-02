@@ -3,14 +3,14 @@ vim.g.mapleader = " " -- set space as leader key
 local map = vim.api.nvim_set_keymap
 
 -- nvim
-map("n", "<leader>qq", ":exit<cr>",
-    {noremap = true, silent = true, desc = "quit"}) -- exit vim
-map("n", "<leader>qs", ":write<cr>",
-    {noremap = true, silent = true, desc = "write"}) -- write buffer
-map("n", "<leader>qm", ":Mason<cr>",
-    {noremap = true, silent = true, desc = "Mason"}) -- Mason
-map("n", "<leader>ql", ":Lazy<cr>",
-    {noremap = true, silent = true, desc = "Lazy"}) -- Mason
+-- map("n", "<leader>qq", ":exit<cr>",
+--     {noremap = true, silent = true, desc = "quit"}) -- exit vim
+-- map("n", "<leader>qs", ":write<cr>",
+--     {noremap = true, silent = true, desc = "write"}) -- write buffer
+-- map("n", "<leader>qm", ":Mason<cr>",
+--     {noremap = true, silent = true, desc = "Mason"}) -- Mason
+-- map("n", "<leader>ql", ":Lazy<cr>",
+    -- {noremap = true, silent = true, desc = "Lazy"}) -- Mason
 -- bufferline
 map("n", "[1", ":BufferLineGoToBuffer 1<cr>",
     {noremap = true, silent = true, desc = "buffer #1"})
@@ -35,7 +35,7 @@ map("n", "[9", ":BufferLineGoToBuffer 9<cr>",
 -- map("n", "[b", ":BufferLineCyclePrev<cr>",
 --     { noremap = true, silent = true, desc = "previous buffer" })
 -- telescope
-map("n", "<leader>ff", ":Telescope find_files hidden=true<cr>",
+map("n", "<leader>ff", ":lua project_files()<cr>",
     {noremap = true, desc = "files"}) -- find files
 map("n", "<leader>fg", ":Telescope live_grep<cr>",
     {noremap = true, silent = true, desc = "grep"}) -- grep
@@ -43,14 +43,16 @@ map("n", "<leader>fb", ":Telescope buffers<cr>",
     {noremap = true, silent = true, desc = "buffers"}) -- buffers
 map("n", "<leader>fh", ":Telescope help_tags<cr>",
     {noremap = true, silent = true, desc = "nvim help tags"}) -- help
-map("n", "<leader>ft", ":TodoTelescope<cr>",
+map("n", "<leader>ft", ":Telescope file_browser<cr>",
+    {noremap = true, silent = true, desc = "Tree"}) -- todo
+map("n", "<leader>fT", ":TodoTelescope<cr>",
     {noremap = true, silent = true, desc = "todo"}) -- todo
 map("n", "<leader>fG", ":Telescope git_commits<cr>",
     {noremap = true, silent = true, desc = "git commits"}) -- git commits
 map("n", "<leader>fc", ":Telescope commands<cr>",
     {noremap = true, silent = true, desc = "commands"}) -- git commits
 map("n", "<leader>fs", ":Telescope lsp_document_symbols<cr>",
-    {noremap = true, silent = true, desc = "commands"}) -- git commits
+    {noremap = true, silent = true, desc = "symbols"}) -- git commits
 -- LSP
 map("n", "<leader>lf", ":lua vim.lsp.buf.format({async = true})<cr>",
     {noremap = true, silent = true, desc = "format"}) -- lsp - format
