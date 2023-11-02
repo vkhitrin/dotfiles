@@ -15,7 +15,7 @@ setopt HIST_REDUCE_BLANKS
 setopt EXTENDED_HISTORY
 
 # Enable rtx
-[ -f "/opt/homebrew/bin/rtx" ] && eval "$(rtx activate zsh)"
+[ -f "/opt/homebrew/bin/rtx" ] && eval "$(/opt/homebrew/bin/rtx activate zsh)"
 
 # Add tab highlight
 zstyle ':completion:*' menu select
@@ -48,16 +48,20 @@ if [[ $(uname) == "Darwin" ]];then
     fi
 
 
-    ## If ggrep is installed, 'use' it instead of grep
+    # If ggrep is installed, 'use' it instead of grep
     if which ggrep > /dev/null 2>&1; then
         alias grep='ggrep --color'
     else
         alias grep='grep --color'
     fi
 
+    # If sublime is installed
     if [[ $(which subl) ]] 2>/dev/null; then
         alias subl='subl --add'
     fi
+
+    # If mackup is installed as part of system's python
+    [ -f "/Users/vadimk/Library/Python/3.9/bin/mackup" ] && alias mackup="/Users/vadimk/Library/Python/3.9/bin/mackup"
 
     # System aliases
     alias ll='ls -l'
