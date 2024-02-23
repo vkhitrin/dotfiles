@@ -6,14 +6,14 @@ local plugins = {
 		"catppuccin/nvim",
 		priority = 1000,
 		config = function()
-			require("plugin_config.catppuccin")
+			require("plugins.ui.catppuccin")
 		end,
 	}, --- dashboard
 	{
 		"goolord/alpha-nvim",
 		event = "VimEnter",
 		config = function()
-			require("plugin_config.alpha")
+			require("plugins.ui.alpha")
 		end,
 	},
 	{
@@ -21,20 +21,20 @@ local plugins = {
 		{
 			"akinsho/bufferline.nvim",
 			config = function()
-				require("plugin_config.bufferline")
+				require("plugins.ui.bufferline")
 			end,
 		}, --- lualine
 		{
 			"nvim-lualine/lualine.nvim",
 			event = "VeryLazy",
 			config = function()
-				require("plugin_config.lualine")
+				require("plugins.ui.lualine")
 			end,
 		}, --- treesitter
 		{
 			"nvim-treesitter/nvim-treesitter",
 			config = function()
-				require("plugin_config.treesitter")
+				require("plugins.editor.treesitter")
 			end,
 			dependencies = { "JoosepAlviste/nvim-ts-context-commentstring" },
 		}, --- telescope
@@ -47,13 +47,13 @@ local plugins = {
 				"BurntSushi/ripgrep",
 			},
 			config = function()
-				require("plugin_config/telescope")
+				require("plugins.editor.telescope")
 			end,
 		}, --- gitsigns
 		{
 			"lewis6991/gitsigns.nvim",
 			config = function()
-				require("plugin_config.gitsigns")
+				require("plugins.ui.gitsigns")
 			end,
 		}, --- mason + lsp
 		{
@@ -65,9 +65,9 @@ local plugins = {
 			},
 			build = ":MasonUpdate",
 			config = function()
-				require("plugin_config.mason")
-				require("plugin_config.mason-lsp")
-				require("plugin_config.lsp")
+				require("plugins.editor.mason")
+				require("plugins.lsp.mason-lsp")
+				require("plugins.lsp.lsp")
 			end,
 		},
 		{
@@ -78,13 +78,13 @@ local plugins = {
 		{
 			"folke/trouble.nvim",
 			config = function()
-				require("plugin_config.trouble")
+				require("plugins.lsp.trouble")
 			end,
 		},
 		{
 			"folke/todo-comments.nvim",
 			config = function()
-				require("plugin_config.todo-comments")
+				require("plugins.editor.todo-comments")
 			end,
 		}, -- "christoomey/vim-tmux-navigator",
 		{
@@ -95,7 +95,7 @@ local plugins = {
 				vim.o.timeoutlen = 300
 			end,
 			config = function()
-				require("plugin_config.which-key")
+				require("plugins.editor.which-key")
 			end,
 		},
 		{ "echasnovski/mini.pairs", event = "InsertEnter", opts = {} },
@@ -104,7 +104,7 @@ local plugins = {
 		{
 			"b0o/schemastore.nvim",
 			config = function()
-				require("plugin_config.schemastore")
+				require("plugins.editor.schemastore")
 			end,
 		}, --- completion
 		{
@@ -120,14 +120,14 @@ local plugins = {
 				"saadparwaiz1/cmp_luasnip",
 			},
 			config = function()
-				require("plugin_config.nvim-cmp")
+				require("plugins.editor.nvim-cmp")
 			end,
 		},
 		{ "L3MON4D3/LuaSnip", build = "make install_jsregexp" }, --- misc: editor
 		{
 			"lukas-reineke/indent-blankline.nvim",
 			config = function()
-				require("plugin_config.indent-blankline")
+				require("plugins.ui.indent-blankline")
 			end,
 		},
 		{
@@ -145,7 +145,7 @@ local plugins = {
 		{
 			"RRethy/vim-illuminate",
 			config = function()
-				require("plugin_config.vim-illuminate")
+				require("plugins.editor.vim-illuminate")
 			end,
 		},
 		{
@@ -153,9 +153,10 @@ local plugins = {
 			event = "VeryLazy",
 			opts = {},
 			config = function()
-				require("plugin_config.lsp-signature")
+				require("plugins.lsp.lsp-signature")
 			end,
 		},
+        { "towolf/vim-helm" }
 	},
 }
 

@@ -40,7 +40,7 @@ export VISUAL=$EDITOR
 # macOS configuration
 if [[ $(uname) == "Darwin" ]];then
 
-    export PATH=/opt/homebrew/sbin:/usr/local/sbin:$HOME/.local/bin:$PATH
+    export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$PATH
 
     # Source zsh-completion
     if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
