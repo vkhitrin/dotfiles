@@ -86,6 +86,7 @@ if [[ $(uname) == "Darwin" ]];then
     alias ll='ls -l'
     alias less='less -rf'
     alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
+    alias gcc='/opt/homebrew/bin/gcc-13'
 
     # Custom aliases
     alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf $HOME/Library/Preferences/ByHost $HOME/.iCloudDrive/Mackup/Library/Preferences; open raycast://extensions/raycast/raycast/export-settings-data"

@@ -6,3 +6,6 @@ export LANG=en_US.UTF-8
 export HISTFILE=~/.zsh_history
 export HISTSIZE=10000000
 export SAVEHIST=10000000
+
+# Custom env variables
+export IS_SERVER=false
