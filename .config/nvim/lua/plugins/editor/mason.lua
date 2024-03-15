@@ -40,6 +40,6 @@ require("mason-tool-installer").setup({
 		"yq",
 		"actionlint",
 	},
-	auto_update = false,
+	auto_update = true,
 	run_on_start = true,
 })

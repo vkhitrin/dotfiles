@@ -77,7 +77,7 @@ index = 17
 color = "#F5E0DC"
 
 [cursor]
-style = "Block"
+style = { shape = "Block"}
 unfocused_hollow = true
 
 [debug]
@@ -160,5 +160,5 @@ dynamic_padding = false
 startup_mode = "Windowed"
 
 [window.padding]
-x = 10
-y = 10
+x = 5
+y = 5

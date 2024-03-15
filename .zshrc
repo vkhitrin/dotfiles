@@ -1,7 +1,7 @@
 # Fix editor issue with zsh https://unix.stackexchange.com/questions/602732/how-do-i-figure-out-what-just-broke-my-zsh-shell-beginning-of-line-and-end-of-li
 bindkey -e
 zmodload zsh/complist
-bindkey -M menuselect '^[[Z' reverse-menu-complete 
+bindkey -M menuselect '^[[Z' reverse-menu-complete
 bindkey "^[[3~" delete-char
 
 # History enhancements
@@ -17,8 +17,6 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_REDUCE_BLANKS
 setopt EXTENDED_HISTORY
 
-# Enable mise (formerly known as rtx)
-[ -f "/opt/homebrew/bin/mise" ] && eval "$(/opt/homebrew/bin/mise activate zsh)"
 # Add tab highlight
 zstyle ':completion:*' menu select
 # Add zsh case-insensitive completion
@@ -29,18 +27,15 @@ zstyle ':completion:*' group-name ''
 # Make deletion behave similar to bash
 autoload -U select-word-style
 select-word-style bash
-    
-# Terminal Editor Discovery
-which vim > /dev/null 2>&1 && alias vi='vim'; export EDITOR=vim
-which nvim > /dev/null 2>&1 && alias vim='nvim'; export EDITOR=nvim
-# Set default editor
-export VISUAL=$EDITOR
-
 
 # macOS configuration
 if [[ $(uname) == "Darwin" ]];then
 
     export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$PATH
+    # Enable mise (formerly known as rtx)
+    [ -f "/opt/homebrew/bin/mise" ] && eval "$(/opt/homebrew/bin/mise activate zsh)"
+    # Enable starship
+    [ -f "/opt/homebrew/bin/starship" ] && eval "$(/opt/homebrew/bin/starship init zsh)"
 
     # Source zsh-completion
     if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
@@ -80,6 +75,11 @@ if [[ $(uname) == "Darwin" ]];then
     # If clop is installed
     [ -f "/Applications/Clop.app/Contents/SharedSupport/ClopCLI" ] && alias clop="/Applications/Clop.app/Contents/SharedSupport/ClopCLI"
 
+    # If krew is installed
+    if [[ $(which kubectl-krew) ]] 2>/dev/null; then
+        export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+    fi
+
     # System aliases
     alias sudoedit='sudo -e'
     alias ls="ls --color=auto -F"
@@ -104,7 +104,7 @@ fi
 #     export MCFLY_LIGHT=false
 #     eval "$(mcfly init zsh)"
 # fi
- 
+
 # Using atuin if it is installed
 if which atuin > /dev/null 2>&1;then
     eval "$(atuin init zsh --disable-up-arrow)"
@@ -113,6 +113,28 @@ fi
 if which bat > /dev/null 2>&1;then
     alias cat="bat"
 fi
+
+if which batman > /dev/null 2>&1;then
+    alias man="batman"
+fi
+
+# Terminal Editor Discovery
+which vim > /dev/null 2>&1 && alias vi='vim'; export EDITOR=vim
+which nvim > /dev/null 2>&1 && alias vim='nvim'; export EDITOR=nvim
+# Set default editor
+export VISUAL=$EDITOR
+
+incognito () {
+    if [[ $1 = disable ]] || [[ $1 == d ]]; then
+        export HISTFILE=~/.zsh_history
+        add-zsh-hook precmd _atuin_precmd
+        add-zsh-hook preexec _atuin_preexec
+    else
+        unset HISTFILE
+        add-zsh-hook -d precmd _atuin_precmd
+        add-zsh-hook -d preexec _atuin_preexec
+    fi
+}
 
 # Snipkit widget bind only if config file exists
 # if [[ -d "$HOME/Library/Application Support/snipkit" ]]; then
