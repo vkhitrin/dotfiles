@@ -74,6 +74,9 @@ local plugins = {
 			"jay-babu/mason-null-ls.nvim",
 			event = { "BufReadPre", "BufNewFile" },
 			dependencies = { "nvimtools/none-ls.nvim" },
+			config = function()
+				require("plugins.lsp.mason-null-ls")
+			end,
 		}, -- misc
 		{
 			"folke/trouble.nvim",

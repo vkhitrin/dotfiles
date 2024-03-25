@@ -58,7 +58,9 @@ map("n", "<leader>lf", ":lua vim.lsp.buf.format({async = true})<cr>",
     {noremap = true, silent = true, desc = "format"}) -- lsp - format
 map("n", "<leader>li", ":LspInfo<cr>",
     {noremap = true, silent = true, desc = "LSP info"}) -- lsp - info
-map("n", "<leader>ln", ":NullLsInfo<cr>",
+map("n", "<leader>li", ":NullLsInfo<cr>",
+    {noremap = true, silent = true, desc = "none-ls info"}) -- lsp - info
+map("n", "<leader>lN", ":NullLsInfo<cr>",
     {noremap = true, silent = true, desc = "null-ls info"}) -- lsp - format
 map("n", "<leader>ln", ":lua vim.lsp.buf.code_action()<CR>",
     {noremap = true, silent = true, desc = "code actions"}) -- lsp - format

@@ -29,18 +29,38 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
--- local default_setup = function(server) lspconfig[server].setup({}) end
-
--- require("mason-lspconfig").setup({handlers = {default_setup}})
 require("mason-lspconfig").setup({
-	handlers = {
-		default_setup,
-	},
+	function(server_name) -- default handler (optional)
+		require("lspconfig")[server_name].setup({})
+	end,
+	["lua_ls"] = lspconfig.lua_ls.setup({
+		settings = {
+			Lua = {
+				runtime = {
+					version = "LuaJIT",
+				},
+				diagnostics = {
+					globals = { "vim" },
+				},
+				telmetry = {
+					enable = false,
+				},
+			},
+		},
+	}),
 })
 
-local null_ls = require("null-ls")
-
-require("mason-null-ls").setup({ handlers = {} })
-
-null_ls.setup({})
-require("lsp_signature").on_attach()
+require("lsp_signature").on_attach(vim.api.nvim_create_autocmd("CursorHold", {
+	buffer = bufnr,
+	callback = function()
+		local opts = {
+			focusable = false,
+			close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+			border = "rounded",
+			source = "always",
+			prefix = " ",
+			scope = "cursor",
+		}
+		vim.diagnostic.open_float(nil, opts)
+	end,
+}))
