@@ -159,11 +159,41 @@ local plugins = {
 				require("plugins.lsp.lsp-signature")
 			end,
 		},
-        { "towolf/vim-helm" }
+		{ "towolf/vim-helm" },
+		{
+			"LunarVim/bigfile.nvim",
+			config = function()
+				require("plugins.editor.bigfile")
+			end,
+		},
 	},
 }
 
-local opts = {}
+local opts = {
+	install = {
+		colorscheme = { "catppuccin" },
+	},
+	ui = {
+		backdrop = 100,
+		border = "rounded",
+        title = " Lazy Plugin Manager ",
+		icons = {
+			cmd = "⌘",
+			config = "🛠",
+			event = "📅",
+			ft = "📂",
+			init = "⚙",
+			keys = "🗝",
+			plugin = "🔌",
+			runtime = "💻",
+			require = "🌙",
+			source = "📄",
+			start = "🚀",
+			task = "📌",
+			lazy = "💤 ",
+		},
+	},
+}
 
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
