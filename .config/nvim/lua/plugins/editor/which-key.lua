@@ -12,6 +12,6 @@ mappings = {
 wk.register(mappings, opts)
 wk.setup({
 	window = {
-		border = "single",
+		border = "rounded",
 	},
 })

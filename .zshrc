@@ -80,6 +80,9 @@ if [[ $(uname) == "Darwin" ]];then
         export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
     fi
 
+    # If MinIO client installed
+    [[ -f /opt/homebrew/bin/mc ]] && complete -o nospace -C /opt/homebrew/bin/mc mc
+
     # System aliases
     alias sudoedit='sudo -e'
     alias ls="ls --color=auto -F"
@@ -152,3 +155,4 @@ incognito () {
 # fi
 
 autoload -U +X bashcompinit && bashcompinit
+

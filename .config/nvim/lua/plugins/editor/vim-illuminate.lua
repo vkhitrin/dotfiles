@@ -3,6 +3,8 @@ require("illuminate").configure({
 		"dirbuf",
 		"dirvish",
 		"fugitive",
-        "alpha"
+        "alpha",
+        "toggleterm",
+        "lazyterm"
 	},
 })

@@ -1,9 +1,7 @@
 local lspconfig = require("lspconfig")
+local schemastore = require("schemastore")
+require("lspconfig.ui.windows").default_options.border = "rounded"
 local lsp_defaults = lspconfig.util.default_config
-local default_setup = function(server)
-	lspconfig[server].setup({})
-end
-
 lsp_defaults.capabilities =
 	vim.tbl_deep_extend("force", lsp_defaults.capabilities, require("cmp_nvim_lsp").default_capabilities())
 --- Rebind to personal keybindings
@@ -29,6 +27,38 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
+local yaml_companion_settings = require("yaml-companion").setup({
+	schemas = {
+		{
+			name = "Kustomization",
+			uri = "https://json.schemastore.org/kustomization.json",
+		},
+		{
+			name = "GitHub Workflow",
+			uri = "https://json.schemastore.org/github-workflow.json",
+		},
+	},
+	builtin_matches = {
+		kubernetes = { enabled = true },
+		cloud_init = { enabled = true },
+	},
+	lspconfig = {
+		settings = {
+			redhat = { telmetry = { enabled = false } },
+			yaml = {
+				validate = true,
+				hover = true,
+				schemaStore = {
+					enable = false,
+					url = "",
+				},
+				single_file_support = true,
+				schemas = schemastore.yaml.schemas({}),
+			},
+		},
+	},
+})
+
 require("mason-lspconfig").setup({
 	function(server_name) -- default handler (optional)
 		require("lspconfig")[server_name].setup({})
@@ -45,10 +75,29 @@ require("mason-lspconfig").setup({
 				telmetry = {
 					enable = false,
 				},
+				workspace = {
+					checkThirdParty = false,
+					-- library = {
+					-- 	unpack(vim.api.nvim_get_runtime_file("", true)),
+					-- 	vim.api.nvim_get_proc,
+					-- },
+				},
 			},
 		},
 	}),
+	["json"] = lspconfig.jsonls.setup({
+		settings = {
+			json = {
+				schemas = schemastore.json.schemas(),
+				validate = { enable = true },
+			},
+		},
+	}),
+	["yamlls"] = lspconfig.yamlls.setup({
+		yaml_companion_settings,
+	}),
 })
+-- lspconfig.yamlls.setup(yaml_companion_settings)
 
 require("lsp_signature").on_attach(vim.api.nvim_create_autocmd("CursorHold", {
 	buffer = bufnr,
@@ -64,3 +113,11 @@ require("lsp_signature").on_attach(vim.api.nvim_create_autocmd("CursorHold", {
 		vim.diagnostic.open_float(nil, opts)
 	end,
 }))
+
+-- Add borders to float windows
+local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+  opts = opts or {}
+  opts.border = "rounded"
+  return orig_util_open_floating_preview(contents, syntax, opts, ...)
+end

@@ -23,13 +23,7 @@ local plugins = {
 			config = function()
 				require("plugins.ui.bufferline")
 			end,
-		}, --- lualine
-		{
-			"nvim-lualine/lualine.nvim",
-			event = "VeryLazy",
-			config = function()
-				require("plugins.ui.lualine")
-			end,
+		},
 		}, --- treesitter
 		{
 			"nvim-treesitter/nvim-treesitter",
@@ -80,9 +74,37 @@ local plugins = {
 		}, -- misc
 		{
 			"folke/trouble.nvim",
+			branch = "dev",
 			config = function()
 				require("plugins.lsp.trouble")
 			end,
+			keys = {
+				{
+					"<leader>xx",
+					"<cmd>Trouble diagnostics toggle<cr>",
+					desc = "Diagnostics (Trouble)",
+				},
+				{
+					"<leader>xX",
+					"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+					desc = "Buffer Diagnostics (Trouble)",
+				},
+				{
+					"<leader>cs",
+					"<cmd>Trouble symbols toggle focus=false<cr>",
+					desc = "Symbols (Trouble)",
+				},
+				{
+					"<leader>xL",
+					"<cmd>Trouble loclist toggle<cr>",
+					desc = "Location List (Trouble)",
+				},
+				{
+					"<leader>xQ",
+					"<cmd>Trouble qflist toggle<cr>",
+					desc = "Quickfix List (Trouble)",
+				},
+			},
 		},
 		{
 			"folke/todo-comments.nvim",
@@ -104,12 +126,8 @@ local plugins = {
 		{ "echasnovski/mini.pairs", event = "InsertEnter", opts = {} },
 		{ "https://github.com/mfussenegger/nvim-ansible.git" },
 		{ "echasnovski/mini.surround", opts = {} },
-		{
-			"b0o/schemastore.nvim",
-			config = function()
-				require("plugins.editor.schemastore")
-			end,
-		}, --- completion
+		{ "b0o/schemastore.nvim" },
+		--- completion
 		{
 			"hrsh7th/nvim-cmp",
 			dependencies = {
@@ -166,6 +184,20 @@ local plugins = {
 				require("plugins.editor.bigfile")
 			end,
 		},
+		{
+			"someone-stole-my-name/yaml-companion.nvim",
+			dependencies = {
+				"neovim/nvim-lspconfig",
+				"nvim-lua/plenary.nvim",
+				"nvim-telescope/telescope.nvim",
+			},
+		},
+		{
+			"nvim-lualine/lualine.nvim",
+			event = "VeryLazy",
+			config = function()
+				require("plugins.ui.lualine")
+			end,
 	},
 }
 
@@ -176,7 +208,7 @@ local opts = {
 	ui = {
 		backdrop = 100,
 		border = "rounded",
-        title = " Lazy Plugin Manager ",
+		title = " Lazy Plugin Manager ",
 		icons = {
 			cmd = "⌘",
 			config = "🛠",

@@ -6,6 +6,8 @@ dashboard.section.header.val = {
 	"TODO:                                                          ",
 	"- Lazy load more plugins                                       ",
 	"- Configure keybindings                                        ",
+	"- Fix YAML schemastore                                         ",
+	"- Fix schema integration with Statusline                       ",
 	"- Fix golang LSP                                               ",
 }
 
