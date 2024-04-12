@@ -1,5 +1,8 @@
 require("telescope").setup({
-	defaults = { file_ignore_patterns = { "^.git/", "^node_modules/" } },
+	defaults = {
+		file_ignore_patterns = { "^.git/", "^node_modules/" },
+		initial_mode = "insert",
+	},
 	pickers = {
 		find_files = {
 			follow = true,
@@ -15,6 +18,7 @@ require("telescope").setup({
 		["file_browser"] = {
 			hijack_netrw = true,
 			follow_symlinks = true,
+			disable_devicons = true,
 			hidden = {
 				file_browser = true,
 				folder_browser = true,

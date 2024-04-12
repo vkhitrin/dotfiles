@@ -139,6 +139,15 @@ incognito () {
     fi
 }
 
+_oci_completion() {
+    COMPREPLY=( $( env COMP_WORDS="${COMP_WORDS[*]}" \
+                   COMP_CWORD=$COMP_CWORD \
+                   _OCI_COMPLETE=complete $1 ) )
+    return 0
+}
+
+complete -F _oci_completion -o default oci;
+
 # Snipkit widget bind only if config file exists
 # if [[ -d "$HOME/Library/Application Support/snipkit" ]]; then
 #     snipkit-snippets-copy-widget () {

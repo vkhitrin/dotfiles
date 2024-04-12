@@ -9,6 +9,7 @@ dashboard.section.header.val = {
 	"- Fix YAML schemastore                                         ",
 	"- Fix schema integration with Statusline                       ",
 	"- Fix golang LSP                                               ",
+	"- Implement DAP (debugger adapter protocol)                    "
 }
 
 -- Set menu

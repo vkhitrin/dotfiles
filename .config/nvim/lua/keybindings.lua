@@ -47,8 +47,8 @@ map("n", "<leader>fs", ":Telescope lsp_document_symbols<cr>",
 map("n", "<leader>fS", ":Telescope yaml_schema<cr>",
     {noremap = true, silent = true, desc = "YAML Schema"}) -- todo
 -- LSP
-map("n", "<leader>lf", ":lua vim.lsp.buf.format({async = true})<cr>",
-    {noremap = true, silent = true, desc = "format"}) -- lsp - format
+-- map("n", "<leader>lf", ":lua vim.lsp.buf.format({async = true})<cr>",
+--     {noremap = true, silent = true, desc = "format"}) -- lsp - format
 map("n", "<leader>li", ":LspInfo<cr>",
     {noremap = true, silent = true, desc = "LSP info"}) -- lsp - info
 map("n", "<leader>lN", ":NullLsInfo<cr>",
