@@ -9,3 +9,12 @@ export SAVEHIST=10000000
 
 # Custom env variables
 export IS_SERVER=false
+
+# Application(s)
+export KUBECTL_COMMAND="kubectl"
+export ANSIBLE_HOME="${HOME}/.local/share/ansible"
+# export AWS_CONFIG_FILE="${HOME}/.config/aws/config"
+# export AWS_SHARED_CREDENTIALS_FILE="${HOME}/.config/aws/credentials"
+# export CARGO_HOME="${HOME}/.local/share/cargo"
+# export CQL_HISTORY="${HOME}/.local/share/cassandra/cqlsh_history"
+# export CLICKHOUSE_HISTORY_FILE="${HOME}/.local/share/"

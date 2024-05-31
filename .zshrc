@@ -121,6 +121,11 @@ if which batman > /dev/null 2>&1;then
     alias man="batman"
 fi
 
+if which kubecolor > /dev/null 2>&1;then
+    alias kubectl="kubecolor"
+    compdef kubecolor=kubectl
+fi
+
 # Terminal Editor Discovery
 which vim > /dev/null 2>&1 && alias vi='vim'; export EDITOR=vim
 which nvim > /dev/null 2>&1 && alias vim='nvim'; export EDITOR=nvim

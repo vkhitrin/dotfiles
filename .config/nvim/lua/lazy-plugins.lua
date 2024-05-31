@@ -72,7 +72,6 @@ local plugins = {
     },
     {
         "folke/trouble.nvim",
-        branch = "dev",
         config = function()
             require("plugins.lsp.trouble")
         end,
@@ -204,6 +203,21 @@ local plugins = {
             require("plugins.editor.dap")
         end,
     },
+    { "vkhitrin/vim-tera" },
+    {
+        "nvim-pack/nvim-spectre",
+        config = function()
+            require("plugins.editor.dap")
+        end,
+        keys = {
+            {
+                "<leader>F",
+                "<cmd>lua require('spectre').toggle()<CR>",
+                desc = "Spectre"
+            }
+        },
+    }
+
 }
 
 local opts = {
