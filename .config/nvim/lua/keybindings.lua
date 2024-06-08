@@ -47,8 +47,6 @@ map("n", "<leader>fs", ":Telescope lsp_document_symbols<cr>",
 map("n", "<leader>fS", ":Telescope yaml_schema<cr>",
     {noremap = true, silent = true, desc = "YAML Schema"}) -- todo
 -- LSP
--- map("n", "<leader>lf", ":lua vim.lsp.buf.format({async = true})<cr>",
---     {noremap = true, silent = true, desc = "format"}) -- lsp - format
 map("n", "<leader>li", ":LspInfo<cr>",
     {noremap = true, silent = true, desc = "LSP info"}) -- lsp - info
 map("n", "<leader>lN", ":NullLsInfo<cr>",
@@ -58,3 +56,14 @@ map("n", "<leader>ln", ":lua vim.lsp.buf.code_action()<CR>",
 --- git
 map("n", "<leader>lgb", ":Gitsigns blame_line<cr>",
     {noremap = true, silent = true, desc = "blameline"}) -- trouble - quickfix
+--- copy to system clipboard
+map("n", "<leader>y", '"+y',
+    {noremap = true, silent = true, desc = "Copy to clipboard"})
+map("n", "<leader>yy", '"+yy',
+    {noremap = true, silent = true, desc = "Copy current line to clipboard"})
+-- map("n", "<leader>Y", '"+Y',
+--     {noremap = true, silent = true, desc = "blameline"})
+map("x", "<leader>y", '"+y',
+    {noremap = true, silent = true, desc = "Copy selection to system clipboard"})
+-- map("x", "<leader>Y", '"+Y',
+--     {noremap = true, silent = true, desc = "Copy selection to system clipboard"})

@@ -30,12 +30,12 @@ require("catppuccin").setup({
 				warnings = { "italic" },
 				information = { "italic" },
 			},
-			-- underlines = {
-			-- 	errors = { },
-			-- 	hints = { },
-			-- 	warnings = { },
-			-- 	information = { },
-			-- },
+			underlines = {
+				errors = { },
+				hints = { },
+				warnings = { },
+				information = { },
+			},
 			inlay_hints = {
 				background = true,
 			},

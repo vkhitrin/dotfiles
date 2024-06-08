@@ -110,9 +110,24 @@ require("mason-lspconfig").setup_handlers({
             },
         })
     end,
+    ["pyright"] = function()
+        lspconfig.pyright.setup({
+            settings = {
+                pyright = {
+                    disableOrganizeImports = true,
+                },
+                python = {
+                    analysis = {
+                        ignore = { "*" },
+                    },
+                },
+            },
+        })
+    end,
+
     -- ["nginx"] = function()
     --     lspconfig.nginx_language_server.setup({
-    --         cmd = { "/Users/vadimk/.local/share/nvim/mason/packages/nginx-language-server/venv/bin/nginx-language-server" },
+    --         cmd = { "${HOME}/.local/share/nvim/mason/packages/nginx-language-server/venv/bin/nginx-language-server" },
     --     })
     -- end
 })
