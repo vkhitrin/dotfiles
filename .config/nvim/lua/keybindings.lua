@@ -38,8 +38,8 @@ map("n", "<leader>ft", ":Telescope file_browser<cr>",
     {noremap = true, silent = true, desc = "Tree"}) -- todo
 map("n", "<leader>fT", ":TodoTelescope<cr>",
     {noremap = true, silent = true, desc = "todo"}) -- todo
-map("n", "<leader>fG", ":Telescope git_commits<cr>",
-    {noremap = true, silent = true, desc = "git commits"}) -- git commits
+-- map("n", "<leader>fG", ":Telescope git_commits<cr>",
+--     {noremap = true, silent = true, desc = "git commits"}) -- git commits
 map("n", "<leader>fc", ":Telescope commands<cr>",
     {noremap = true, silent = true, desc = "commands"}) -- git commits
 map("n", "<leader>fs", ":Telescope lsp_document_symbols<cr>",
