@@ -3,15 +3,16 @@ local opts
 opts = {}
 local mappings = {}
 mappings = {
-	["<leader>q"] = { name = "+nvim" },
-	["<leader>f"] = { name = "+find" },
-	["<leader>l"] = { name = "+lsp/code actions" },
-	["<leader>lx"] = { name = "+trouble" },
-	["<leader>lg"] = { name = "+git" },
+    ["<leader>f"] = { name = "+Telescope/Utils" },
+    ["<leader>l"] = { name = "+LSP/Diagnostics" },
+    ["<leader>lx"] = { name = "+Trouble" },
+    ["<leader>y"] = {
+        { '"+y', "Copy current selection to clipboard", mode = "x" },
+    },
 }
 wk.register(mappings, opts)
 wk.setup({
-	window = {
-		border = "rounded",
-	},
+    window = {
+        border = "rounded",
+    },
 })

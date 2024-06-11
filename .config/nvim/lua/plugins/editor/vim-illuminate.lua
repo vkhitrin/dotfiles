@@ -1,10 +1,10 @@
 require("illuminate").configure({
-	filetypes_denylist = {
-		"dirbuf",
-		"dirvish",
-		"fugitive",
+    filetypes_denylist = {
+        "dirbuf",
+        "dirvish",
+        "fugitive",
         "alpha",
         "toggleterm",
-        "lazyterm"
-	},
+        "lazyterm",
+    },
 })

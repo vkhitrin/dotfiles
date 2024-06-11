@@ -86,7 +86,7 @@ cmp.setup({
 cmp.setup.filetype("gitcommit", {
     sources = cmp.config.sources({
         { name = "git" },
-        { name = 'conventionalcommits' },
+        { name = "conventionalcommits" },
     }, { { name = "buffer" } }),
 })
 
@@ -104,13 +104,13 @@ cmp.setup.cmdline(":", {
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 vim.keymap.set("i", "<c-G>", function()
-  require("cmp").complete({
-    config = {
-      sources = {
-        {
-          name = "rg",
+    require("cmp").complete({
+        config = {
+            sources = {
+                {
+                    name = "rg",
+                },
+            },
         },
-      },
-    },
-  })
+    })
 end)

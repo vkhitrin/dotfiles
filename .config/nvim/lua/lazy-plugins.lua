@@ -18,9 +18,67 @@ local plugins = {
     {
         {
             "akinsho/bufferline.nvim",
+            lazy = false,
             config = function()
                 require("plugins.ui.bufferline")
             end,
+            keys = {
+                {
+                    "[1",
+                    ":BufferLineGoToBuffer 1<cr>",
+                    desc = "Buffer #1",
+                },
+                {
+                    "[2",
+                    ":BufferLineGoToBuffer 2<cr>",
+                    desc = "Buffer #2",
+                },
+                {
+                    "[3",
+                    ":BufferLineGoToBuffer 3<cr>",
+                    desc = "Buffer #3",
+                },
+                {
+                    "[4",
+                    ":BufferLineGoToBuffer 4<cr>",
+                    desc = "Buffer #4",
+                },
+                {
+                    "[5",
+                    ":BufferLineGoToBuffer 5<cr>",
+                    desc = "Buffer #5",
+                },
+                {
+                    "[6",
+                    ":BufferLineGoToBuffer 6<cr>",
+                    desc = "Buffer #6",
+                },
+                {
+                    "[6",
+                    ":BufferLineGoToBuffer 6<cr>",
+                    desc = "Buffer #6",
+                },
+                {
+                    "[7",
+                    ":BufferLineGoToBuffer 7<cr>",
+                    desc = "Buffer #7",
+                },
+                {
+                    "[8",
+                    ":BufferLineGoToBuffer 8<cr>",
+                    desc = "Buffer #8",
+                },
+                {
+                    "[9",
+                    ":BufferLineGoToBuffer 9<cr>",
+                    desc = "Buffer #9",
+                },
+                {
+                    "[0",
+                    ":BufferLineGoToBuffer 10<cr>",
+                    desc = "Buffer #10",
+                },
+            },
         },
     },
     {
@@ -41,6 +99,28 @@ local plugins = {
         config = function()
             require("plugins.editor.telescope")
         end,
+        keys = {
+            {
+                "<leader>ff",
+                ":lua project_files()<cr>",
+                desc = "Files",
+            },
+            {
+                "<leader>fg",
+                ":Telescope live_grep<cr>",
+                desc = "Grep",
+            },
+            {
+                "<leader>ft",
+                ":Telescope file_browser<cr>",
+                desc = "File Browser",
+            },
+            {
+                "<leader>fT",
+                ":TodoTelescope<cr>",
+                desc = "TODO",
+            },
+        },
     },
     {
         "lewis6991/gitsigns.nvim",
@@ -61,6 +141,18 @@ local plugins = {
             require("plugins.lsp.mason-lsp")
             require("plugins.lsp.lsp")
         end,
+        keys = {
+            {
+                "<leader>li",
+                ":LspInfo<cr>",
+                desc = "LSP Info",
+            },
+            {
+                "<leader>ln",
+                ":NullLsInfo<cr>",
+                desc = "null-ls Info",
+            },
+        },
     },
     {
         "jay-babu/mason-null-ls.nvim",
@@ -228,6 +320,12 @@ local plugins = {
         end,
         keys = { { "<leader>fG", "<cmd>LazyGit<cr>", desc = "LazyGit" } },
     },
+    -- {
+    --     "tris203/precognition.nvim",
+    --     event = "VeryLazy",
+    --     config = {
+    --     }
+    -- }
 }
 
 local opts = {
