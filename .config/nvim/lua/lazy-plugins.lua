@@ -136,6 +136,7 @@ local plugins = {
             "neovim/nvim-lspconfig",
         },
         build = ":MasonUpdate",
+        lazy = false,
         config = function()
             require("plugins.editor.mason")
             require("plugins.lsp.mason-lsp")
@@ -320,6 +321,7 @@ local plugins = {
         end,
         keys = { { "<leader>fG", "<cmd>LazyGit<cr>", desc = "LazyGit" } },
     },
+    { "nvim-tree/nvim-web-devicons" },
     -- {
     --     "tris203/precognition.nvim",
     --     event = "VeryLazy",
@@ -336,21 +338,21 @@ local opts = {
         backdrop = 100,
         border = "rounded",
         title = " Lazy Plugin Manager ",
-        icons = {
-            cmd = "⌘",
-            config = "🛠",
-            event = "📅",
-            ft = "📂",
-            init = "⚙",
-            keys = "🗝",
-            plugin = "🔌",
-            runtime = "💻",
-            require = "🌙",
-            source = "📄",
-            start = "🚀",
-            task = "📌",
-            lazy = "💤 ",
-        },
+        -- icons = {
+        --     cmd = "⌘",
+        --     config = "🛠",
+        --     event = "📅",
+        --     ft = "📂",
+        --     init = "⚙",
+        --     keys = "🗝",
+        --     plugin = "🔌",
+        --     runtime = "💻",
+        --     require = "🌙",
+        --     source = "📄",
+        --     start = "🚀",
+        --     task = "📌",
+        --     lazy = "💤 ",
+        -- },
     },
 }
 

@@ -14,6 +14,34 @@ local luasnip = require("luasnip")
 local lspkind = require("lspkind")
 require("luasnip.loaders.from_vscode").lazy_load()
 
+-- local kind_icons = {
+--     Text = "",
+--     Method = "󰆧",
+--     Function = "󰊕",
+--     Constructor = "",
+--     Field = "󰇽",
+--     Variable = "󰂡",
+--     Class = "󰠱",
+--     Interface = "",
+--     Module = "",
+--     Property = "󰜢",
+--     Unit = "",
+--     Value = "󰎠",
+--     Enum = "",
+--     Keyword = "󰌋",
+--     Snippet = "",
+--     Color = "󰏘",
+--     File = "󰈙",
+--     Reference = "",
+--     Folder = "󰉋",
+--     EnumMember = "",
+--     Constant = "󰏿",
+--     Struct = "",
+--     Event = "",
+--     Operator = "󰆕",
+--     TypeParameter = "󰅲",
+-- }
+
 cmp.setup({
     completion = { compleopt = "menu,menuone,noinsert" },
     snippet = {
@@ -32,8 +60,9 @@ cmp.setup({
     }, { { name = "buffer" } }),
 
     formatting = {
-        format = function(entry, vim_item)
-            vim_item.menu = ({
+        format = lspkind.cmp_format({
+            mode = "symbol_text",
+            menu = {
                 luasnip = "[Snippets]",
                 nvim_lsp = "[LSP]",
                 nvim_lua = "[Lua]",
@@ -42,10 +71,23 @@ cmp.setup({
                 git = "[Git]",
                 conventionalcommits = "[GitCC]",
                 rg = "[Ripgrep]",
-            })[entry.source.name]
-
-            return vim_item
-        end,
+            },
+        }),
+        -- format = function(entry, vim_item)
+        --     vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
+        --     vim_item.menu = ({
+        --         luasnip = "[Snippets]",
+        --         nvim_lsp = "[LSP]",
+        --         nvim_lua = "[Lua]",
+        --         buffer = "[Buffer]",
+        --         async_path = "[Path]",
+        --         git = "[Git]",
+        --         conventionalcommits = "[GitCC]",
+        --         rg = "[Ripgrep]",
+        --     })[entry.source.name]
+        --
+        --     return vim_item
+        -- end,
     },
     window = {
         completion = cmp.config.window.bordered(),

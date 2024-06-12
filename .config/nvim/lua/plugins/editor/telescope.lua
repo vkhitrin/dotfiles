@@ -21,7 +21,7 @@ require("telescope").setup({
         ["file_browser"] = {
             hijack_netrw = true,
             follow_symlinks = true,
-            disable_devicons = true,
+            disable_devicons = false,
             hidden = {
                 file_browser = true,
                 folder_browser = true,
