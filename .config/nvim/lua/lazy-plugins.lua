@@ -92,7 +92,7 @@ local plugins = {
         "nvim-telescope/telescope.nvim",
         dependencies = {
             "nvim-lua/plenary.nvim",
-            "nvim-telescope/telescope-ui-select.nvim",
+            -- "nvim-telescope/telescope-ui-select.nvim",
             "nvim-telescope/telescope-file-browser.nvim",
             "BurntSushi/ripgrep",
         },
@@ -287,7 +287,6 @@ local plugins = {
     },
     {
         "nvim-lualine/lualine.nvim",
-        event = "VeryLazy",
         config = function()
             require("plugins.ui.lualine")
         end,
@@ -322,6 +321,12 @@ local plugins = {
         keys = { { "<leader>fG", "<cmd>LazyGit<cr>", desc = "LazyGit" } },
     },
     { "nvim-tree/nvim-web-devicons" },
+    {
+        "/stevearc/dressing.nvim",
+        config = function()
+            require("plugins.ui.dressing")
+        end,
+    },
     -- {
     --     "tris203/precognition.nvim",
     --     event = "VeryLazy",

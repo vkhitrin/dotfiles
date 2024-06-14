@@ -15,9 +15,9 @@ require("telescope").setup({
         },
     },
     extensions = {
-        ["ui-select"] = {
-            require("telescope.themes").get_dropdown({}),
-        },
+        -- ["ui-select"] = {
+        --     require("telescope.themes").get_dropdown({}),
+        -- },
         ["file_browser"] = {
             hijack_netrw = true,
             follow_symlinks = true,
@@ -29,7 +29,7 @@ require("telescope").setup({
         },
     },
 })
-require("telescope").load_extension("ui-select")
+-- require("telescope").load_extension("ui-select")
 require("telescope").load_extension("file_browser")
 require("telescope").load_extension("yaml_schema")
 
