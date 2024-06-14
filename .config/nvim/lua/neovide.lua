@@ -8,4 +8,6 @@ if vim.g.neovide then
     vim.api.nvim_set_keymap("!", "<D-v>", "<C-R>+", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("t", "<D-v>", "<C-R>+", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("v", "<D-v>", "<C-R>+", { noremap = true, silent = true })
+    vim.g.neovide_text_gamma = 0.8
+    vim.g.neovide_text_contrast = 0.1
 end
