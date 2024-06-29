@@ -9,13 +9,6 @@ local plugins = {
         end,
     },
     {
-        "goolord/alpha-nvim",
-        event = "VimEnter",
-        config = function()
-            require("plugins.ui.alpha")
-        end,
-    },
-    {
         {
             "akinsho/bufferline.nvim",
             lazy = false,
@@ -322,9 +315,23 @@ local plugins = {
     },
     { "nvim-tree/nvim-web-devicons" },
     {
-        "/stevearc/dressing.nvim",
+        "stevearc/dressing.nvim",
         config = function()
             require("plugins.ui.dressing")
+        end,
+    },
+    {
+        "windwp/nvim-ts-autotag",
+        config = function()
+            require("plugins.editor.nvim-ts-autotag")
+        end,
+    },
+    {
+        "OXY2DEV/markview.nvim",
+        ft = { "markdown" },
+        dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+        config = function()
+            require("plugins.ui.markview")
         end,
     },
     -- {
@@ -343,21 +350,10 @@ local opts = {
         backdrop = 100,
         border = "rounded",
         title = " Lazy Plugin Manager ",
-        -- icons = {
-        --     cmd = "⌘",
-        --     config = "🛠",
-        --     event = "📅",
-        --     ft = "📂",
-        --     init = "⚙",
-        --     keys = "🗝",
-        --     plugin = "🔌",
-        --     runtime = "💻",
-        --     require = "🌙",
-        --     source = "📄",
-        --     start = "🚀",
-        --     task = "📌",
-        --     lazy = "💤 ",
-        -- },
+        icons = {
+            loaded = "󰸞",
+            not_loaded = "",
+        },
     },
 }
 

@@ -4,6 +4,11 @@ require("catppuccin").setup({
         light = "latte",
         dark = "mocha",
     },
+    custom_highlights = function(colors)
+        return {
+            NormalFloat = { bg = colors.base },
+        }
+    end,
     integrations = {
         alpha = true,
         cmp = true,

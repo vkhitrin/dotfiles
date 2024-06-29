@@ -31,7 +31,7 @@ select-word-style bash
 # macOS configuration
 if [[ $(uname) == "Darwin" ]];then
 
-    export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$PATH
+    export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
     # Enable mise (formerly known as rtx)
     [ -f "/opt/homebrew/bin/mise" ] && eval "$(/opt/homebrew/bin/mise activate zsh)"
     # Enable starship
@@ -62,6 +62,11 @@ if [[ $(uname) == "Darwin" ]];then
     # If gtar is installed, use it instead
     if which gtar > /dev/null 2>&1; then
         alias tar='gtar'
+    fi
+    #
+    # If gdate is installed, use it instead
+    if which gdate > /dev/null 2>&1; then
+        alias date='gdate'
     fi
 
     # If sublime is installed
