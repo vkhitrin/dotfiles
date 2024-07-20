@@ -1,18 +1,14 @@
 local wk = require("which-key")
-local opts
-opts = {}
 local mappings = {}
 mappings = {
-    ["<leader>f"] = { name = "+Telescope/Utils" },
-    ["<leader>l"] = { name = "+LSP/Diagnostics" },
-    ["<leader>lx"] = { name = "+Trouble" },
-    ["<leader>y"] = {
-        { '"+y', "Copy current selection to clipboard", mode = "x" },
-    },
+    { "<leader>f",  group = "+Telescope/Utils" },
+    { "<leader>l",  group = "+LSP/Diagnostics" },
+    { "<leader>lx", group = "+Trouble" },
+    { "<leader>y",  '"+y',                     desc = "Copy current selection to clipboard", mode = "x" },
 }
-wk.register(mappings, opts)
+wk.add(mappings)
 wk.setup({
-    window = {
+    win = {
         border = "rounded",
     },
 })

@@ -50,6 +50,7 @@ cmp.setup({
         end,
     },
     sources = cmp.config.sources({
+        { name = "copilot" },
         { name = "nvim_lsp" },
         { name = "nvim_lua" },
         { name = "luasnip" },
@@ -71,6 +72,7 @@ cmp.setup({
                 git = "[Git]",
                 conventionalcommits = "[GitCC]",
                 rg = "[Ripgrep]",
+                copilot = "[Copilot]",
             },
         }),
         -- format = function(entry, vim_item)

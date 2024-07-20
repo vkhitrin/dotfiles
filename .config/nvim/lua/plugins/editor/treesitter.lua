@@ -39,6 +39,7 @@ require("nvim-treesitter.configs").setup({
         "vim",
         "vimdoc",
         "xml",
+        "rst",
         "yaml",
     },
     auto_install = true,

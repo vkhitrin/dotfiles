@@ -222,8 +222,8 @@ local plugins = {
             "onsails/lspkind.nvim",
             "saadparwaiz1/cmp_luasnip",
             "petertriho/cmp-git",
-            "davidsierradz/cmp-conventionalcommits",
-            "lukas-reineke/cmp-rg",
+            -- "davidsierradz/cmp-conventionalcommits", currently disabled due to an issue with BSD cat
+            -- "lukas-reineke/cmp-rg",
         },
         config = function()
             require("plugins.editor.nvim-cmp")
@@ -237,15 +237,15 @@ local plugins = {
         end,
     },
     {
-        "echasnovski/mini.comment",
-        opts = {
-            options = {
-                custom_commentstring = function()
-                    return require("ts_context_commentstring.internal").calculate_commentstring()
-                        or vim.bo.commentstring
-                end,
-            },
-        },
+        -- "echasnovski/mini.comment",
+        -- opts = {
+        --     options = {
+        --         custom_commentstring = function()
+        --             return require("ts_context_commentstring.internal").calculate_commentstring()
+        --                 or vim.bo.commentstring
+        --         end,
+        --     },
+        -- },
     },
     { "romainl/vim-cool" },
     {
@@ -334,6 +334,18 @@ local plugins = {
             require("plugins.ui.markview")
         end,
     },
+    {
+        "fladson/vim-kitty",
+    },
+    {
+        "zbirenbaum/copilot.lua",
+        event = { "InsertEnter", "LspAttach" },
+        dependencies = { "zbirenbaum/copilot-cmp", "AndreM222/copilot-lualine" },
+        config = function()
+            require("plugins.editor.copilot")
+        end,
+    },
+
     -- {
     --     "tris203/precognition.nvim",
     --     event = "VeryLazy",
