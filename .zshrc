@@ -68,7 +68,7 @@ if [[ $(uname) == "Darwin" ]];then
 
     if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
         source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-        # FAST_HIGHLIGHT[chroma-man]=
+        FAST_HIGHLIGHT[chroma-man]=
         fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
     fi
 
@@ -96,6 +96,11 @@ if [[ $(uname) == "Darwin" ]];then
     # If gcut is installed, use it instead
     if which gcut > /dev/null 2>&1; then
         alias cut='gcut'
+    fi
+
+    # If gsed is installed, use it instead
+    if which gsed > /dev/null 2>&1; then
+        alias sed='gsed'
     fi
 
     # If sublime is installed
@@ -203,4 +208,3 @@ complete -F _oci_completion -o default oci;
 # fi
 
 autoload -U +X bashcompinit && bashcompinit
-

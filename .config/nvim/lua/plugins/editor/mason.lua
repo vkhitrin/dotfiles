@@ -1,6 +1,7 @@
 require("mason").setup({
+    PATH = "append",
     ui = {
-        border = "rounded",
+        border = "none",
         height = 0.8,
         icons = {
             package_installed = "✓",

@@ -3,8 +3,8 @@ require("bufferline").setup({
     highlights = require("catppuccin.groups.integrations.bufferline").get({
         styles = { "italic", "bold" },
         custom = {
-            mocha
-        }
+            mocha,
+        },
         -- custom = {
         --     mocha = {
         --         fill = { bg = "#1e1e2e" },

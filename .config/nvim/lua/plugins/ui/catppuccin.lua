@@ -6,8 +6,32 @@ require("catppuccin").setup({
     },
     custom_highlights = function(colors)
         return {
-            NormalFloat = { bg = colors.base },
-            FloatBorder = { bg = colors.base },
+            -- Telescop highlights
+            TelescopeMatching = { fg = colors.red, bold = true },
+            TelescopeSelection = { fg = colors.text, bg = colors.surface0, bold = true },
+            TelescopePromptPrefix = { bg = colors.mantle },
+            TelescopePromptNormal = { bg = colors.mantle },
+            TelescopeResultsNormal = { bg = colors.mantle },
+            TelescopePreviewNormal = { bg = colors.mantle },
+            TelescopePromptBorder = { bg = colors.mantle, fg = colors.mantle },
+            TelescopeResultsBorder = { bg = colors.mantle, fg = colors.mantle },
+            TelescopePreviewBorder = { bg = colors.mantle, fg = colors.mantle },
+            TelescopePromptTitle = { bg = colors.blue, fg = colors.mantle, bold = true },
+            TelescopeResultsTitle = { fg = colors.mantle },
+            TelescopePreviewTitle = { bg = colors.blue, fg = colors.mantle, bold = true },
+            -- Bufferline highlights
+            BufferLineFill = { bg = colors.mantle, fg = colors.text },
+            BufferLineTabSeparator = { bg = colors.mantle, fg = colors.text },
+            BufferLineSeparatorVisible = { bg = colors.mantle, fg = colors.text },
+            BufferLineSeparatorSelected = { bg = colors.mantle, fg = colors.text },
+            -- Pmenu highlights
+            Pmenu = {
+                bg = colors.mantle,
+                fg = colors.overlay2,
+            },
+            PmenuSel = { bg = colors.surface1, bold = true },
+            PmenuSbar = { bg = colors.surface1 },
+            PmenuThumb = { bg = colors.overlay0 },
         }
     end,
     integrations = {

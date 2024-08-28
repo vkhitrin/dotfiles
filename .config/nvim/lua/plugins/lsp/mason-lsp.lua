@@ -1,6 +1,6 @@
 local lspconfig = require("lspconfig")
 local schemastore = require("schemastore")
-require("lspconfig.ui.windows").default_options.border = "rounded"
+require("lspconfig.ui.windows").default_options.border = "none"
 local lsp_defaults = lspconfig.util.default_config
 lsp_defaults.capabilities =
     vim.tbl_deep_extend("force", lsp_defaults.capabilities, require("cmp_nvim_lsp").default_capabilities())
@@ -108,6 +108,11 @@ require("mason-lspconfig").setup_handlers({
             },
         })
     end,
+    ["powershell_es"] = function()
+        lspconfig.powershell_es.setup({
+            bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
+        })
+    end,
     -- ["pyright"] = function()
     --     lspconfig.pyright.setup({
     --         settings = {
@@ -146,7 +151,7 @@ require("lsp_signature").on_attach(vim.api.nvim_create_autocmd("CursorHold", {
         local opts = {
             focusable = false,
             close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-            border = "rounded",
+            border = "none",
             source = "always",
             prefix = " ",
             scope = "cursor",
@@ -156,12 +161,12 @@ require("lsp_signature").on_attach(vim.api.nvim_create_autocmd("CursorHold", {
 }))
 
 -- Add borders to float windows
-local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-    opts = opts or {}
-    opts.border = "rounded"
-    return orig_util_open_floating_preview(contents, syntax, opts, ...)
-end
+-- local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+-- function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+--     opts = opts or {}
+--     opts.border = "none"
+--     return orig_util_open_floating_preview(contents, syntax, opts, ...)
+-- end
 
 --- Custom LSP Capabilities Command
 vim.api.nvim_create_user_command("LspCapabilities", function()

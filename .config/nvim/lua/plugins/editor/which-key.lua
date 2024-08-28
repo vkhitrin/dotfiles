@@ -9,6 +9,6 @@ mappings = {
 wk.add(mappings)
 wk.setup({
     win = {
-        border = "rounded",
+        border = "none",
     },
 })

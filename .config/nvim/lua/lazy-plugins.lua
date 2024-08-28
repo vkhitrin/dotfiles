@@ -71,6 +71,11 @@ local plugins = {
                     ":BufferLineGoToBuffer 10<cr>",
                     desc = "Buffer #10",
                 },
+                {
+                    "<F12>",
+                    ":CopilotChatToggle<cr>",
+                    desc = "Toggle Copilot Chat",
+                },
             },
         },
     },
@@ -345,6 +350,7 @@ local plugins = {
             require("plugins.editor.copilot")
         end,
     },
+    { "CopilotC-Nvim/CopilotChat.nvim", branch = "canary", opts = {} },
 
     -- {
     --     "tris203/precognition.nvim",
@@ -360,7 +366,7 @@ local opts = {
     },
     ui = {
         backdrop = 100,
-        border = "rounded",
+        border = "none",
         title = " Lazy Plugin Manager ",
         icons = {
             loaded = "󰸞",

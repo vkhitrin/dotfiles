@@ -6,41 +6,9 @@ local has_words_before = function()
     return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
 
-local feedkey = function(key, mode)
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
-end
-
 local luasnip = require("luasnip")
 local lspkind = require("lspkind")
 require("luasnip.loaders.from_vscode").lazy_load()
-
--- local kind_icons = {
---     Text = "",
---     Method = "󰆧",
---     Function = "󰊕",
---     Constructor = "",
---     Field = "󰇽",
---     Variable = "󰂡",
---     Class = "󰠱",
---     Interface = "",
---     Module = "",
---     Property = "󰜢",
---     Unit = "",
---     Value = "󰎠",
---     Enum = "",
---     Keyword = "󰌋",
---     Snippet = "",
---     Color = "󰏘",
---     File = "󰈙",
---     Reference = "",
---     Folder = "󰉋",
---     EnumMember = "",
---     Constant = "󰏿",
---     Struct = "",
---     Event = "",
---     Operator = "󰆕",
---     TypeParameter = "󰅲",
--- }
 
 cmp.setup({
     completion = { compleopt = "menu,menuone,noinsert" },
@@ -63,6 +31,7 @@ cmp.setup({
     formatting = {
         format = lspkind.cmp_format({
             mode = "symbol_text",
+            symbol_map = { Copilot = "" },
             menu = {
                 luasnip = "[Snippets]",
                 nvim_lsp = "[LSP]",
@@ -75,25 +44,10 @@ cmp.setup({
                 copilot = "[Copilot]",
             },
         }),
-        -- format = function(entry, vim_item)
-        --     vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
-        --     vim_item.menu = ({
-        --         luasnip = "[Snippets]",
-        --         nvim_lsp = "[LSP]",
-        --         nvim_lua = "[Lua]",
-        --         buffer = "[Buffer]",
-        --         async_path = "[Path]",
-        --         git = "[Git]",
-        --         conventionalcommits = "[GitCC]",
-        --         rg = "[Ripgrep]",
-        --     })[entry.source.name]
-        --
-        --     return vim_item
-        -- end,
-    },
-    window = {
-        completion = cmp.config.window.bordered(),
-        documentation = cmp.config.window.bordered(),
+        -- window = {
+        -- completion = cmp.config.window.bordered(),
+        -- documentation = cmp.config.window.bordered(),
+        -- },
     },
     mapping = cmp.mapping.preset.insert({
         ["<C-b>"] = cmp.mapping.scroll_docs(-4),
@@ -113,7 +67,6 @@ cmp.setup({
                 fallback()
             end
         end, { "i", "s" }),
-
         ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
                 cmp.select_prev_item()
@@ -146,15 +99,15 @@ cmp.setup.cmdline(":", {
 
 -- Set up lspconfig.
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-vim.keymap.set("i", "<c-G>", function()
-    require("cmp").complete({
-        config = {
-            sources = {
-                {
-                    name = "rg",
-                },
-            },
-        },
-    })
-end)
+--
+-- vim.keymap.set("i", "<c-G>", function()
+--     require("cmp").complete({
+--         config = {
+--             sources = {
+--                 {
+--                     name = "rg",
+--                 },
+--             },
+--         },
+--     })
+-- end)
