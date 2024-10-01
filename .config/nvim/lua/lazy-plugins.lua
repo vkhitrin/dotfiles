@@ -331,14 +331,14 @@ local plugins = {
             require("plugins.editor.nvim-ts-autotag")
         end,
     },
-    {
-        "OXY2DEV/markview.nvim",
-        ft = { "markdown" },
-        dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
-        config = function()
-            require("plugins.ui.markview")
-        end,
-    },
+    -- {
+    --     "OXY2DEV/markview.nvim",
+    --     ft = { "markdown" },
+    --     dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+    --     config = function()
+    --         require("plugins.ui.markview")
+    --     end,
+    -- },
     {
         "fladson/vim-kitty",
     },
