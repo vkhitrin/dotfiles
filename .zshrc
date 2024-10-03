@@ -114,18 +114,11 @@ if [[ $(uname) == "Darwin" ]];then
     # If clop is installed
     [ -f "/Applications/Clop.app/Contents/SharedSupport/ClopCLI" ] && alias clop="/Applications/Clop.app/Contents/SharedSupport/ClopCLI"
 
-    # If krew is installed
-    if [[ $(which kubectl-krew) ]] 2>/dev/null; then
-        export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-    fi
-
     # If MinIO client installed
     [[ -f /opt/homebrew/bin/mc ]] && complete -o nospace -C /opt/homebrew/bin/mc mc
 
-    # System aliases
+    # macOS aliases
     alias sudoedit='sudo -e'
-    alias ls="ls --color=auto -F"
-    alias ll='ls -l'
     alias less='less -rf'
     alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
     alias gcc='/opt/homebrew/bin/gcc-13'
@@ -134,7 +127,22 @@ if [[ $(uname) == "Darwin" ]];then
     alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf $HOME/Library/Preferences/ByHost $HOME/.iCloudDrive/Mackup/Library/Preferences; open raycast://extensions/raycast/raycast/export-settings-data"
     alias system_python="/usr/bin/python3"
     alias system_pip="/usr/bin/python3 -m pip"
-    alias dotfiles='git --git-dir=$HOME/Projects/Automation/Setup/dotfiles --work-tree=$HOME'
+fi
+
+# Linux configuration
+if [[ $(uname) == "Linux" ]];then
+    autoload -U +X compinit && compinit
+    autoload -U +X bashcompinit && bashcompinit
+
+    export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
+    export PATH=$HOME/.local/bin:$HOME/go/bin:$PATH
+
+    # Enable starship
+    [ -f "/usr/bin/starship" ] && eval "$(/usr/bin/starship init zsh)"
+
+    # Enable SSH Agent (based on a systemd service)
+    [ -S "/run/user/$(id -u)/ssh-agent.socket" ] && export SSH_AUTH_SOCK="/run/user/$(id -u)/ssh-agent.socket"
+
 fi
 
 # Using mcfly if it is installed
@@ -152,14 +160,22 @@ if which atuin > /dev/null 2>&1;then
     eval "$(atuin init zsh --disable-up-arrow)"
 fi
 
+# If bat is installed
 if which bat > /dev/null 2>&1;then
     alias cat="bat"
 fi
 
+# If batman is installed
 if which batman > /dev/null 2>&1;then
     alias man="batman"
 fi
 
+# If krew is installed
+if [[ $(which kubectl-krew) ]] 2>/dev/null; then
+    export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+fi
+
+# If kubecolor is installed
 if which kubecolor > /dev/null 2>&1;then
     alias kubectl="kubecolor"
     compdef kubecolor=kubectl
@@ -167,7 +183,11 @@ fi
 
 # Terminal Editor Discovery
 which vim > /dev/null 2>&1 && alias vi='vim'; export EDITOR=vim
-which nvim > /dev/null 2>&1 && alias vim='nvim'; export EDITOR=nvim
+which nvim > /dev/null 2>&1 && alias vi='vim'; alias vim='nvim'; export EDITOR=nvim
+# Global aliases
+alias ls="ls --color=auto -F"
+alias ll='ls -l'
+alias dotfiles='git --git-dir=$HOME/Projects/Automation/Setup/dotfiles --work-tree=$HOME'
 # Set default editor
 export VISUAL=$EDITOR
 
