@@ -54,10 +54,6 @@ select-word-style bash
 if [[ $(uname) == "Darwin" ]];then
 
     export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
-    # Enable mise (formerly known as rtx)
-    [ -f "/opt/homebrew/bin/mise" ] && eval "$(/opt/homebrew/bin/mise activate zsh)"
-    # Enable starship
-    [ -f "/opt/homebrew/bin/starship" ] && eval "$(/opt/homebrew/bin/starship init zsh)"
 
     # Source zsh-completion
     if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
@@ -137,9 +133,6 @@ if [[ $(uname) == "Linux" ]];then
     export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
     export PATH=$HOME/.local/bin:$HOME/go/bin:$PATH
 
-    # Enable starship
-    [ -f "/usr/bin/starship" ] && eval "$(/usr/bin/starship init zsh)"
-
     # Enable SSH Agent (based on a systemd service)
     [ -S "/run/user/$(id -u)/ssh-agent.socket" ] && export SSH_AUTH_SOCK="/run/user/$(id -u)/ssh-agent.socket"
 
@@ -154,6 +147,16 @@ fi
 #     export MCFLY_LIGHT=false
 #     eval "$(mcfly init zsh)"
 # fi
+
+# Enable mise (formerly known as rtx)
+if which mise > /dev/null 2>&1;then
+    eval "$(mise activate zsh)"
+fi
+
+# Enable starship
+if which starship > /dev/null 2>&1;then
+    eval "$(starship init zsh)"
+fi
 
 # Using atuin if it is installed
 if which atuin > /dev/null 2>&1;then

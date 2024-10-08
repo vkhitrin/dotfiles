@@ -1,0 +1,7 @@
+default_profile = "default"
+[profiles.default]
+adapter = "sqlite"
+theme = "catppuccin-mocha"
+limit = 100000
+keymap_name = ["vscode"]
+show_files = "."
