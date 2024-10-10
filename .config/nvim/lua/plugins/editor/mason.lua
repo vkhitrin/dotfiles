@@ -36,6 +36,7 @@ require("mason-tool-installer").setup({
         "tfsec",
         "typescript-language-server",
         "ruff",
+        "rust-analyzer",
         "pyright",
         "yaml-language-server",
         "yamllint",
