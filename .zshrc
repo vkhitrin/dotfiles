@@ -127,14 +127,27 @@ fi
 
 # Linux configuration
 if [[ $(uname) == "Linux" ]];then
-    autoload -U +X compinit && compinit
-    autoload -U +X bashcompinit && bashcompinit
+
+    autoload -Uz compinit promptipnit bashcompinit
+    compinit; bashcompinit
+
+    if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+        source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+        fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
+    fi
+
+
+    [ -f "/usr/share/zsh/plugins/zsh-autopair/autopair.zsh" ] && source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
 
     export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
     export PATH=$HOME/.local/bin:$HOME/go/bin:$PATH
 
     # Enable SSH Agent (based on a systemd service)
     [ -S "/run/user/$(id -u)/ssh-agent.socket" ] && export SSH_AUTH_SOCK="/run/user/$(id -u)/ssh-agent.socket"
+
+    if which aws_completer > /dev/null 2>&1;then
+        complete -C "$(which aws_completer)" aws
+    fi
 
 fi
 
