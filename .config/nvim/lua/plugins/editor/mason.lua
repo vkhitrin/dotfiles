@@ -16,6 +16,7 @@ require("mason-tool-installer").setup({
         "ansible-language-server",
         "bash-language-server",
         "esbonio",
+        "gitlab-ci-ls",
         "gopls",
         "helm-ls",
         "jq",

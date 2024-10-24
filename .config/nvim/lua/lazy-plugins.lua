@@ -228,7 +228,7 @@ local plugins = {
             "onsails/lspkind.nvim",
             "saadparwaiz1/cmp_luasnip",
             "petertriho/cmp-git",
-            -- "davidsierradz/cmp-conventionalcommits", currently disabled due to an issue with BSD cat
+            "davidsierradz/cmp-conventionalcommits",
             -- "lukas-reineke/cmp-rg",
         },
         config = function()
@@ -352,6 +352,7 @@ local plugins = {
         end,
     },
     { "CopilotC-Nvim/CopilotChat.nvim", branch = "canary", opts = {} },
+    { "projectfluent/fluent.vim"},
 
     -- {
     --     "tris203/precognition.nvim",
