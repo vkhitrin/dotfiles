@@ -149,6 +149,9 @@ if [[ $(uname) == "Linux" ]];then
         complete -C "$(which aws_completer)" aws
     fi
 
+    bindkey "^[[1;3C" forward-word
+    bindkey "^[[1;3D" backward-word
+
 fi
 
 # Using mcfly if it is installed
