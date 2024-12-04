@@ -351,8 +351,8 @@ local plugins = {
             require("plugins.editor.copilot")
         end,
     },
-    { "CopilotC-Nvim/CopilotChat.nvim", branch = "canary", opts = {} },
-    { "projectfluent/fluent.vim"},
+    { "CopilotC-Nvim/CopilotChat.nvim", opts = {} },
+    { "projectfluent/fluent.vim" },
 
     -- {
     --     "tris203/precognition.nvim",
