@@ -123,6 +123,11 @@ if [[ $(uname) == "Darwin" ]];then
     alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf $HOME/Library/Preferences/ByHost $HOME/.iCloudDrive/Mackup/Library/Preferences; open raycast://extensions/raycast/raycast/export-settings-data"
     alias system_python="/usr/bin/python3"
     alias system_pip="/usr/bin/python3 -m pip"
+
+    # Source zsh-completion
+    if [[ -d "${HOME}/.config/glab-cli/work" ]];then
+        alias glab-work="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work glab"
+    fi
 fi
 
 # Linux configuration

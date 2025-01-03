@@ -5,6 +5,11 @@ export LANG=en_US.UTF-8
 # Custom env variables
 export IS_SERVER=false
 
+# PGP
+export GPG_TTY=$(tty)
+
+# Include all kubeconfig files
+export KUBECONFIG=$(find "$HOME/.kube" -type file -maxdepth 1 | xargs | sed -e 's/ /:/g')
 # Application(s)
 export KUBECTL_COMMAND="kubectl"
 export ANSIBLE_HOME="${HOME}/.local/share/ansible"

@@ -199,7 +199,8 @@ local plugins = {
         config = function()
             require("plugins.editor.todo-comments")
         end,
-    }, -- "christoomey/vim-tmux-navigator",
+    },
+    "christoomey/vim-tmux-navigator",
     {
         "folke/which-key.nvim",
         event = "VeryLazy",
@@ -241,17 +242,6 @@ local plugins = {
         config = function()
             require("plugins.ui.indent-blankline")
         end,
-    },
-    {
-        -- "echasnovski/mini.comment",
-        -- opts = {
-        --     options = {
-        --         custom_commentstring = function()
-        --             return require("ts_context_commentstring.internal").calculate_commentstring()
-        --                 or vim.bo.commentstring
-        --         end,
-        --     },
-        -- },
     },
     { "romainl/vim-cool" },
     {
@@ -353,7 +343,23 @@ local plugins = {
     },
     { "CopilotC-Nvim/CopilotChat.nvim", opts = {} },
     { "projectfluent/fluent.vim" },
+    {
+        "psliwka/vim-dirtytalk",
+        build = ":DirtytalkUpdate",
+        config = function()
+            vim.opt.spell = true
+            vim.opt.spelllang = { "en", "programming" }
+        end,
+    },
 
+    -- {
+    --     "rachartier/tiny-inline-diagnostic.nvim",
+    --     event = "VeryLazy",
+    --     priority = 1000,
+    --     config = function()
+    --         require("plugins.ui.tiny-inline-diagnostics")
+    --     end,
+    -- },
     -- {
     --     "tris203/precognition.nvim",
     --     event = "VeryLazy",

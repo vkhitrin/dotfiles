@@ -97,6 +97,54 @@ cmp.setup.cmdline(":", {
     sources = cmp.config.sources({ { name = "async_path" } }, { { name = "cmdline" } }),
 })
 
+local format = require("cmp_git.format")
+local sort = require("cmp_git.sort")
+require("cmp_git").setup({
+    github = {
+        hosts = { "github.com" },
+        issues = {
+            fields = { "title", "number", "body", "updatedAt", "state" },
+            filter = "all",
+            limit = 100,
+            state = "all",
+            sort_by = sort.github.issues,
+            format = format.github.issues,
+        },
+        mentions = {
+            limit = 100,
+            sort_by = sort.github.mentions,
+            format = format.github.mentions,
+        },
+        pull_requests = {
+            fields = { "title", "number", "body", "updatedAt", "state" },
+            limit = 100,
+            state = "all",
+            sort_by = sort.github.pull_requests,
+            format = format.github.pull_requests,
+        },
+    },
+    gitlab = {
+        hosts = {"gitlab-work.com", "gitlab.com", "work-on-prem"}, -- list of private instances of gitlab
+        issues = {
+            limit = 100,
+            state = "opened", -- opened, closed, all
+            sort_by = sort.gitlab.issues,
+            format = format.gitlab.issues,
+        },
+        mentions = {
+            limit = 100,
+            sort_by = sort.gitlab.mentions,
+            format = format.gitlab.mentions,
+        },
+        merge_requests = {
+            limit = 100,
+            state = "opened", -- opened, closed, locked, merged
+            sort_by = sort.gitlab.merge_requests,
+            format = format.gitlab.merge_requests,
+        },
+    },
+})
+
 -- Set up lspconfig.
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 --
