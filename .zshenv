@@ -9,7 +9,7 @@ export IS_SERVER=false
 export GPG_TTY=$(tty)
 
 # Include all kubeconfig files
-export KUBECONFIG=$(find "$HOME/.kube" -type file -maxdepth 1 | xargs | sed -e 's/ /:/g')
+export KUBECONFIG=$(find "$HOME/.kube" -maxdepth 1 -type f | xargs | sed -e 's/ /:/g')
 # Application(s)
 export KUBECTL_COMMAND="kubectl"
 export ANSIBLE_HOME="${HOME}/.local/share/ansible"
