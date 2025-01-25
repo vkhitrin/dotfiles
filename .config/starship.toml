@@ -80,7 +80,7 @@ style = "red"
 [aws]
 format = '[$symbol($profile )(\($region\) )(\[$duration\] )]($style)'
 style = "yellow"
-symbol = "☁️"
+symbol = " "
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
