@@ -157,6 +157,9 @@ if [[ $(uname) == "Linux" ]];then
     bindkey "^[[1;3C" forward-word
     bindkey "^[[1;3D" backward-word
 
+    # Custom aliases
+    alias _backup_my_linux="mackup backup -vf"
+
 fi
 
 # Using mcfly if it is installed
