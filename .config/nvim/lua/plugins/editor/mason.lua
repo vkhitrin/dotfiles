@@ -1,5 +1,9 @@
 require("mason").setup({
     PATH = "append",
+    registries = {
+        "file:~/.config/nvim/files/mason",
+        "github:mason-org/mason-registry",
+    },
     ui = {
         border = "none",
         height = 0.8,
@@ -34,6 +38,7 @@ require("mason-tool-installer").setup({
         "shellcheck",
         "shfmt",
         "sonarlint-language-server",
+        "sqruff",
         "stylua",
         "taplo",
         "terraform-ls",
