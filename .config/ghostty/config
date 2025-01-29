@@ -5,6 +5,7 @@ font-family-italic = "SFMono Nerd Font Mono"
 font-family-bold-italic = "SFMono Nerd Font Mono"
 font-size = 15
 macos-titlebar-style = hidden
+window-decoration = false
 window-padding-x = 5
 window-padding-y = 5
 mouse-scroll-multiplier = 0
