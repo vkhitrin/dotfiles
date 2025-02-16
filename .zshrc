@@ -133,6 +133,11 @@ fi
 # Linux configuration
 if [[ $(uname) == "Linux" ]];then
 
+    # Custom environment variables
+    export QT_WAYLAND_DECORATION=adwaita # Client-side decorations for QT5/6 to mimic GTK
+    export GTK_USE_PORTAL=1 # Use XDG portals in GTK3 apps
+    export GTK_DEBUG=portals # Use XDG portals in GTK4 apps
+
     autoload -Uz compinit promptipnit bashcompinit
     compinit; bashcompinit
 
@@ -161,16 +166,6 @@ if [[ $(uname) == "Linux" ]];then
     alias _backup_my_linux="mackup backup -vf"
 
 fi
-
-# Using mcfly if it is installed
-# if which mcfly > /dev/null 2>&1;then
-#     export MCFLY_FUZZY=0
-#     export MCFLY_RESULTS=50
-#     export MCFLY_RESULTS_SORT=LAST_RUN
-#     export MCFLY_DELETE_WITHOUT_CONFIRM=true
-#     export MCFLY_LIGHT=false
-#     eval "$(mcfly init zsh)"
-# fi
 
 # Enable mise (formerly known as rtx)
 if which mise > /dev/null 2>&1;then
