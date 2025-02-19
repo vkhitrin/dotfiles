@@ -18,30 +18,17 @@ vim.opt.cursorline = true                     -- display cursorline
 vim.opt.mouse = ""                            -- disable mouse
 vim.opt.wrap = false                          -- diable line wrap
 vim.g.mapleader = " "                         -- set space as leader key
---- autocmd
+--- autocmds
 vim.api.nvim_create_autocmd("TermOpen", {
     desc = "nvim builtin terminal tweaks",
     callback = function()
         vim.opt_local.number = false
     end,
 })
-vim.api.nvim_create_autocmd('FileType', {
-    pattern = { 'qf', 'help' },
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "qf", "help" },
     desc = "Quick closing of quickfix and help windows",
     callback = function()
-        vim.keymap.set('n', 'q', '<cmd>bd<cr>', { silent = true, buffer = true })
+        vim.keymap.set("n", "q", "<cmd>bd<cr>", { silent = true, buffer = true })
     end,
 })
-
-local function get_listed_buffers()
-    local buffers = {}
-    local len = 0
-    for buffer = 1, vim.fn.bufnr("$") do
-        if vim.fn.buflisted(buffer) == 1 then
-            len = len + 1
-            buffers[len] = buffer
-        end
-    end
-
-    return buffers
-end
