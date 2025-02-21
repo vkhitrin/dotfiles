@@ -213,40 +213,41 @@ alias dotfiles='git --git-dir=$HOME/Projects/Automation/Setup/dotfiles --work-tr
 # Set default editor
 export VISUAL=$EDITOR
 
-incognito () {
-    if [[ $1 = disable ]] || [[ $1 == d ]]; then
-        export HISTFILE=~/.zsh_history
-        add-zsh-hook precmd _atuin_precmd
-        add-zsh-hook preexec _atuin_preexec
-    else
-        unset HISTFILE
-        add-zsh-hook -d precmd _atuin_precmd
-        add-zsh-hook -d preexec _atuin_preexec
-    fi
-}
-
-_oci_completion() {
-    COMPREPLY=( $( env COMP_WORDS="${COMP_WORDS[*]}" \
-                   COMP_CWORD=$COMP_CWORD \
-                   _OCI_COMPLETE=complete $1 ) )
-    return 0
-}
-
 complete -F _oci_completion -o default oci;
 
+awsx() {
+    __construct_aws_profiles_mapping | fzf --header-lines=1 --info=inline \
+        --bind='ctrl-r:reload:__construct_aws_profiles_mapping' --prompt="Filter " \
+        --bind='ctrl-l:execute-silent(aws-vault login {1} -s)+reload(__construct_aws_profiles_mapping)'\
+        --bind='ctrl-d:execute-silent(aws-vault clear {1})+reload(__construct_aws_profiles_mapping)'\
+        --layout=reverse-list --nth=1,2,3,5 \
+        --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af' \
+        --preview="echo 'Ctrl-R: Reload List | Ctrl-L: Login | Ctrl-D: Clear Session | Enter: Exec'" \
+        --preview-window=down,1,border-none --tmux 80% \
+        --bind 'enter:become(aws-vault exec {1})'
+}
+
+kctx() {
+    __get_kuberentes_contexts | fzf --info=inline --ansi \
+        --bind='ctrl-r:reload:(__get_kuberentes_contexts)' --prompt="Filter " \
+        --bind='ctrl-u:execute-silent(kubectl config unset current-context)+reload(__get_kuberentes_contexts)'\
+        --layout=reverse-list \
+        --border-label ' Kubernetes Contexts ' --color 'border:#89b4fa,label:#89b4fa' \
+        --preview="echo 'Ctrl-R: Reload List | Ctrl-U: Unset Current Context | Enter: Set Context'" \
+        --preview-window=down,1,border-none \
+        --bind 'enter:become(kubectl config use-context {})'
+}
+
 # Snipkit widget bind only if config file exists
-# if [[ -d "$HOME/Library/Application Support/snipkit" ]]; then
-#     snipkit-snippets-copy-widget () {
-#         echoti rmkx
-#         exec </dev/tty
-#         local snipkit_output=$(mktemp ${TMPDIR:-/tmp}/snipkit.output.XXXXXXXX)
-#         snipkit print -o "${snipkit_output}"
-#         echoti smkx
-#         cat $snipkit_output | pbcopy
-#         rm -f $snipkit_output
-#     }
-#     zle -N snipkit-snippets-copy-widget
-#     bindkey "^Xc" snipkit-snippets-copy-widget
-# fi
+if [[ -d "${HOME}/Library/Application Support/snipkit" ]]; then
+    snipkit-snippets-copy-widget () {
+        echoti rmkx
+        exec </dev/tty
+        snipkit copy
+        echoti smkx
+    }
+    zle -N snipkit-snippets-copy-widget
+    bindkey "^Xc" snipkit-snippets-copy-widget
+fi
 
 autoload -U +X bashcompinit && bashcompinit
