@@ -6,6 +6,7 @@ require("mason").setup({
     },
     ui = {
         border = "none",
+        backdrop = 100,
         height = 0.8,
         icons = {
             package_installed = "✓",

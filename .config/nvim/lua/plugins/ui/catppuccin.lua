@@ -6,19 +6,9 @@ require("catppuccin").setup({
     },
     custom_highlights = function(colors)
         return {
-            -- Telescop highlights
-            TelescopeMatching = { fg = colors.red, bold = true },
-            TelescopeSelection = { fg = colors.text, bg = colors.surface0, bold = true },
-            TelescopePromptPrefix = { bg = colors.mantle },
-            TelescopePromptNormal = { bg = colors.mantle },
-            TelescopeResultsNormal = { bg = colors.mantle },
-            TelescopePreviewNormal = { bg = colors.mantle },
-            TelescopePromptBorder = { bg = colors.mantle, fg = colors.mantle },
-            TelescopeResultsBorder = { bg = colors.mantle, fg = colors.mantle },
-            TelescopePreviewBorder = { bg = colors.mantle, fg = colors.mantle },
-            TelescopePromptTitle = { bg = colors.blue, fg = colors.mantle, bold = true },
-            TelescopeResultsTitle = { fg = colors.mantle },
-            TelescopePreviewTitle = { bg = colors.blue, fg = colors.mantle, bold = true },
+            -- Snacks highlights
+            SnacksPicker = { link = "Normal" },
+            SnacksPickerMatch = { fg = colors.red },
             -- Bufferline highlights
             BufferLineFill = { bg = colors.mantle, fg = colors.text },
             BufferLineTabSeparator = { bg = colors.mantle, fg = colors.text },
@@ -46,7 +36,7 @@ require("catppuccin").setup({
             enabled = true,
             indentscope_color = "",
         },
-        telescope = true,
+        snacks = true,
         illuminate = {
             enabled = true,
             lsp = false,

@@ -128,6 +128,9 @@ if [[ $(uname) == "Darwin" ]];then
     if [[ -d "${HOME}/.config/glab-cli/work" ]];then
         alias glab-work="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work glab"
     fi
+
+    # Jira punchout tool
+    [ -f "/opt/homebrew/bin/punchout" ] && alias punchout="punchout -db-path=${HOME}/.cache/punchout/punchout.v1.db"
 fi
 
 # Linux configuration
@@ -216,11 +219,11 @@ export VISUAL=$EDITOR
 complete -F _oci_completion -o default oci;
 
 awsx() {
-    __construct_aws_profiles_mapping | fzf --header-lines=1 --info=inline \
+    __construct_aws_profiles_mapping | fzf --exact --ansi --header-lines=1 --info=inline \
         --bind='ctrl-r:reload:__construct_aws_profiles_mapping' --prompt="Filter " \
         --bind='ctrl-l:execute-silent(aws-vault login {1} -s)+reload(__construct_aws_profiles_mapping)'\
         --bind='ctrl-d:execute-silent(aws-vault clear {1})+reload(__construct_aws_profiles_mapping)'\
-        --layout=reverse-list --nth=1,2,3,5 \
+        --layout=reverse-list \
         --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl-L: Login | Ctrl-D: Clear Session | Enter: Exec'" \
         --preview-window=down,1,border-none --tmux 80% \

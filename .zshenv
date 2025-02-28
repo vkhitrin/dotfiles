@@ -5,13 +5,12 @@ export LANG=en_US.UTF-8
 # Custom env variables
 export IS_SERVER=false
 
-# FZF
+# fzf
 export FZF_DEFAULT_OPTS=" \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
---color=selected-bg:#45475a \
---tmux"
+--color=selected-bg:#45475a --no-mouse --tmux 60%"
 
 # PGP
 export GPG_TTY=$(tty)
@@ -36,24 +35,31 @@ __construct_aws_profiles_mapping() {
             local PROFILE_ACCOUNT_ID=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_account_id" -v)
             local PROFILE_ROLE=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_role_name" -v)
             local PROFILE_SESSION=$(echo ${AWS_VAULT_LIST} | grep "${PROFILE}" | awk '{print $3}')
+            if [[ ${PROFILE_SESSION} == "-" ]] && PROFILE_SESSION=" "
             local PROFILE_DESCRIPTION=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "description" -v)
-            echo "${PROFILE},${PROFILE_ACCOUNT_ID},${PROFILE_ROLE},${PROFILE_SESSION},${PROFILE_DESCRIPTION}"
+            echo "${PROFILE},${PROFILE_ACCOUNT_ID},${PROFILE_ROLE},${PROFILE_SESSION},${PROFILE_DESCRIPTION}" | awk -F ',' -v cur="${PROFILE_SESSION}" '
+            {
+              if ($4 ~ / /)
+                print $0;
+              else
+                print "\033[33m"$0"\033[0m";
+            }'
         done
-    ) | awk -F ',' '{print $1,$2,$3,$4,$5,$6}' OFS=',' | column -t -s ',' | sed 's/\([^,]*,[^,]*,[^,]*,[^,]*\),/\1,/' 
+    ) | awk -F ',' '{print $1,$2,$3,$5}' OFS=',' | ansicolumn -t -s ',' | sed 's/\([^,]*,[^,]*,[^,]*,[^,]*\),/\1,/' 
 }
 
 __get_kuberentes_contexts() {
-    local contexts=$(kubectl config get-contexts -o name) 
-    local current_context=$(kubectl config current-context 2>/dev/null)
-    if [[ -n "$current_context" ]]; then
-      (echo "$contexts" | awk -v cur="$current_context" '
+    local CONTEXTS=$(kubectl config get-contexts -o name) 
+    local CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null)
+    if [[ -n "$CURRENT_CONTEXT" ]]; then
+      (echo "$CONTEXTS" | awk -v cur="$CURRENT_CONTEXT" '
       {
         if ($0 == cur)
-          print "\033[31m" $0 "\033[0m";  # Yellow highlight
+          print "\033[31m" $0 "\033[0m";
         else
           print $0;
       }')
     else
-      echo ${contexts}
+      echo ${CONTEXTS}
     fi
 }

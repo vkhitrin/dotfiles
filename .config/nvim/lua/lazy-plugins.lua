@@ -639,6 +639,15 @@ local plugins = {
         config = function()
             require("plugins.editor.todo-comments")
         end,
+        keys = {
+            {
+                "<leader>st",
+                function()
+                    Snacks.picker.todo_comments()
+                end,
+                desc = "Todo",
+            },
+        },
     },
     "christoomey/vim-tmux-navigator",
     {
@@ -699,7 +708,6 @@ local plugins = {
         dependencies = {
             "neovim/nvim-lspconfig",
             "nvim-lua/plenary.nvim",
-            "nvim-telescope/telescope.nvim",
         },
     },
     {
