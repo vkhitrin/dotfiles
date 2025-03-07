@@ -129,6 +129,18 @@ if [[ $(uname) == "Darwin" ]];then
         alias glab-work="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work glab"
     fi
 
+    # Snipkit widget bind only if config file exists
+    if [[ -d "${HOME}/Library/Application Support/snipkit" ]]; then
+        snipkit-snippets-copy-widget () {
+            echoti rmkx
+            exec </dev/tty
+            snipkit copy
+            echoti smkx
+        }
+        zle -N snipkit-snippets-copy-widget
+        bindkey "^Xc" snipkit-snippets-copy-widget
+    fi
+
     # Jira punchout tool
     [ -f "/opt/homebrew/bin/punchout" ] && alias punchout="punchout -db-path=${HOME}/.cache/punchout/punchout.v1.db"
 fi
@@ -241,16 +253,12 @@ kctx() {
         --bind 'enter:become(kubectl config use-context {})'
 }
 
-# Snipkit widget bind only if config file exists
-if [[ -d "${HOME}/Library/Application Support/snipkit" ]]; then
-    snipkit-snippets-copy-widget () {
-        echoti rmkx
-        exec </dev/tty
-        snipkit copy
-        echoti smkx
-    }
-    zle -N snipkit-snippets-copy-widget
-    bindkey "^Xc" snipkit-snippets-copy-widget
-fi
+gpx() {
+    local STARTING_PATH="${1:-${HOME}/Projects/}"
+    cd $(__get_git_directories "${STARTING_PATH}" | fzf --border-label ' Git Projects ' --color 'border:#fab387,label:#fab387' \
+        --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
+        --preview-window=down,1,border-none
+    )
+}
 
 autoload -U +X bashcompinit && bashcompinit

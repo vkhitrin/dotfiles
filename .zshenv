@@ -63,3 +63,8 @@ __get_kuberentes_contexts() {
       echo ${CONTEXTS}
     fi
 }
+
+__get_git_directories() {
+    local STARTING_PATH="${1}"
+    fd -H -t d -g '.git' "${1}" | xargs -I {} dirname {}
+}
