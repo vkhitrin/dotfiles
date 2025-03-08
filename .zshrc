@@ -143,6 +143,10 @@ if [[ $(uname) == "Darwin" ]];then
 
     # Jira punchout tool
     [ -f "/opt/homebrew/bin/punchout" ] && alias punchout="punchout -db-path=${HOME}/.cache/punchout/punchout.v1.db"
+
+    # Cosmicding
+    [ -f "${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
+        export COSMICDING_SQLITE_DATABASE="${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite"
 fi
 
 # Linux configuration
@@ -179,7 +183,10 @@ if [[ $(uname) == "Linux" ]];then
 
     # Custom aliases
     alias _backup_my_linux="mackup backup -vf"
-
+    #
+    # Cosmicding
+    [ -f "${HOME}/.cache/cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
+        export COSMICDING_SQLITE_DATABASE="${HOME}/.cache/cosmicding/com.vkhitrin.cosmicding-db.sqlite"
 fi
 
 # Enable mise (formerly known as rtx)
@@ -236,7 +243,7 @@ awsx() {
         --bind='ctrl-l:execute-silent(aws-vault login {1} -s)+reload(__construct_aws_profiles_mapping)'\
         --bind='ctrl-d:execute-silent(aws-vault clear {1})+reload(__construct_aws_profiles_mapping)'\
         --layout=reverse-list \
-        --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af' \
+        --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,preview-fg:#f9e2af' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl-L: Login | Ctrl-D: Clear Session | Enter: Exec'" \
         --preview-window=down,1,border-none --tmux 80% \
         --bind 'enter:become(aws-vault exec {1})'
@@ -247,7 +254,7 @@ kctx() {
         --bind='ctrl-r:reload:(__get_kuberentes_contexts)' --prompt="Filter " \
         --bind='ctrl-u:execute-silent(kubectl config unset current-context)+reload(__get_kuberentes_contexts)'\
         --layout=reverse-list \
-        --border-label ' Kubernetes Contexts ' --color 'border:#89b4fa,label:#89b4fa' \
+        --border-label ' Kubernetes Contexts ' --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl-U: Unset Current Context | Enter: Set Context'" \
         --preview-window=down,1,border-none \
         --bind 'enter:become(kubectl config use-context {})'
@@ -255,10 +262,32 @@ kctx() {
 
 gpx() {
     local STARTING_PATH="${1:-${HOME}/Projects/}"
-    cd $(__get_git_directories "${STARTING_PATH}" | fzf --border-label ' Git Projects ' --color 'border:#fab387,label:#fab387' \
+    cd $(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label ' Git Projects ' \
+        --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
         --preview-window=down,1,border-none
     )
+}
+
+bookmarksx() {
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+    fi
+
+    __get_cosmicding_bookmarks | fzf --header-lines=1 --info=inline \
+        --bind='ctrl-r:reload:__get_cosmicding_bookmarks' --prompt="Filter " \
+        --bind="ctrl-u:become(echo {} | awk '{print \$NF}' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --layout=reverse-list \
+        --border-label ' Bookmarks ' --color 'border:#b4befe,label:#b4befe,header:#b4befe:bold,preview-fg:#b4befe' \
+        --preview="echo 'Ctrl-R: Reload List | Ctrl+U: Copy To Clipboard | Enter: Open'" \
+        --preview-window=down,1,border-none --tmux 90% \
+        --bind "enter:become(echo {} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
 
 autoload -U +X bashcompinit && bashcompinit
