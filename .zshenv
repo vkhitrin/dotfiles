@@ -69,11 +69,15 @@ __get_git_directories() {
     fd -H -t d -g '.git' "${1}" | xargs -I {} dirname {}
 }
 
+__get_directories() {
+    local STARTING_PATH="${1}"
+    fd --full-path -H -t d "${1}"
+}
+
 __get_cosmicding_bookmarks() {
     if [[ -n "${COSMICDING_SQLITE_DATABASE}" ]]; then
         sqlite3 --json "${COSMICDING_SQLITE_DATABASE}" "SELECT title,url,tag_names FROM Bookmarks" | \
             jq -r '(["title", "tags", "url"] | @csv), (.[] | [.title, .tag_names, .url] | @csv)' | sed 's/","/|/g' | sed 's/^"\(.*\)"$/\1/g' | column -t -s'|'
-
     else
         echo "Environment variable COSMICDING_SQLITE_DATABASE is not defined"
     fi

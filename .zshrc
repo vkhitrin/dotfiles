@@ -269,7 +269,7 @@ gpx() {
     )
 }
 
-bookmarksx() {
+bkmx() {
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -282,12 +282,21 @@ bookmarksx() {
 
     __get_cosmicding_bookmarks | fzf --header-lines=1 --info=inline \
         --bind='ctrl-r:reload:__get_cosmicding_bookmarks' --prompt="Filter " \
-        --bind="ctrl-u:become(echo {} | awk '{print \$NF}' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-u:become(echo {} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --layout=reverse-list \
         --border-label ' Bookmarks ' --color 'border:#b4befe,label:#b4befe,header:#b4befe:bold,preview-fg:#b4befe' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl+U: Copy To Clipboard | Enter: Open'" \
         --preview-window=down,1,border-none --tmux 90% \
         --bind "enter:become(echo {} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
+}
+
+cdx() {
+    local STARTING_PATH="${1:-${PWD}}"
+    cd $(__get_directories "${STARTING_PATH}" | fzf --border-label " Directories Under '${STARTING_PATH}' " \
+        --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
+        --prompt "Filter " --preview="echo 'Enter: Navigate Directory'" \
+        --preview-window=down,1,border-none
+    )
 }
 
 autoload -U +X bashcompinit && bashcompinit
