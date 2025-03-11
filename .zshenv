@@ -49,7 +49,7 @@ __construct_aws_profiles_mapping() {
 }
 
 __get_kuberentes_contexts() {
-    local CONTEXTS=$(kubectl config get-contexts -o name) 
+    local CONTEXTS=$(kubesess completion-context | sed -e 's/ /\n/g')
     local CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null)
     if [[ -n "$CURRENT_CONTEXT" ]]; then
       (echo "$CONTEXTS" | awk -v cur="$CURRENT_CONTEXT" '

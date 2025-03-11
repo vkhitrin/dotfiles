@@ -147,6 +147,8 @@ if [[ $(uname) == "Darwin" ]];then
     # Cosmicding
     [ -f "${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
         export COSMICDING_SQLITE_DATABASE="${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite"
+
+
 fi
 
 # Linux configuration
@@ -250,19 +252,20 @@ awsx() {
 }
 
 kctx() {
-    __get_kuberentes_contexts | fzf --info=inline --ansi \
+    export KUBECONFIG=$(__get_kuberentes_contexts | fzf --info=inline --ansi \
         --bind='ctrl-r:reload:(__get_kuberentes_contexts)' --prompt="Filter " \
         --bind='ctrl-u:execute-silent(kubectl config unset current-context)+reload(__get_kuberentes_contexts)'\
         --layout=reverse-list \
         --border-label ' Kubernetes Contexts ' --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl-U: Unset Current Context | Enter: Set Context'" \
         --preview-window=down,1,border-none \
-        --bind 'enter:become(kubectl config use-context {})'
+        --bind 'enter:become(kubesess -v {} context)'
+    )
 }
 
 gpx() {
     local STARTING_PATH="${1:-${HOME}/Projects/}"
-    cd $(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label ' Git Projects ' \
+    cd $(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
         --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
         --preview-window=down,1,border-none
