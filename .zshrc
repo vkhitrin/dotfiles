@@ -134,7 +134,7 @@ if [[ $(uname) == "Darwin" ]];then
         snipkit-snippets-copy-widget () {
             echoti rmkx
             exec </dev/tty
-            snipkit copy
+            snipkit exec
             echoti smkx
         }
         zle -N snipkit-snippets-copy-widget
@@ -143,6 +143,9 @@ if [[ $(uname) == "Darwin" ]];then
 
     # Jira punchout tool
     [ -f "/opt/homebrew/bin/punchout" ] && alias punchout="punchout -db-path=${HOME}/.cache/punchout/punchout.v1.db"
+
+    # Google Cloud SDK Completion
+    [ -f "/opt/homebrew/share/zsh/site-functions/_google_cloud_sdk" ] && source /opt/homebrew/share/zsh/site-functions/_google_cloud_sdk
 
     # Cosmicding
     [ -f "${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
@@ -233,11 +236,9 @@ which nvim > /dev/null 2>&1 && alias vi='vim'; alias vim='nvim'; export EDITOR=n
 # Global aliases
 alias ls="ls --color=auto -F"
 alias ll='ls -l'
-alias dotfiles='git --git-dir=$HOME/Projects/Automation/Setup/dotfiles --work-tree=$HOME'
+alias dotfiles='git --git-dir=${HOME}/Projects/Automation/Setup/dotfiles --work-tree=${HOME}'
 # Set default editor
 export VISUAL=$EDITOR
-
-complete -F _oci_completion -o default oci;
 
 awsx() {
     __construct_aws_profiles_mapping | fzf --exact --ansi --header-lines=1 --info=inline \
@@ -302,4 +303,3 @@ cdx() {
     )
 }
 
-autoload -U +X bashcompinit && bashcompinit

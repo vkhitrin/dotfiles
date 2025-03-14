@@ -41,7 +41,7 @@ style = "green"
 [git_branch]
 symbol = "⑆ "
 format = '[$symbol$branch]($style) '
-style = 'yellow'
+style = 'peach'
 
 [git_status]
 format = '$all_status$ahead_behind'
