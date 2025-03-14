@@ -21,11 +21,6 @@ export KUBECONFIG=$(find "$HOME/.kube" -maxdepth 1 -type f | xargs | sed -e 's/ 
 # Application(s)
 export KUBECTL_COMMAND="kubectl"
 export ANSIBLE_HOME="${HOME}/.local/share/ansible"
-# export AWS_CONFIG_FILE="${HOME}/.config/aws/config"
-# export AWS_SHARED_CREDENTIALS_FILE="${HOME}/.config/aws/credentials"
-# export CARGO_HOME="${HOME}/.local/share/cargo"
-# export CQL_HISTORY="${HOME}/.local/share/cassandra/cqlsh_history"
-# export CLICKHOUSE_HISTORY_FILE="${HOME}/.local/share/"
 
 __construct_aws_profiles_mapping() {
     local AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
@@ -55,7 +50,7 @@ __get_kuberentes_contexts() {
       (echo "$CONTEXTS" | awk -v cur="$CURRENT_CONTEXT" '
       {
         if ($0 == cur)
-          print "\033[31m" $0 "\033[0m";
+          print "\033[1;34m" $0 "\033[0m";
         else
           print $0;
       }')

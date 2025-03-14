@@ -18,7 +18,6 @@ truncation_symbol = ""
 # format = "[❯](red)[❯](yellow)[❯](green) "
 # shell = 'bash'
 # when = '[ -n "${HISTFILE}" ]'
-
 [custom.incognito]
 format = "[❯](text)[❯](text)[❯](text) "
 shell = 'bash'
@@ -76,7 +75,7 @@ disabled = true
 disabled = false
 symbol = ""
 format = "[$symbol $context()]($style) "
-style = "red"
+style = "blue"
 
 [aws]
 format = '[$symbol($profile )(\($region\) )(\[$duration\] )]($style)'
@@ -86,7 +85,7 @@ symbol = " "
 [azure]
 symbol = "󰠅 "
 format = "[$symbol($subscription)]($style) "
-style = "blue"
+style = "sapphire"
 disabled = false
 
 [gcloud]

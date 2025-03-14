@@ -53,11 +53,11 @@ select-word-style bash
 # macOS configuration
 if [[ $(uname) == "Darwin" ]];then
 
-    export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
+    export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${PATH}"
 
     # Source zsh-completion
     if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
-        FPATH="/opt/homebrew/share/zsh-completions:$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+        FPATH="/opt/homebrew/share/zsh-completions:/opt/homebrew/share/zsh/site-functions:${FPATH}"
         autoload -Uz compinit promptipnit bashcompinit
         compinit; bashcompinit
     fi
@@ -70,7 +70,7 @@ if [[ $(uname) == "Darwin" ]];then
 
     [ -f "/opt/homebrew/share/zsh-autopair/autopair.zsh" ] && source /opt/homebrew/share/zsh-autopair/autopair.zsh
 
-    [ -S "$HOME/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock" ] && export SSH_AUTH_SOCK="$HOME/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock"
+    [ -S "${HOME}/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock" ] && export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock"
 
     # If ggrep is installed, 'use' it instead of grep
     if which ggrep > /dev/null 2>&1; then
@@ -99,32 +99,27 @@ if [[ $(uname) == "Darwin" ]];then
         alias sed='gsed'
     fi
 
-    # If sublime is installed
-    if [[ $(which subl) ]] 2>/dev/null; then
-        alias subl='subl --add'
-    fi
-
     # If mackup is installed as part of system's python
-    [ -f "$HOME/Library/Python/3.9/bin/mackup" ] && alias mackup="$HOME/Library/Python/3.9/bin/mackup"
+    [ -f "${HOME}/Library/Python/3.9/bin/mackup" ] && alias mackup="${HOME}/Library/Python/3.9/bin/mackup"
 
     # If clop is installed
     [ -f "/Applications/Clop.app/Contents/SharedSupport/ClopCLI" ] && alias clop="/Applications/Clop.app/Contents/SharedSupport/ClopCLI"
 
     # If MinIO client installed
-    [[ -f /opt/homebrew/bin/mc ]] && complete -o nospace -C /opt/homebrew/bin/mc mc
+    [[ -f "/opt/homebrew/bin/mc" ]] && complete -o nospace -C /opt/homebrew/bin/mc mc
 
     # macOS aliases
     alias sudoedit='sudo -e'
     alias less='less -rf'
     alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
-    alias gcc='/opt/homebrew/bin/gcc-13'
+    alias gcc='/opt/homebrew/bin/gcc-14'
 
     # Custom aliases
-    alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf $HOME/Library/Preferences/ByHost $HOME/.iCloudDrive/Mackup/Library/Preferences; open raycast://extensions/raycast/raycast/export-settings-data"
+    alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf ${HOME}/Library/Preferences/ByHost \"${HOME}/.iCloudDrive/Operating Systems/macOS/Mackup/Library/Preferences\"; open raycast://extensions/raycast/raycast/export-settings-data"
     alias system_python="/usr/bin/python3"
     alias system_pip="/usr/bin/python3 -m pip"
 
-    # Source zsh-completion
+    # Custom GitLab configuration
     if [[ -d "${HOME}/.config/glab-cli/work" ]];then
         alias glab-work="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work glab"
     fi
@@ -151,6 +146,9 @@ if [[ $(uname) == "Darwin" ]];then
     [ -f "${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
         export COSMICDING_SQLITE_DATABASE="${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite"
 
+    # If Twingate Python Script is present
+    [ -d "/Users/vkhitrin/Projects/Automation/Tools/Twingate-CLI" ] && alias tgcli="uv --directory='${HOME}/Projects/Automation/Tools/Twingate-CLI' run --no-project --with 'requests' --with 'pandas' ${HOME}/Projects/Automation/Tools/Twingate-CLI/tgcli.py"
+
 
 fi
 
@@ -173,10 +171,9 @@ if [[ $(uname) == "Linux" ]];then
 
     [ -f "/usr/share/zsh/plugins/zsh-autopair/autopair.zsh" ] && source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
 
-    export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:$HOME/.local/bin:$HOME/go/bin:$PATH
-    export PATH=$HOME/.local/bin:$HOME/go/bin:$PATH
+    export PATH="${HOME}/.local/bin:${HOME}/go/bin:${PATH}"
 
-    # Enable SSH Agent (based on a systemd service)
+    # Enable SSH Agent (based on a custom systemd service)
     [ -S "/run/user/$(id -u)/ssh-agent.socket" ] && export SSH_AUTH_SOCK="/run/user/$(id -u)/ssh-agent.socket"
 
     if which aws_completer > /dev/null 2>&1;then
@@ -234,11 +231,11 @@ fi
 which vim > /dev/null 2>&1 && alias vi='vim'; export EDITOR=vim
 which nvim > /dev/null 2>&1 && alias vi='vim'; alias vim='nvim'; export EDITOR=nvim
 # Global aliases
-alias ls="ls --color=auto -F"
+alias ls='ls --color=auto -F'
 alias ll='ls -l'
 alias dotfiles='git --git-dir=${HOME}/Projects/Automation/Setup/dotfiles --work-tree=${HOME}'
 # Set default editor
-export VISUAL=$EDITOR
+export VISUAL=${EDITOR}
 
 awsx() {
     __construct_aws_profiles_mapping | fzf --exact --ansi --header-lines=1 --info=inline \
@@ -253,24 +250,26 @@ awsx() {
 }
 
 kctx() {
-    export KUBECONFIG=$(__get_kuberentes_contexts | fzf --info=inline --ansi \
+    local SELECTED_CONTEXT=$(__get_kuberentes_contexts | fzf --info=inline --ansi \
+        --bind='ctrl-u:execute-silent(rm -rf ${HOME}/.kube/kubesess/cache/)+reload(__get_kuberentes_contexts)' \
         --bind='ctrl-r:reload:(__get_kuberentes_contexts)' --prompt="Filter " \
-        --bind='ctrl-u:execute-silent(kubectl config unset current-context)+reload(__get_kuberentes_contexts)'\
         --layout=reverse-list \
         --border-label ' Kubernetes Contexts ' --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl-U: Unset Current Context | Enter: Set Context'" \
         --preview-window=down,1,border-none \
         --bind 'enter:become(kubesess -v {} context)'
     )
+    [ ! -z ${SELECTED_CONTEXT} ] && export KUBECONFIG="${SELECTED_CONTEXT}"
 }
 
 gpx() {
     local STARTING_PATH="${1:-${HOME}/Projects/}"
-    cd $(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
+    local SELECTED_DIR=$(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
         --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
         --preview-window=down,1,border-none
     )
+    [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
 }
 
 bkmx() {
@@ -296,10 +295,11 @@ bkmx() {
 
 cdx() {
     local STARTING_PATH="${1:-${PWD}}"
-    cd $(__get_directories "${STARTING_PATH}" | fzf --border-label " Directories Under '${STARTING_PATH}' " \
-        --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
-        --prompt "Filter " --preview="echo 'Enter: Navigate Directory'" \
+    local SELECTED_DIR=$(__get_directories "${STARTING_PATH}" | fzf --border-label " Directories Under '${STARTING_PATH}' " \
+        --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
+        --prompt "Filter " --preview="echo 'Enter: Navigate To Selected Directory'" \
         --preview-window=down,1,border-none
     )
+    [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
 }
 
