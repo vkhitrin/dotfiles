@@ -295,7 +295,7 @@ bkmx() {
 
 cdx() {
     local STARTING_PATH="${1:-${PWD}}"
-    local SELECTED_DIR=$(__get_directories "${STARTING_PATH}" | fzf --border-label " Directories Under '${STARTING_PATH}' " \
+    local SELECTED_DIR=$(__get_directories "${STARTING_PATH}" | fzf --border-label " All Directories Under '$(basename ${STARTING_PATH})' " \
         --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Selected Directory'" \
         --preview-window=down,1,border-none

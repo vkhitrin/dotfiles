@@ -678,7 +678,6 @@ local plugins = {
             "onsails/lspkind.nvim",
             "saadparwaiz1/cmp_luasnip",
             "petertriho/cmp-git",
-            "davidsierradz/cmp-conventionalcommits",
             -- "lukas-reineke/cmp-rg",
         },
         config = function()

@@ -24,6 +24,7 @@ require("mason-tool-installer").setup({
         "esbonio",
         "gitlab-ci-ls",
         "gopls",
+        "harper-ls",
         "helm-ls",
         "jq",
         "json-lsp",

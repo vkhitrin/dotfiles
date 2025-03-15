@@ -24,7 +24,6 @@ cmp.setup({
         { name = "luasnip" },
         { name = "async_path" },
         { name = "git" },
-        { name = "conventionalcommits" },
         -- { name = "rg" },
     }, { { name = "buffer" } }),
 
@@ -39,7 +38,6 @@ cmp.setup({
                 buffer = "[Buffer]",
                 async_path = "[Path]",
                 git = "[Git]",
-                conventionalcommits = "[GitCC]",
                 rg = "[Ripgrep]",
                 copilot = "[Copilot]",
             },
@@ -83,7 +81,6 @@ cmp.setup({
 cmp.setup.filetype("gitcommit", {
     sources = cmp.config.sources({
         { name = "git" },
-        { name = "conventionalcommits" },
     }, { { name = "buffer" } }),
 })
 
@@ -124,7 +121,7 @@ require("cmp_git").setup({
         },
     },
     gitlab = {
-        hosts = {"gitlab-work.com", "gitlab.com", "work-on-prem"}, -- list of private instances of gitlab
+        hosts = { "gitlab.com" },
         issues = {
             limit = 100,
             state = "opened", -- opened, closed, all

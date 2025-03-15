@@ -116,6 +116,15 @@ require("mason-lspconfig").setup_handlers({
             bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
         })
     end,
+    ["harper_ls"] = function()
+        lspconfig.harper_ls.setup({
+            settings = {
+                ["harper-ls"] = {
+                    userDictPath = "",
+                },
+            },
+        })
+    end,
     -- ["pyright"] = function()
     --     lspconfig.pyright.setup({
     --         settings = {
