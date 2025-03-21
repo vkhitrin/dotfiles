@@ -1,8 +1,5 @@
 palette = "catppuccin_mocha"
 add_newline = false
-# format = """$directory$character${custom.incognito}"""
-# right_format = """$kubernetes"""
-# format = """$kubernetes $git_branch${custom.mise}\n$directory${custom.character}${custom.incognito}"""
 format = """$aws$gcloud$azure$kubernetes$git_branch${custom.mise}\n$directory${character}"""
 continuation_prompt = "[❯](blue) "
 
@@ -14,28 +11,12 @@ error_symbol = "[❯](red)[❯](yellow)[❯](green)"
 style = "text"
 truncation_symbol = ""
 
-# [custom.character]
-# format = "[❯](red)[❯](yellow)[❯](green) "
-# shell = 'bash'
-# when = '[ -n "${HISTFILE}" ]'
-[custom.incognito]
-format = "[❯](text)[❯](text)[❯](text) "
-shell = 'bash'
-when = '[ -z "${HISTFILE}" ]'
-
 [custom.mise]
 symbol = "⍟ "
 format = "[$symbol$output]($style)"
 command = "mise current | xargs"
 detect_files = [".mise.toml"]
 style = "green"
-
-# [custom.github]
-# symbol = "⍟ "
-# format = "[$symbol$output]($style)"
-# command = "${HOME}/.local/bin/get-active-gh-user.sh"
-# detect_files = [".mise.toml"]
-# style = "green"
 
 [git_branch]
 symbol = "⑆ "

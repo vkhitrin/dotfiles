@@ -21,6 +21,7 @@ export KUBECONFIG=$(find "$HOME/.kube" -maxdepth 1 -type f | xargs | sed -e 's/ 
 # Application(s)
 export KUBECTL_COMMAND="kubectl"
 export ANSIBLE_HOME="${HOME}/.local/share/ansible"
+export GLAMOUR_STYLE="${HOME}/.config/glamour/catppuccin-mocha.json"
 
 __construct_aws_profiles_mapping() {
     local AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
