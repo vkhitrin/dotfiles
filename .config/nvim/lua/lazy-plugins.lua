@@ -664,6 +664,7 @@ local plugins = {
     { "echasnovski/mini.pairs",                          event = "InsertEnter", opts = {} },
     { "https://github.com/mfussenegger/nvim-ansible.git" },
     { "echasnovski/mini.surround",                       opts = {} },
+    { "echasnovski/mini.diff",                       opts = {} },
     { "b0o/schemastore.nvim" },
     {
         "iguanacucumber/magazine.nvim",
@@ -702,12 +703,15 @@ local plugins = {
     },
     { "towolf/vim-helm" },
     {
-        "someone-stole-my-name/yaml-companion.nvim",
+        "https://github.com/cenk1cenk2/schema-companion.nvim",
         ft = { "yaml" },
         dependencies = {
             "neovim/nvim-lspconfig",
             "nvim-lua/plenary.nvim",
         },
+        config = function()
+            require("plugins.editor.schema-companion")
+        end,
     },
     {
         "nvim-lualine/lualine.nvim",
@@ -744,26 +748,24 @@ local plugins = {
             require("plugins.editor.nvim-ts-autotag")
         end,
     },
-    -- {
-    --     "OXY2DEV/markview.nvim",
-    --     ft = { "markdown" },
-    --     dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
-    --     config = function()
-    --         require("plugins.ui.markview")
-    --     end,
-    -- },
+    {
+        "OXY2DEV/markview.nvim",
+        ft = { "markdown", "codecompanion" },
+        dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+        config = function()
+            require("plugins.ui.markview")
+        end,
+    },
     {
         "fladson/vim-kitty",
     },
     {
-        "zbirenbaum/copilot.lua",
+        "olimorris/codecompanion.nvim",
         event = { "InsertEnter", "LspAttach" },
-        dependencies = { "zbirenbaum/copilot-cmp", "AndreM222/copilot-lualine" },
         config = function()
-            require("plugins.editor.copilot")
+            require("plugins.editor.codecompanion")
         end,
     },
-    { "CopilotC-Nvim/CopilotChat.nvim", opts = {} },
     { "projectfluent/fluent.vim" },
     {
         "psliwka/vim-dirtytalk",

@@ -1,5 +1,6 @@
 local lspconfig = require("lspconfig")
 local schemastore = require("schemastore")
+local schemacompanion = require("schema-companion")
 require("lspconfig.ui.windows").default_options.border = "none"
 local lsp_defaults = lspconfig.util.default_config
 lsp_defaults.capabilities =
@@ -25,38 +26,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
         vim.keymap.set("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
         vim.keymap.set("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
     end,
-})
-
-local yaml_companion_settings = require("yaml-companion").setup({
-    schemas = {
-        {
-            name = "Kustomization",
-            uri = "https://json.schemastore.org/kustomization.json",
-        },
-        {
-            name = "GitHub Workflow",
-            uri = "https://json.schemastore.org/github-workflow.json",
-        },
-    },
-    builtin_matches = {
-        kubernetes = { enabled = true },
-        cloud_init = { enabled = true },
-    },
-    lspconfig = {
-        settings = {
-            redhat = { telmetry = { enabled = false } },
-            yaml = {
-                validate = true,
-                hover = true,
-                schemaStore = {
-                    enable = false,
-                    url = "",
-                },
-                single_file_support = true,
-                schemas = schemastore.yaml.schemas({}),
-            },
-        },
-    },
 })
 
 require("mason-lspconfig").setup_handlers({
@@ -98,7 +67,23 @@ require("mason-lspconfig").setup_handlers({
         })
     end,
     ["yamlls"] = function()
-        lspconfig.yamlls.setup(yaml_companion_settings)
+        require("lspconfig").yamlls.setup(require("schema-companion").setup_client({
+            lspconfig = {
+                settings = {
+                    redhat = { telmetry = { enabled = false } },
+                    yaml = {
+                        validate = true,
+                        hover = true,
+                        schemaStore = {
+                            enable = false,
+                            url = "",
+                        },
+                        single_file_support = true,
+                        schemas = schemastore.yaml.schemas({}),
+                    },
+                },
+            },
+        }))
     end,
     ["helm_ls"] = function()
         lspconfig.helm_ls.setup({
