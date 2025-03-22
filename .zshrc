@@ -156,9 +156,7 @@ fi
 if [[ $(uname) == "Linux" ]];then
 
     # Custom environment variables
-    export QT_WAYLAND_DECORATION=adwaita # Client-side decorations for QT5/6 to mimic GTK
-    export GTK_USE_PORTAL=1 # Use XDG portals in GTK3 apps
-    export GTK_DEBUG=portals # Use XDG portals in GTK4 apps
+    # export QT_WAYLAND_DECORATION=adwaita # Client-side decorations for QT5/6 to mimic GTK
 
     autoload -Uz compinit promptipnit bashcompinit
     compinit; bashcompinit
