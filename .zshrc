@@ -288,7 +288,7 @@ bkmx() {
         --bind="ctrl-u:become(echo {} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --layout=reverse-list \
         --border-label ' Bookmarks ' --color 'border:#b4befe,label:#b4befe,header:#b4befe:bold,preview-fg:#b4befe' \
-        --preview="echo 'Ctrl-R: Reload List | Ctrl+U: Copy To Clipboard | Enter: Open'" \
+        --preview="echo 'Ctrl-R: Reload List | Ctrl+U: Copy URL To Clipboard | Enter: Open'" \
         --preview-window=down,1,border-none --tmux 90% \
         --bind "enter:become(echo {} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
@@ -303,3 +303,32 @@ cdx() {
     [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
 }
 
+if which jira > /dev/null 2>&1;then
+    jipx() {
+        jira projects list | fzf --border-label " Jira Projects " --header-lines=1 --layout=reverse-list \
+            --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
+            --prompt "Filter " --preview="echo 'Enter: Open Project In Browser'" \
+            --preview-window=down,1,border-none \
+            --bind "enter:become(jira open --project {1})"
+    }
+    # TODO: Add pagination support
+    jiix() {
+        local CLIPBOARD_COMMAND
+        local OPEN_COMMAND
+        if [[ $(uname) == "Darwin" ]];then
+            CLIPBOARD_COMMAND="pbcopy"
+            OPEN_COMMAND="open"
+        elif [[ $(uname) == "Linux" ]]; then
+            CLIPBOARD_COMMAND="wl-copy"
+            OPEN_COMMAND="xdg-open"
+        fi
+        local JQL="${1:-(assignee = currentUser()) AND (status !='done')}"
+        jira issues list --jql="${JQL}" --plain --columns key,status,summary  2>&1 | fzf --border-label " Jira Issues " \
+            --header-lines=1 --layout=reverse-list \
+            --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
+            --bind="ctrl-u:become(jira open --no-browser {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+            --prompt "JQL: ${JQL} " --preview="echo 'Ctrl+U: Copy URL To Clipboard | Enter: Open Issue In Browser'" \
+            --preview-window=down,1,border-none \
+            --bind "enter:become(jira open {1})"
+    }
+fi
