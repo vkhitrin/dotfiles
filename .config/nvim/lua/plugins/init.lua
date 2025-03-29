@@ -664,7 +664,7 @@ local plugins = {
     { "echasnovski/mini.pairs",                          event = "InsertEnter", opts = {} },
     { "https://github.com/mfussenegger/nvim-ansible.git" },
     { "echasnovski/mini.surround",                       opts = {} },
-    { "echasnovski/mini.diff",                       opts = {} },
+    { "echasnovski/mini.diff",                           opts = {} },
     { "b0o/schemastore.nvim" },
     {
         "iguanacucumber/magazine.nvim",
@@ -750,7 +750,7 @@ local plugins = {
     },
     {
         "OXY2DEV/markview.nvim",
-        ft = { "markdown", "codecompanion" },
+        ft = { "codecompanion" },
         dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
         config = function()
             require("plugins.ui.markview")
@@ -775,21 +775,6 @@ local plugins = {
             vim.opt.spelllang = { "en", "programming" }
         end,
     },
-
-    -- {
-    --     "rachartier/tiny-inline-diagnostic.nvim",
-    --     event = "VeryLazy",
-    --     priority = 1000,
-    --     config = function()
-    --         require("plugins.ui.tiny-inline-diagnostics")
-    --     end,
-    -- },
-    -- {
-    --     "tris203/precognition.nvim",
-    --     event = "VeryLazy",
-    --     config = {
-    --     }
-    -- }
 }
 
 local opts = {

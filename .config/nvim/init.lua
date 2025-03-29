@@ -1,4 +1,3 @@
 vim.loader.enable()
-require("settings")     -- settings
-require("lazy-plugins") -- configure plugins using lazy.nvim
-require("neovide")      -- neovide related configuration
+require("settings") -- settings
+require("plugins")  -- configure plugins using lazy.nvim
