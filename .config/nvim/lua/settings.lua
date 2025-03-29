@@ -17,6 +17,7 @@ vim.opt.background = "dark"                   -- set background to dark
 vim.opt.cursorline = true                     -- display cursorline
 vim.opt.mouse = ""                            -- disable mouse
 vim.opt.wrap = false                          -- diable line wrap
+vim.opt.showmode = false                      -- Do not display mode below statusline
 vim.g.mapleader = " "                         -- set space as leader key
 --- autocmds
 vim.api.nvim_create_autocmd("TermOpen", {

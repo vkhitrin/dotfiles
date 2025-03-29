@@ -1,7 +1,6 @@
 require("mason").setup({
     PATH = "append",
     registries = {
-        "file:~/.config/nvim/files/mason",
         "github:mason-org/mason-registry",
     },
     ui = {

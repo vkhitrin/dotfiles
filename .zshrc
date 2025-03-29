@@ -265,7 +265,7 @@ gpx() {
     local SELECTED_DIR=$(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
         --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
-        --preview-window=down,1,border-none
+        --preview-window=down,1,border-none --scheme=path
     )
     [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
 }
@@ -296,7 +296,7 @@ cdx() {
     local SELECTED_DIR=$(__get_directories "${STARTING_PATH}" | fzf --border-label " All Directories Under '$(basename ${STARTING_PATH})' " \
         --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Selected Directory'" \
-        --preview-window=down,1,border-none
+        --preview-window=down,1,border-none --scheme=path
     )
     [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
 }

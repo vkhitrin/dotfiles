@@ -1,2 +1,3 @@
 .DS_Store
+.gitlab-ci-local
 .gitlab-ci-local.yml
