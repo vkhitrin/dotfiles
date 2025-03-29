@@ -165,8 +165,8 @@ if [[ $(uname) == "Linux" ]];then
     autoload -Uz compinit promptipnit bashcompinit
     compinit; bashcompinit
 
-    if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-        source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    if [[ -f /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
+        source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
         fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
     fi
 
