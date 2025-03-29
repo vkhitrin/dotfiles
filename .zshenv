@@ -23,6 +23,9 @@ export KUBECTL_COMMAND="kubectl"
 export ANSIBLE_HOME="${HOME}/.local/share/ansible"
 export GLAMOUR_STYLE="${HOME}/.config/glamour/catppuccin-mocha.json"
 
+# Gcloud
+export CLOUDSDK_PYTHON_SITEPACKAGES=1
+
 __construct_aws_profiles_mapping() {
     local AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
     (
@@ -82,8 +85,8 @@ __get_cosmicding_bookmarks() {
 __get_xx_gitlab_projects() {
     if [[ -n "${XX_CACHE_DIR}" ]]; then
         if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
-            sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT project,gitlab_host,id FROM Projects" | \
-                jq -r '(["project","id","host"] | @csv) , (.[] | [.project, .id, .gitlab_host] | @csv)' | sed 's/"//g' | column -t -s','
+            sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT project,id,web_url FROM Projects" | \
+                jq -r '(["project","id","url"] | @csv) , (.[] | [.project, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
         else
             echo "gitlab.db doesn't exist"
         fi
@@ -99,6 +102,32 @@ __get_xx_gitlab_groups() {
                 jq -r '(["group","id","url"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
         else
             echo "gitlab.db doesn't exist"
+        fi
+    else
+        echo "Environment variable XX_CACHE_DIR is not defined"
+    fi
+}
+
+__get_xx_confluence_spaces() {
+    if [[ -n "${XX_CACHE_DIR}" ]]; then
+        if [[ -f "${XX_CACHE_DIR}/confluence.db" ]]; then
+            sqlite3 --json "${XX_CACHE_DIR}/confluence.db" "SELECT name,key,url FROM Spaces" | \
+                jq -r '(["name","key","url"] | @csv) , (.[] | [.name, .key, .url] | @csv)' | sed 's/"//g' | column -t -s','
+        else
+            echo "confluence.db doesn't exist"
+        fi
+    else
+        echo "Environment variable XX_CACHE_DIR is not defined"
+    fi
+}
+
+__get_xx_confluence_pages() {
+    if [[ -n "${XX_CACHE_DIR}" ]]; then
+        if [[ -f "${XX_CACHE_DIR}/confluence.db" ]]; then
+            sqlite3 --json "${XX_CACHE_DIR}/confluence.db" "SELECT title,space,url FROM Pages" | \
+                jq -r '(["title","space","url"] | @csv) , (.[] | [.title, .space, .url] | @csv)' | sed 's/"//g' | column -t -s','
+        else
+            echo "confluence.db doesn't exist"
         fi
     else
         echo "Environment variable XX_CACHE_DIR is not defined"

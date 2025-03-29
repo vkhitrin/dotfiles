@@ -267,7 +267,7 @@ kctx() {
 gpx() {
     local STARTING_PATH="${1:-${HOME}/Projects/}"
     local SELECTED_DIR=$(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
-        --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
+        --info=inline --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
         --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
         --preview-window=down,1,border-none --scheme=path
     )
@@ -325,7 +325,8 @@ if which jira > /dev/null 2>&1;then
             OPEN_COMMAND="xdg-open"
         fi
         local JQL="${1:-(assignee = currentUser()) AND (status !='done')}"
-        jira issues list --jql="${JQL}" --plain --columns key,status,summary  2>&1 | fzf --border-label " Jira Issues " \
+        # Workaround https://github.com/ankitpokhrel/jira-cli/issues/834
+        jira issues list --jql="${JQL}" --plain --columns key,status,summary  2>&1 | sed 's/\[\]/\]/g' | fzf --border-label " Jira Issues " \
             --header-lines=1 --layout=reverse-list \
             --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
             --bind="ctrl-u:become(jira open --no-browser {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
@@ -347,13 +348,13 @@ glpx() {
     fi
 
     __get_xx_gitlab_projects | fzf --header-lines=1 --info=inline \
-        --bind="ctrl-u:become(echo http://{3}/{1} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-u:become(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --bind="ctrl-i:become(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --layout=reverse-list \
         --border-label ' GitLab Projects ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
         --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy ID To Clipboard | Enter: Open'" \
-        --preview-window=down,1,border-none --tmux 50% \
-        --bind "enter:become(echo http://{3}/{1} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
+        --preview-window=down,1,border-none --tmux 80% \
+        --bind "enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
 
 glgx() {
@@ -373,6 +374,48 @@ glgx() {
         --layout=reverse-list \
         --border-label ' GitLab Groups ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
         --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy ID To Clipboard | Enter: Open'" \
-        --preview-window=down,1,border-none --tmux 50% \
+        --preview-window=down,1,border-none --tmux 80% \
         --bind "enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
+}
+
+cfsx() {
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+    fi
+
+    __get_xx_confluence_spaces | fzf --header-lines=1 --info=inline \
+        --bind="ctrl-u:become(echo {} | awk -F '   *' '{print \$3}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-i:become(echo {} | awk -F '   *' '{print \$2}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --layout=reverse-list --delimiter ' ' \
+        --border-label ' Confluence Spaces ' --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa:bold,preview-fg:#89b4fa' \
+        --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy Key To Clipboard | Enter: Open'" \
+        --preview-window=down,1,border-none --tmux 80% \
+        --bind "enter:become(echo {} | awk -F '   *' '{print \$3}' | xargs ${OPEN_COMMAND})"
+}
+
+cfpx() {
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+    fi
+
+    __get_xx_confluence_pages | fzf --header-lines=1 --info=inline \
+        --bind="ctrl-u:become(echo {} | awk -F '   *' '{print \$3}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-i:become(echo {} | awk -F '   *' '{print \$2}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --layout=reverse-list --delimiter ' ' \
+        --border-label ' Confluence Pages ' --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa:bold,preview-fg:#89b4fa' \
+        --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy Key To Clipboard | Enter: Open'" \
+        --preview-window=down,1,border-none --tmux 80% \
+        --bind "enter:become(echo {} | awk -F '   *' '{print \$3}' | xargs ${OPEN_COMMAND})"
 }
