@@ -2,9 +2,6 @@ local lspconfig = require("lspconfig")
 local schemastore = require("schemastore")
 local schemacompanion = require("schema-companion")
 require("lspconfig.ui.windows").default_options.border = "none"
-local lsp_defaults = lspconfig.util.default_config
-lsp_defaults.capabilities =
-    vim.tbl_deep_extend("force", lsp_defaults.capabilities, require("cmp_nvim_lsp").default_capabilities())
 vim.api.nvim_create_autocmd("LspAttach", {
     desc = "LSP actions",
     callback = function(event)
@@ -30,7 +27,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 require("mason-lspconfig").setup_handlers({
     function(server_name)
-        require("lspconfig")[server_name].setup({})
+        local capabilities = require("blink.cmp").get_lsp_capabilities()
+        require("lspconfig")[server_name].setup({ capabilities = capabilities })
     end,
     ["lua_ls"] = function()
         lspconfig.lua_ls.setup({

@@ -13,6 +13,3 @@ require("codecompanion").setup({
         },
     },
 })
-
-
-

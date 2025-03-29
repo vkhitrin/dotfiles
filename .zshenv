@@ -78,3 +78,29 @@ __get_cosmicding_bookmarks() {
         echo "Environment variable COSMICDING_SQLITE_DATABASE is not defined"
     fi
 }
+
+__get_xx_gitlab_projects() {
+    if [[ -n "${XX_CACHE_DIR}" ]]; then
+        if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
+            sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT project,gitlab_host,id FROM Projects" | \
+                jq -r '(["project","id","host"] | @csv) , (.[] | [.project, .id, .gitlab_host] | @csv)' | sed 's/"//g' | column -t -s','
+        else
+            echo "gitlab.db doesn't exist"
+        fi
+    else
+        echo "Environment variable XX_CACHE_DIR is not defined"
+    fi
+}
+
+__get_xx_gitlab_groups() {
+    if [[ -n "${XX_CACHE_DIR}" ]]; then
+        if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
+            sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT group_name AS name,id,web_url FROM Groups" | \
+                jq -r '(["group","id","url"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
+        else
+            echo "gitlab.db doesn't exist"
+        fi
+    else
+        echo "Environment variable XX_CACHE_DIR is not defined"
+    fi
+}

@@ -146,6 +146,10 @@ if [[ $(uname) == "Darwin" ]];then
     [ -f "${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
         export COSMICDING_SQLITE_DATABASE="${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite"
 
+    # XX (CrossX)
+    [ -d "${HOME}/Library/Caches/com.vkhitrin.xx" ] && \
+        export XX_CACHE_DIR="${HOME}/Library/Caches/com.vkhitrin.xx"
+
     # If Twingate Python Script is present
     [ -d "/Users/vkhitrin/Projects/Automation/Tools/Twingate-CLI" ] && alias tgcli="uv --directory='${HOME}/Projects/Automation/Tools/Twingate-CLI' run --no-project --with 'requests' --with 'pandas' ${HOME}/Projects/Automation/Tools/Twingate-CLI/tgcli.py"
 
@@ -330,3 +334,45 @@ if which jira > /dev/null 2>&1;then
             --bind "enter:become(jira open {1})"
     }
 fi
+
+glpx() {
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+    fi
+
+    __get_xx_gitlab_projects | fzf --header-lines=1 --info=inline \
+        --bind="ctrl-u:become(echo http://{3}/{1} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-i:become(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --layout=reverse-list \
+        --border-label ' GitLab Projects ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
+        --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy ID To Clipboard | Enter: Open'" \
+        --preview-window=down,1,border-none --tmux 50% \
+        --bind "enter:become(echo http://{3}/{1} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
+}
+
+glgx() {
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+    fi
+
+    __get_xx_gitlab_groups | fzf --header-lines=1 --info=inline \
+        --bind="ctrl-u:become(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-i:become(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --layout=reverse-list \
+        --border-label ' GitLab Groups ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
+        --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy ID To Clipboard | Enter: Open'" \
+        --preview-window=down,1,border-none --tmux 50% \
+        --bind "enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
+}

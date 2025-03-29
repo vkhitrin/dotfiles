@@ -667,25 +667,25 @@ local plugins = {
     { "echasnovski/mini.diff",                           opts = {} },
     { "b0o/schemastore.nvim" },
     {
-        "iguanacucumber/magazine.nvim",
-        name = "nvim-cmp",
+        "Saghen/blink.cmp",
+        version = "*",
         dependencies = {
-            "hrsh7th/cmp-nvim-lsp",
-            "hrsh7th/cmp-buffer",
-            "https://codeberg.org/FelipeLema/cmp-async-path",
-            "hrsh7th/cmp-cmdline",
-            "hrsh7th/cmp-vsnip",
+            --     "hrsh7th/cmp-nvim-lsp",
+            --     "hrsh7th/cmp-buffer",
+            --     "https://codeberg.org/FelipeLema/cmp-async-path",
+            --     "hrsh7th/cmp-cmdline",
+            --     "hrsh7th/cmp-vsnip",
             "rafamadriz/friendly-snippets",
-            "onsails/lspkind.nvim",
-            "saadparwaiz1/cmp_luasnip",
-            "petertriho/cmp-git",
-            -- "lukas-reineke/cmp-rg",
+            --     "onsails/lspkind.nvim",
+            --     "saadparwaiz1/cmp_luasnip",
+            --     "petertriho/cmp-git",
+            --     -- "lukas-reineke/cmp-rg",
         },
         config = function()
-            require("plugins.editor.nvim-cmp")
+            require("plugins.editor.blink")
         end,
     },
-    { "L3MON4D3/LuaSnip", build = "make install_jsregexp" },
+    -- { "L3MON4D3/LuaSnip", build = "make install_jsregexp" },
     { "romainl/vim-cool" },
     {
         "RRethy/vim-illuminate",
@@ -774,6 +774,12 @@ local plugins = {
             vim.opt.spell = true
             vim.opt.spelllang = { "en", "programming" }
         end,
+    },
+    {
+        "nvim-orgmode/orgmode",
+        event = "VeryLazy",
+        ft = { "org" },
+        config = function() end,
     },
 }
 
