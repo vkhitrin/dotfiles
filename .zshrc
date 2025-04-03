@@ -239,11 +239,27 @@ alias dotfiles='git --git-dir=${HOME}/Projects/Automation/Setup/dotfiles --work-
 # Set default editor
 export VISUAL=${EDITOR}
 
-awsx() {
+xx-widget () {
+    xx
+}
+zle -N xx-widget
+bindkey "^Xx" xx-widget
+
+xx() {
+    __get_xx_functions | fzf --header-lines=1 --info=inline \
+        --layout=reverse-list --delimiter ' ' \
+        --border-label ' xx ' --color 'border:#F4E0DC,label:#F4E0DC,header:#F4E0DC:bold,preview-fg:#F4E0DC' \
+        --preview="echo 'Enter: Execute Command'" \
+        --preview-window=down,1,border-none --tmux 80% \
+        --bind "enter:become(source ${HOME}/.zshrc;{1})"
+}
+
+function awsx() {
+    # xx ;aws:Activate AWS profile for shell
     __construct_aws_profiles_mapping | fzf --exact --ansi --header-lines=1 --info=inline \
         --bind='ctrl-r:reload:__construct_aws_profiles_mapping' --prompt="Filter " \
-        --bind='ctrl-l:execute-silent(aws-vault login {1} -s)+reload(__construct_aws_profiles_mapping)'\
-        --bind='ctrl-d:execute-silent(aws-vault clear {1})+reload(__construct_aws_profiles_mapping)'\
+        --bind='ctrl-l:execute-silent(aws-vault login {1} -s)+reload(__construct_aws_profiles_mapping)' \
+        --bind='ctrl-d:execute-silent(aws-vault clear {1})+reload(__construct_aws_profiles_mapping)' \
         --layout=reverse-list \
         --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,preview-fg:#f9e2af' \
         --preview="echo 'Ctrl-R: Reload List | Ctrl-L: Login | Ctrl-D: Clear Session | Enter: Exec'" \
@@ -251,7 +267,8 @@ awsx() {
         --bind 'enter:become(aws-vault exec {1})'
 }
 
-kctx() {
+function kctx() {
+    # xx ;kubernetes:Activate Kubernetes context for shell
     local SELECTED_CONTEXT=$(__get_kuberentes_contexts | fzf --info=inline --ansi \
         --bind='ctrl-u:execute-silent(rm -rf ${HOME}/.kube/kubesess/cache/)+reload(__get_kuberentes_contexts)' \
         --bind='ctrl-r:reload:(__get_kuberentes_contexts)' --prompt="Filter " \
@@ -264,17 +281,20 @@ kctx() {
     [ ! -z ${SELECTED_CONTEXT} ] && export KUBECONFIG="${SELECTED_CONTEXT}"
 }
 
-gpx() {
+function gpx() {
+    # xx ;git,shell:Navigate to local git projects
     local STARTING_PATH="${1:-${HOME}/Projects/}"
     local SELECTED_DIR=$(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
         --info=inline --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
-        --prompt "Filter " --preview="echo 'Enter: Navigate To Git Project Directory'" \
+        --bind='ctrl-o:execute-silent(cd {}; git open)' \
+        --prompt "Filter " --preview="echo 'CTRL+O: Open Remote | Enter: Navigate To Git Project Directory'" \
         --preview-window=down,1,border-none --scheme=path
     )
     [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
 }
 
-bkmx() {
+function bkmx() {
+    # xx ;linkding:View bookmarks
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -295,7 +315,8 @@ bkmx() {
         --bind "enter:become(echo {} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
 
-cdx() {
+function cdx() {
+    # xx ;shell:Navigate to directory
     local STARTING_PATH="${1:-${PWD}}"
     local SELECTED_DIR=$(__get_directories "${STARTING_PATH}" | fzf --border-label " All Directories Under '$(basename ${STARTING_PATH})' " \
         --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
@@ -306,7 +327,8 @@ cdx() {
 }
 
 if which jira > /dev/null 2>&1;then
-    jipx() {
+    function jipx() {
+        # xx ;jira:Query Jira for projects
         jira projects list | fzf --border-label " Jira Projects " --header-lines=1 --layout=reverse-list \
             --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
             --prompt "Filter " --preview="echo 'Enter: Open Project In Browser'" \
@@ -314,7 +336,8 @@ if which jira > /dev/null 2>&1;then
             --bind "enter:become(jira open --project {1})"
     }
     # TODO: Add pagination support
-    jiix() {
+    function jiix() {
+        # xx ;jira:Query Jira for issues
         local CLIPBOARD_COMMAND
         local OPEN_COMMAND
         if [[ $(uname) == "Darwin" ]];then
@@ -336,7 +359,8 @@ if which jira > /dev/null 2>&1;then
     }
 fi
 
-glpx() {
+function glpx() {
+    # xx ;gitlab:Display cached GitLab Projects
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -357,7 +381,8 @@ glpx() {
         --bind "enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
 
-glgx() {
+function glgx() {
+    # xx ;gitlab:Display cached GitLab Groups
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -378,7 +403,8 @@ glgx() {
         --bind "enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
 
-cfsx() {
+function cfsx() {
+    # xx ;confluence:Display cached Confluence spaces
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -399,7 +425,8 @@ cfsx() {
         --bind "enter:become(echo {} | awk -F '   *' '{print \$3}' | xargs ${OPEN_COMMAND})"
 }
 
-cfpx() {
+function cfpx() {
+    # xx ;confluence:Display cached Confluence pages
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then

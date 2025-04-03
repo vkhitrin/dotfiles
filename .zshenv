@@ -133,3 +133,25 @@ __get_xx_confluence_pages() {
         echo "Environment variable XX_CACHE_DIR is not defined"
     fi
 }
+
+__get_xx_functions() {
+    local GNU_SED_COMMAND
+    local GNU_AWK_COMMNAD
+    local XX_FUNCTIONS
+    if [[ $(uname) == "Darwin" ]];then
+        GNU_AWK_COMMNAD="gawk"
+        GNU_SED_COMMAND="gsed"
+    elif [[ $(uname) == "Linux" ]]; then
+        GNU_AWK_COMMNAD="awk"
+        GNU_SED_COMMAND="sed"
+    fi
+
+    XX_FUNCTIONS=$(rg --follow --type zsh --color always --field-context-separator '' --color never \
+        --no-filename --no-context-separator --only-matching -e '^\s*function\s+(?P<fname>([^\s(]+))' \
+        -r '$fname' -A 1 --field-match-separator ' ' "${HOME}" --max-depth 1 | ${GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
+        | ${GNU_SED_COMMAND} "s!${HOME}!!" | ${GNU_SED_COMMAND} 'N;s/\n/ /' | ${GNU_AWK_COMMNAD} '{$2=$3="";print}')
+
+
+    echo "${XX_FUNCTIONS}" | ${GNU_AWK_COMMNAD} -F \
+      ' *; *' 'BEGIN { printf "%-8s %-12s %-s\n", "COMMAND", "TAG", "DESCRIPTION" } {split($2, a, ":"); gsub(",", " ", a[1]); printf "%-8s %-12s %-s\n", $1, a[1], a[2]}'
+}
