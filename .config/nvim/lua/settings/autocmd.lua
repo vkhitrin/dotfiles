@@ -4,6 +4,7 @@ vim.api.nvim_create_autocmd("TermOpen", {
         vim.opt_local.number = false
     end,
 })
+
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "qf", "help" },
     desc = "Quick closing of quickfix and help windows",

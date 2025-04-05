@@ -27,6 +27,9 @@ export GLAMOUR_STYLE="${HOME}/.config/glamour/catppuccin-mocha.json"
 export CLOUDSDK_PYTHON_SITEPACKAGES=1
 export CLOUDSDK_CORE_ACCOUNT="" # Unset account, each shell should define the required account
 
+# ChromaDB
+export ANONYMIZED_TELEMETRY="False"
+
 # Azure
 AZURE_CORE_COLLECT_TELEMETRY="false"
 

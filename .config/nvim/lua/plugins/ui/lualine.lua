@@ -7,6 +7,7 @@ local function get_yaml_schema()
 end
 
 local codecompanion = require("lualine.component"):extend()
+local vectorcode = require("vectorcode.integrations")
 
 codecompanion.processing = false
 codecompanion.spinner_index = 1
@@ -62,6 +63,18 @@ require("lualine").setup({
     sections = {
         lualine_x = {
             codecompanion,
+            {
+                function()
+                    return require("vectorcode.integrations").lualine(opts)[1]()
+                end,
+                cond = function()
+                    if package.loaded["vectorcode"] == nil then
+                        return false
+                    else
+                        return require("vectorcode.integrations").lualine(opts).cond()
+                    end
+                end,
+            },
             "encoding",
             "fileformat",
             "filetype",

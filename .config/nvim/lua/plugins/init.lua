@@ -781,6 +781,14 @@ local plugins = {
         ft = { "org" },
         config = function() end,
     },
+    {
+        "Davidyz/VectorCode",
+        cmd = "VectorCode",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        config = function()
+            require("plugins.editor.vectorcode")
+        end,
+    },
 }
 
 local opts = {
