@@ -8,8 +8,8 @@ export IS_SERVER=false
 # fzf
 export FZF_DEFAULT_OPTS=" \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
---color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
---color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
+--color=fg:#cdd6f4,header:#f38ba8,info:#f4e0dc,pointer:#f5e0dc \
+--color=marker:#b4befe,fg+:#cdd6f4,prompt:#f4e0dc,hl+:#f38ba8 \
 --color=selected-bg:#45475a --no-mouse --tmux 75%"
 
 # PGP
@@ -25,6 +25,52 @@ export GLAMOUR_STYLE="${HOME}/.config/glamour/catppuccin-mocha.json"
 
 # Gcloud
 export CLOUDSDK_PYTHON_SITEPACKAGES=1
+export CLOUDSDK_CORE_ACCOUNT="" # Unset account, each shell should define the required account
+
+# Azure
+AZURE_CORE_COLLECT_TELEMETRY="false"
+
+__get_xx_functions() {
+    local GNU_SED_COMMAND
+    local GNU_AWK_COMMNAD
+    local XX_FUNCTIONS
+    if [[ $(uname) == "Darwin" ]];then
+        GNU_AWK_COMMNAD="gawk"
+        GNU_SED_COMMAND="gsed"
+    elif [[ $(uname) == "Linux" ]]; then
+        GNU_AWK_COMMNAD="awk"
+        GNU_SED_COMMAND="sed"
+    fi
+
+    XX_FUNCTIONS=$(rg --follow --type zsh --color always --field-context-separator '' --color never \
+        --no-filename --no-context-separator --only-matching -e '^\s*function\s+(?P<fname>([^\s(]+))' \
+        -r '$fname' -A 1 --field-match-separator ' ' "${HOME}" --max-depth 1 | ${GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
+        | ${GNU_SED_COMMAND} "s!${HOME}!!" | ${GNU_SED_COMMAND} 'N;s/\n/ /' | ${GNU_AWK_COMMNAD} '{$2=$3="";print}')
+
+
+    echo "${XX_FUNCTIONS}" | ${GNU_AWK_COMMNAD} -F \
+' *; *' 'BEGIN { print "COMMAND,TAGS,SHELL SCOPED,DESCRIPTION" }
+{
+    split($2, a, ":");
+    gsub(",", " ", a[1]);
+    shell_scoped = "";
+    if (match(a[2], /@[^ ]+/)) {
+        shell_scoped = substr(a[2], RSTART + 1, RLENGTH - 1);  # Remove '@'
+    }
+    gsub(/@[^\s]+/, "", a[2]);
+    shell_scoped_colored = shell_scoped;
+    if (shell_scoped == "FALSE") {
+        shell_scoped_colored = "\033[32m" shell_scoped "\033[0m";  # Green
+    } else if (shell_scoped == "TRUE") {
+        shell_scoped_colored = "\033[31m" shell_scoped "\033[0m";  # Red
+    } else if (shell_scoped == "PARTIAL") {
+        shell_scoped_colored = "\033[33m" shell_scoped "\033[0m";  # Yellow
+    }
+
+    # Print the fields separated by commas (CSV format)
+    print $1 "," a[1] "," shell_scoped_colored "," a[2];
+}' | ansicolumn -t -s ','
+}
 
 __construct_aws_profiles_mapping() {
     local AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
@@ -76,7 +122,7 @@ __get_directories() {
 __get_cosmicding_bookmarks() {
     if [[ -n "${COSMICDING_SQLITE_DATABASE}" ]]; then
         sqlite3 --json "${COSMICDING_SQLITE_DATABASE}" "SELECT title,url,tag_names FROM Bookmarks" | \
-            jq -r '(["title", "tags", "url"] | @csv), (.[] | [.title, .tag_names, .url] | @csv)' | sed 's/","/|/g' | sed 's/^"\(.*\)"$/\1/g' | column -t -s'|'
+            jq -r '(["TITLE", "TAGS", "URL"] | @csv), (.[] | [.title, .tag_names, .url] | @csv)' | sed 's/","/|/g' | sed 's/^"\(.*\)"$/\1/g' | column -t -s'|'
     else
         echo "Environment variable COSMICDING_SQLITE_DATABASE is not defined"
     fi
@@ -86,7 +132,7 @@ __get_xx_gitlab_projects() {
     if [[ -n "${XX_CACHE_DIR}" ]]; then
         if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
             sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT project,id,web_url FROM Projects" | \
-                jq -r '(["project","id","url"] | @csv) , (.[] | [.project, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
+                jq -r '(["PROJECT","ID","URL"] | @csv) , (.[] | [.project, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
         else
             echo "gitlab.db doesn't exist"
         fi
@@ -99,7 +145,7 @@ __get_xx_gitlab_groups() {
     if [[ -n "${XX_CACHE_DIR}" ]]; then
         if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
             sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT group_name AS name,id,web_url FROM Groups" | \
-                jq -r '(["group","id","url"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
+                jq -r '(["GROUP","ID","URL"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
         else
             echo "gitlab.db doesn't exist"
         fi
@@ -134,24 +180,38 @@ __get_xx_confluence_pages() {
     fi
 }
 
-__get_xx_functions() {
-    local GNU_SED_COMMAND
-    local GNU_AWK_COMMNAD
-    local XX_FUNCTIONS
-    if [[ $(uname) == "Darwin" ]];then
-        GNU_AWK_COMMNAD="gawk"
-        GNU_SED_COMMAND="gsed"
-    elif [[ $(uname) == "Linux" ]]; then
-        GNU_AWK_COMMNAD="awk"
-        GNU_SED_COMMAND="sed"
+__construct_google_cloud_sdk_accounts() {
+    (
+        echo "ACCOUNT";
+        gcloud auth list --format=json | jq -r -c '.[].account' | awk -v cur="${CLOUDSDK_CORE_ACCOUNT}" '
+            {
+              if ($0 == cur)
+                print "\033[32m"$0"\033[0m";
+              else
+                print $0;
+            }'
+    )
+}
+
+__construct_azure_accounts() {
+    local ACTIVE_SUBSCRIPTION=$(jq -r '.subscriptions[] | select(.isDefault == true) | .name' "${HOME}/.azure/azureProfile.json")
+    (
+        echo "SUBSCRIPTION,SUBSCRIPTION ID,ACCOUNT";
+        cat "${HOME}/.azure/azureProfile.json" | jq -r '.subscriptions[] | [.name,.id,.user.name] | @csv' \
+            | sed 's/"//g' | awk -F ',' -v cur="${ACTIVE_SUBSCRIPTION}" '
+            {
+              if ($1 == cur)
+                print "\033[96m"$0"\033[0m";
+              else
+                print $0;
+            }'
+    ) | ansicolumn -t -s','
+}
+
+__unset_azure_account() {
+    local UPDATED_JSON=$(jq '.subscriptions |= map(if has("isDefault") then .isDefault = false else . end)' \
+      "${HOME}/.azure/azureProfile.json")
+    if [ ! -z ${UPDATED_JSON} ]; then
+        echo "${UPDATED_JSON}" > "${HOME}/.azure/azureProfile.json"
     fi
-
-    XX_FUNCTIONS=$(rg --follow --type zsh --color always --field-context-separator '' --color never \
-        --no-filename --no-context-separator --only-matching -e '^\s*function\s+(?P<fname>([^\s(]+))' \
-        -r '$fname' -A 1 --field-match-separator ' ' "${HOME}" --max-depth 1 | ${GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
-        | ${GNU_SED_COMMAND} "s!${HOME}!!" | ${GNU_SED_COMMAND} 'N;s/\n/ /' | ${GNU_AWK_COMMNAD} '{$2=$3="";print}')
-
-
-    echo "${XX_FUNCTIONS}" | ${GNU_AWK_COMMNAD} -F \
-      ' *; *' 'BEGIN { printf "%-8s %-12s %-s\n", "COMMAND", "TAG", "DESCRIPTION" } {split($2, a, ":"); gsub(",", " ", a[1]); printf "%-8s %-12s %-s\n", $1, a[1], a[2]}'
 }

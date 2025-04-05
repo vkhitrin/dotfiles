@@ -240,22 +240,21 @@ alias dotfiles='git --git-dir=${HOME}/Projects/Automation/Setup/dotfiles --work-
 export VISUAL=${EDITOR}
 
 xx-widget () {
-    xx
+    xx | xargs zsh -i -c
 }
 zle -N xx-widget
-bindkey "^Xx" xx-widget
+bindkey "^X^X" xx-widget
 
 xx() {
-    __get_xx_functions | fzf --header-lines=1 --info=inline \
-        --layout=reverse-list --delimiter ' ' \
+    __get_xx_functions | fzf --header-lines=1 --info=inline --ansi \
+        --layout=reverse-list --accept-nth 1 \
         --border-label ' xx ' --color 'border:#F4E0DC,label:#F4E0DC,header:#F4E0DC:bold,preview-fg:#F4E0DC' \
         --preview="echo 'Enter: Execute Command'" \
-        --preview-window=down,1,border-none --tmux 80% \
-        --bind "enter:become(source ${HOME}/.zshrc;{1})"
+        --preview-window=down,1,border-none --tmux 80%
 }
 
 function awsx() {
-    # xx ;aws:Activate AWS profile for shell
+    # xx ;aws:Activate AWS profile for shell@TRUE
     __construct_aws_profiles_mapping | fzf --exact --ansi --header-lines=1 --info=inline \
         --bind='ctrl-r:reload:__construct_aws_profiles_mapping' --prompt="Filter " \
         --bind='ctrl-l:execute-silent(aws-vault login {1} -s)+reload(__construct_aws_profiles_mapping)' \
@@ -268,7 +267,7 @@ function awsx() {
 }
 
 function kctx() {
-    # xx ;kubernetes:Activate Kubernetes context for shell
+    # xx ;kubernetes:Activate Kubernetes context for shell@TRUE
     local SELECTED_CONTEXT=$(__get_kuberentes_contexts | fzf --info=inline --ansi \
         --bind='ctrl-u:execute-silent(rm -rf ${HOME}/.kube/kubesess/cache/)+reload(__get_kuberentes_contexts)' \
         --bind='ctrl-r:reload:(__get_kuberentes_contexts)' --prompt="Filter " \
@@ -282,7 +281,7 @@ function kctx() {
 }
 
 function gpx() {
-    # xx ;git,shell:Navigate to local git projects
+    # xx ;git,shell:Navigate to local git projects@PARTIAL
     local STARTING_PATH="${1:-${HOME}/Projects/}"
     local SELECTED_DIR=$(__get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
         --info=inline --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
@@ -294,7 +293,7 @@ function gpx() {
 }
 
 function bkmx() {
-    # xx ;linkding:View bookmarks
+    # xx ;linkding:View bookmarks@FALSE
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -316,7 +315,7 @@ function bkmx() {
 }
 
 function cdx() {
-    # xx ;shell:Navigate to directory
+    # xx ;shell:Navigate to directory@TRUE
     local STARTING_PATH="${1:-${PWD}}"
     local SELECTED_DIR=$(__get_directories "${STARTING_PATH}" | fzf --border-label " All Directories Under '$(basename ${STARTING_PATH})' " \
         --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
@@ -328,7 +327,7 @@ function cdx() {
 
 if which jira > /dev/null 2>&1;then
     function jipx() {
-        # xx ;jira:Query Jira for projects
+        # xx ;jira:Query Jira for projects@FALSE
         jira projects list | fzf --border-label " Jira Projects " --header-lines=1 --layout=reverse-list \
             --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
             --prompt "Filter " --preview="echo 'Enter: Open Project In Browser'" \
@@ -337,7 +336,7 @@ if which jira > /dev/null 2>&1;then
     }
     # TODO: Add pagination support
     function jiix() {
-        # xx ;jira:Query Jira for issues
+        # xx ;jira:Query Jira for issues@FALSE
         local CLIPBOARD_COMMAND
         local OPEN_COMMAND
         if [[ $(uname) == "Darwin" ]];then
@@ -360,7 +359,7 @@ if which jira > /dev/null 2>&1;then
 fi
 
 function glpx() {
-    # xx ;gitlab:Display cached GitLab Projects
+    # xx ;gitlab:Display cached GitLab Projects@FALSE
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -382,7 +381,7 @@ function glpx() {
 }
 
 function glgx() {
-    # xx ;gitlab:Display cached GitLab Groups
+    # xx ;gitlab:Display cached GitLab Groups@FALSE
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -404,7 +403,7 @@ function glgx() {
 }
 
 function cfsx() {
-    # xx ;confluence:Display cached Confluence spaces
+    # xx ;confluence:Display cached Confluence spaces@FALSE
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -426,7 +425,7 @@ function cfsx() {
 }
 
 function cfpx() {
-    # xx ;confluence:Display cached Confluence pages
+    # xx ;confluence:Display cached Confluence pages@FALSE
     local CLIPBOARD_COMMAND
     local OPEN_COMMAND
     if [[ $(uname) == "Darwin" ]];then
@@ -445,4 +444,33 @@ function cfpx() {
         --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy Key To Clipboard | Enter: Open'" \
         --preview-window=down,1,border-none --tmux 80% \
         --bind "enter:become(echo {} | awk -F '   *' '{print \$3}' | xargs ${OPEN_COMMAND})"
+}
+
+function gcpx() {
+    # xx ;gcp:Activate GCP Account for shell@TRUE
+    local SELECTED_ACCOUNT=$(__construct_google_cloud_sdk_accounts | fzf --exact --ansi --header-lines=1 --info=inline \
+        --bind='ctrl-r:reload(__construct_google_cloud_sdk_accounts)' --prompt="Filter " \
+        --layout=reverse-list \
+        --border-label ' GCP Accounts ' --color 'border:#a6e3a1,label:#a6e3a1,header:#a6e3a1:bold,preview-fg:#a6e3a1' \
+        --preview="echo 'Ctrl-R: Reload List | Enter: Activate Account'" \
+        --preview-window=down,1,border-none --tmux 40%)
+    if [ ! -z ${SELECTED_ACCOUNT} ]; then
+        export CLOUDSDK_CORE_ACCOUNT="${SELECTED_ACCOUNT}"
+        export XX_CLOUDSDK_ACTIVE="true"
+    fi
+}
+
+function azx() {
+    # xx ;azure:Activate Azure Subscription globally@FALSE
+    local SELECTED_SUBSCRIPTION=$(__construct_azure_accounts | fzf --exact --ansi --header-lines=1 --info=inline \
+        --bind='ctrl-u:execute-silent(__unset_azure_account)+reload(__construct_azure_accounts)' --prompt="Filter " \
+        --bind='ctrl-r:reload(__construct_azure_accounts)' --prompt="Filter " \
+        --layout=reverse-list \
+        --border-label ' Azure Subscriptions ' --color 'border:#74c7ec,label:#74c7ec,header:#74c7ec:bold,preview-fg:#74c7ec' \
+        --preview="echo 'Ctrl-R: Reload List  | Ctrl+U: Unset Active Subscription | Enter: Activate Subscription'" \
+        --delimiter="[[:space:]][[:space:]]+" --accept-nth 2 \
+        --preview-window=down,1,border-none)
+    if [ ! -z ${SELECTED_SUBSCRIPTION} ]; then
+        az account set --subscription "${SELECTED_SUBSCRIPTION}"
+    fi
 }

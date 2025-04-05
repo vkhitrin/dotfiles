@@ -12,14 +12,14 @@ style = "text"
 truncation_symbol = ""
 
 [custom.mise]
-symbol = "⍟ "
+symbol = "󱁤 "
 format = "[$symbol$output]($style)"
 command = "mise current | xargs"
 detect_files = [".mise.toml"]
 style = "green"
 
 [git_branch]
-symbol = "⑆ "
+symbol = " "
 format = '[$symbol$branch]($style) '
 style = 'peach'
 
@@ -74,6 +74,7 @@ symbol = "󱇶 "
 format = '[$symbol$account(@$domain)(\($region\))]($style) '
 style = "green"
 disabled = false
+detect_env_vars = ["XX_CLOUDSDK_ACTIVE"]
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
