@@ -12,6 +12,10 @@ require("snacks").setup({
         styles = {
             backdrop = false,
         },
+        sources = {
+            files = { hidden = true },
+            explorer = { hidden = true },
+        },
     },
     quickfile = { enabled = true },
     scope = { enabled = true },
@@ -19,6 +23,6 @@ require("snacks").setup({
     statuscolumn = { enabled = true },
     words = { enabled = true },
     win = {
-        backdrop = false
-    }
+        backdrop = false,
+    },
 })
