@@ -2,6 +2,8 @@
 
 # Custom environment variables
 # export QT_WAYLAND_DECORATION=adwaita # Client-side decorations for QT5/6 to mimic GTK
+autoload -Uz compinit promptipnit bashcompinit
+compinit; bashcompinit
 
 if [[ -f /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
     source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
