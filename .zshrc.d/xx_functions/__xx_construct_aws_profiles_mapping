@@ -1,0 +1,20 @@
+__xx_construct_aws_profiles_mapping() {
+    local AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
+    (
+        echo "Profile,Account ID,Role,Session,Description";
+        for PROFILE in $(aws configure list-profiles | grep -v default); do
+            local PROFILE_ACCOUNT_ID=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_account_id" -v)
+            local PROFILE_ROLE=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_role_name" -v)
+            local PROFILE_SESSION=$(echo ${AWS_VAULT_LIST} | grep "${PROFILE}" | awk '{print $3}')
+            if [[ ${PROFILE_SESSION} == "-" ]] && PROFILE_SESSION=" "
+            local PROFILE_DESCRIPTION=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "description" -v)
+            echo "${PROFILE},${PROFILE_ACCOUNT_ID},${PROFILE_ROLE},${PROFILE_SESSION},${PROFILE_DESCRIPTION}" | awk -F ',' -v cur="${PROFILE_SESSION}" '
+            {
+              if ($4 ~ / /)
+                print $0;
+              else
+                print "\033[33m"$0"\033[0m";
+            }'
+        done
+    ) | awk -F ',' '{print $1,$2,$3,$5}' OFS=',' | ansicolumn -t -s ',' | sed 's/\([^,]*,[^,]*,[^,]*,[^,]*\),/\1,/' 
+}

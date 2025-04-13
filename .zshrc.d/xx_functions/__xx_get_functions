@@ -1,0 +1,45 @@
+__xx_get_functions() {
+    local GNU_SED_COMMAND
+    local GNU_AWK_COMMNAD
+    local XX_FUNCTIONS
+    if [[ $(uname) == "Darwin" ]];then
+        GNU_AWK_COMMNAD="gawk"
+        GNU_SED_COMMAND="gsed"
+    elif [[ $(uname) == "Linux" ]]; then
+        GNU_AWK_COMMNAD="awk"
+        GNU_SED_COMMAND="sed"
+    fi
+    
+    XX_ACTIVE_FILES=$(
+        for fn in ${(ok)functions[(I)*x]}; do
+            type "$fn" | grep '99-xx' | grep 'shell function from' | ${GNU_SED_COMMAND} 's/.*is a shell function from //g'
+        done | sort | uniq | ${GNU_SED_COMMAND} ':a;N;$!ba;s/\n/ /g'
+    )
+
+    XX_FUNCTIONS=$(rg --follow --type zsh --color always --field-context-separator '' --color never \
+        --no-filename --no-context-separator --only-matching -e '^\s*function\s+(?P<fname>([^\s(]+))' \
+        -r '$fname' -A 1 --field-match-separator ' ' ${(z)XX_ACTIVE_FILES} --max-depth 1 | ${GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
+        | ${GNU_SED_COMMAND} "s!${HOME}!!" | ${GNU_SED_COMMAND} 'N;s/\n/ /' | ${GNU_AWK_COMMNAD} '{$2=$3="";print}' | sort)
+
+
+    echo "${XX_FUNCTIONS}" | ${GNU_AWK_COMMNAD} -F \
+' *; *' 'BEGIN { print "COMMAND,TAGS,SUBSHELL,DESCRIPTION" }
+{
+    split($2, a, ":");
+    gsub(",", " ", a[1]);
+    subshell = "";
+    if (match(a[2], /@[^ ]+/)) {
+        subshell = substr(a[2], RSTART + 1, RLENGTH - 1);
+    }
+    gsub(/@[^\s]+/, "", a[2]);
+    subshell_colored = subshell;
+    if (subshell == "FALSE") {
+        subshell_colored = "\033[32m" subshell "\033[0m";
+    } else if (subshell == "TRUE") {
+        subshell_colored = "\033[31m" subshell "\033[0m";
+    } else if (subshell == "PARTIAL") {
+        subshell_colored = "\033[33m" subshell "\033[0m";
+    }
+    print $1 "," a[1] "," subshell_colored "," a[2];
+}' | ansicolumn -t -s ','
+}

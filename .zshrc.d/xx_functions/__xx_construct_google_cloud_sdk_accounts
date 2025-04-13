@@ -1,0 +1,12 @@
+__xx_construct_google_cloud_sdk_accounts() {
+    (
+        echo "ACCOUNT";
+        gcloud auth list --format=json | jq -r -c '.[].account' | awk -v cur="${CLOUDSDK_CORE_ACCOUNT}" '
+            {
+              if ($0 == cur)
+                print "\033[32m"$0"\033[0m";
+              else
+                print $0;
+            }'
+    )
+}

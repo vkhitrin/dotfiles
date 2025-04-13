@@ -1,0 +1,15 @@
+__xx_get_kuberentes_contexts() {
+    local CONTEXTS=$(kubesess completion-context | sed -e 's/ /\n/g')
+    local CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null)
+    if [[ -n "$CURRENT_CONTEXT" ]]; then
+      (echo "$CONTEXTS" | awk -v cur="$CURRENT_CONTEXT" '
+      {
+        if ($0 == cur)
+          print "\033[1;34m" $0 "\033[0m";
+        else
+          print $0;
+      }')
+    else
+      echo ${CONTEXTS}
+    fi
+}

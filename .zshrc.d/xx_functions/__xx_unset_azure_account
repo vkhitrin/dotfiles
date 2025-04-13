@@ -1,0 +1,7 @@
+__xx_unset_azure_account() {
+    local UPDATED_JSON=$(jq '.subscriptions |= map(if has("isDefault") then .isDefault = false else . end)' \
+      "${HOME}/.azure/azureProfile.json")
+    if [ ! -z ${UPDATED_JSON} ]; then
+        echo "${UPDATED_JSON}" > "${HOME}/.azure/azureProfile.json"
+    fi
+}

@@ -1,0 +1,4 @@
+__xx_get_cosmicding_bookmarks() {
+    sqlite3 --json "${COSMICDING_SQLITE_DATABASE}" "SELECT title,url,tag_names FROM Bookmarks" | \
+        jq -r '(["TITLE", "TAGS", "URL"] | @csv), (.[] | [.title, .tag_names, .url] | @csv)' | sed 's/","/|/g' | sed 's/^"\(.*\)"$/\1/g' | column -t -s'|'
+}

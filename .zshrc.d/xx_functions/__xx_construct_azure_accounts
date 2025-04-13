@@ -1,0 +1,14 @@
+__xx_construct_azure_accounts() {
+    local ACTIVE_SUBSCRIPTION=$(jq -r '.subscriptions[] | select(.isDefault == true) | .name' "${HOME}/.azure/azureProfile.json")
+    (
+        echo "SUBSCRIPTION,SUBSCRIPTION ID,ACCOUNT";
+        cat "${HOME}/.azure/azureProfile.json" | jq -r '.subscriptions[] | [.name,.id,.user.name] | @csv' \
+            | sed 's/"//g' | awk -F ',' -v cur="${ACTIVE_SUBSCRIPTION}" '
+            {
+              if ($1 == cur)
+                print "\033[96m"$0"\033[0m";
+              else
+                print $0;
+            }'
+    ) | ansicolumn -t -s','
+}

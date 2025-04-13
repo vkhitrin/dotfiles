@@ -1,0 +1,6 @@
+__xx_get_jira_issues() {
+    local JQL="${1:-(assignee = currentUser()) AND (status !='done')}"
+    # Workaround https://github.com/ankitpokhrel/jira-cli/issues/834
+    echo "${JQL}"
+    jira issues list --jql="${JQL}" --plain --columns key,status,summary  2>&1 | sed 's/\[\]/\]/g'
+}

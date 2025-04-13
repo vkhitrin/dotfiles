@@ -1,0 +1,3 @@
+__xx_get_jira_projects() {
+    jira projects list
+} 

@@ -1,0 +1,8 @@
+__xx_get_gitlab_groups() {
+    if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
+        sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT group_name AS name,id,web_url FROM Groups" | \
+            jq -r '(["GROUP","ID","URL"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
+    else
+        echo "gitlab.db doesn't exist"
+    fi
+}

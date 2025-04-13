@@ -1,0 +1,4 @@
+__xx_get_directories() {
+    local STARTING_PATH="${1}"
+    fd --full-path -H -t d "${1}"
+}
