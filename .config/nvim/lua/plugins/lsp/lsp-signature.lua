@@ -3,6 +3,6 @@ require("lsp_signature").setup({
     handler_opts = {
         border = "none",
     },
-    hi_parameter = "TelescopeSelection",
+    -- hi_parameter = "TelescopeSelection",
     hint_enable = false,
 })

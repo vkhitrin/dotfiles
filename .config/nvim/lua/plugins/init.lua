@@ -160,13 +160,6 @@ local plugins = {
                 desc = "Find Git Files",
             },
             {
-                "<leader>fp",
-                function()
-                    Snacks.picker.projects()
-                end,
-                desc = "Projects",
-            },
-            {
                 "<leader>fr",
                 function()
                     Snacks.picker.recent()
@@ -729,14 +722,14 @@ local plugins = {
     { "vkhitrin/vim-tera" },
     { "pdurbin/vim-tsv" },
     {
-        "nvim-pack/nvim-spectre",
+        "MagicDuck/grug-far.nvim",
         config = function()
-            require("plugins.editor.spectre")
+            require("plugins.editor.grug-far")
         end,
         keys = {
             {
                 "<leader>F",
-                "<cmd>lua require('spectre').toggle()<CR>",
+                "<cmd>lua require('grug-far').toggle_instance({ instanceName='far', staticTitle='Find and Replace' })<CR>",
                 desc = "Spectre",
             },
         },
@@ -776,18 +769,17 @@ local plugins = {
         end,
     },
     {
-        "nvim-orgmode/orgmode",
-        event = "VeryLazy",
-        ft = { "org" },
-        config = function() end,
-    },
-    {
         "Davidyz/VectorCode",
         cmd = "VectorCode",
         dependencies = { "nvim-lua/plenary.nvim" },
         config = function()
             require("plugins.editor.vectorcode")
         end,
+    },
+    {
+        "mrcjkb/rustaceanvim",
+        version = "^6",
+        lazy = false,
     },
 }
 

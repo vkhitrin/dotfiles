@@ -2,3 +2,4 @@
 .gitlab-ci-local
 .gitlab-ci-local.yml
 .vectorcode
+.config/nvim/lazy-lock.json
