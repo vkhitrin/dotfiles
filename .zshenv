@@ -32,3 +32,11 @@ export ANONYMIZED_TELEMETRY="False"
 
 # Azure
 export AZURE_CORE_COLLECT_TELEMETRY="false"
+
+# xx
+if [ -d "${HOME}/.zshrc.d/xx_functions" ]; then
+    fpath=("${HOME}/.zshrc.d/xx_functions" ${fpath})
+    for fn in ${HOME}/.zshrc.d/xx_functions/*(N:t); do
+      autoload -Uz "$fn"
+    done
+fi
