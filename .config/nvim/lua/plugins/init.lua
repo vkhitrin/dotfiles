@@ -781,6 +781,9 @@ local plugins = {
         version = "^6",
         lazy = false,
     },
+    {
+        "https://gitlab.com/HiPhish/jinja.vim",
+    },
 }
 
 local opts = {

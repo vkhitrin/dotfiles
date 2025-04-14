@@ -15,7 +15,7 @@ truncation_symbol = ""
 symbol = "󱁤 "
 format = "[$symbol$output]($style)"
 command = "mise current | xargs"
-detect_files = [".mise.toml"]
+detect_files = [".mise.toml", "mise.toml"]
 style = "green"
 
 [git_branch]
