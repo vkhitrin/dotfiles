@@ -22,10 +22,11 @@ function jiix() {
     fi
     # Workaround https://github.com/ankitpokhrel/jira-cli/issues/834
      __xx_get_jira_issues | sed 's/\[\]/\]/g' | fzf --border-label " Jira Issues " \
-        --header-lines=1 --layout=reverse-list \
+        --header-lines=2 --layout=reverse-list \
         --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
         --bind="ctrl-u:become(jira open --no-browser {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
-        --prompt "Filter " --preview="echo 'Ctrl+U: Copy URL To Clipboard | Enter: Open Issue In Browser'" \
+        --bind="ctrl-i:become(echo {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+        --prompt "Filter " --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl-I: Copy KEY To Clipboard | Enter: Open Issue In Browser'" \
         --preview-window=down,1,border-none \
         --bind "enter:become(jira open {1})"
 }

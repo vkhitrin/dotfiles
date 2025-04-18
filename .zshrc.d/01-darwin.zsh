@@ -60,9 +60,10 @@ alias sudoedit='sudo -e'
 alias less='less -rf'
 alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
 alias gcc='/opt/homebrew/bin/gcc-14'
+alias java_home='/usr/libexec/java_home'
 
 # Custom aliases
-alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf ${HOME}/Library/Preferences/ByHost \"${HOME}/.iCloudDrive/Operating Systems/macOS/Mackup/Library/Preferences\"; open raycast://extensions/raycast/raycast/export-settings-data"
+alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf ${HOME}/Library/Preferences/ByHost \"${HOME}/.iCloudDrive/OperatingSystems/macOS/Mackup/Library/Preferences\"; open raycast://extensions/raycast/raycast/export-settings-data"
 
 # Custom GitLab configuration
 if [[ -d "${HOME}/.config/glab-cli/work" ]];then

@@ -1,4 +1,5 @@
 vim.g.mapleader = " "                                -- set space as leader key
+vim.g.maplocalleader = ","                           -- set leader for plugins
 vim.opt.showmatch = true                             -- show matching brackets
 vim.opt.hlsearch = true                              -- highlight search results
 vim.opt.smartindent = true                           -- enable autoindent
