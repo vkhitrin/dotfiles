@@ -1,0 +1,8 @@
+__xx_new_todo() {
+    local TODOMAN_COMMAND="todo new"
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 80% -w 80% -S 'fg=#f5c2e7' -T '#[align=absolute-centre] TODO - New #[align=right]' -E "${TODOMAN_COMMAND}"
+    else
+        zsh -i -c "${TODOMAN_COMMAND}"
+    fi
+}
