@@ -1,0 +1,4 @@
+__xx_get_todo() {
+    todo --porcelain list | \
+    jq -r '(["SUMMARY", "DESCRIPTION", "LIST", "ID"] | @csv), (.[] | [.summary, .description, .list, .id] | @csv)' | sed 's/"//g' | ansicolumn -t -s','
+}
