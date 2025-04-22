@@ -46,12 +46,6 @@ if which gsed > /dev/null 2>&1; then
     alias sed='gsed'
 fi
 
-# If mackup is installed as part of system's python
-[ -f "${HOME}/Library/Python/3.9/bin/mackup" ] && alias mackup="${HOME}/Library/Python/3.9/bin/mackup"
-
-# If clop is installed
-[ -f "/Applications/Clop.app/Contents/SharedSupport/ClopCLI" ] && alias clop="/Applications/Clop.app/Contents/SharedSupport/ClopCLI"
-
 # If MinIO client installed
 [[ -f "/opt/homebrew/bin/mc" ]] && complete -o nospace -C /opt/homebrew/bin/mc mc
 

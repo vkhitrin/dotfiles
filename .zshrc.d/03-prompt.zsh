@@ -1,3 +1,4 @@
+[[ -n ${XX_BYPASS_PROMPT} ]] && return
 
 # Enable starship prompt
 if which starship > /dev/null 2>&1;then
