@@ -784,6 +784,27 @@ local plugins = {
     {
         "https://gitlab.com/HiPhish/jinja.vim",
     },
+    {
+        "ravitemer/mcphub.nvim",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+        },
+        cmd = "MCPHub",
+        build = "bundled_build.lua",
+        config = function()
+            require("plugins.editor.mcphub")
+        end,
+    },
+    {
+        "milanglacier/minuet-ai.nvim",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "Saghen/blink.cmp",
+        },
+        config = function()
+            require("plugins.editor.minuet-ai")
+        end,
+    },
 }
 
 local opts = {

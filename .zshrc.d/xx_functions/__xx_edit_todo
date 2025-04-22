@@ -1,0 +1,10 @@
+__xx_edit_todo() {
+    local TODOMAN_TASK_ID=$(echo ${@} | awk '{print $NF}')
+    local TODOMAN_COMMAND="todo edit"
+    [[ ! -z ${TODOMAN_TASK_ID} ]] || exit
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 80% -w 80% -S 'fg=#f5c2e7' -T '#[align=absolute-centre] TODO - Edit #[align=right]' -E "${TODOMAN_COMMAND} ${TODOMAN_TASK_ID}"
+    else
+        zsh -i -c "${TODOMAN_COMMAND} ${TODOMAN_TASK_ID}"
+    fi
+}
