@@ -805,6 +805,9 @@ local plugins = {
             require("plugins.editor.minuet-ai")
         end,
     },
+    {
+        "m-pilia/vim-pkgbuild",
+    },
 }
 
 local opts = {

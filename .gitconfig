@@ -1,0 +1,63 @@
+[credential]
+    helper = 
+[user]
+    name = Vadim Khitrin
+[alias]
+    graph = log --stat --graph --pretty=fuller --date=relative
+    amend = commit --amend
+    amendit = commit --amend --no-edit
+    adda = add . -A
+    puf = push --force
+    gitrm = rm --cached -r
+    fast-review = "!git adda; git amendit; git review"
+    rm-other-branches = "!git branch -l | grep -v '*' | xargs -n1 git branch -D"
+    fast-puf = "!git adda; git amendit; git puf"
+    rename-branch = branch --move
+    rm-branch = branch -D
+    update-submodules-remote = "submodule update --recursive --remote"
+    root = rev-parse --show-toplevel
+[pull]
+    rebase = true
+[init]
+    defaultBranch = main
+[fetch]
+    prune = true
+[feature]
+    manyFiles = true
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+# Color scheme for delta
+[include]
+	path = ~/.config/delta/catppuccin.gitconfig
+[core]
+    pager = delta
+    excludesFile = "~/.gitignore"
+[interactive]
+    diffFilter = delta --color-only
+[delta]
+    navigate = true    # use n and N to move between diff sections
+    side-by-side = true
+    features = catppuccin-mocha
+[merge]
+    conflictstyle = diff3
+[diff]
+    colorMoved = default
+# Include private related configuration - HTTPS
+[includeIf "hasconfig:remote.*.url:**github.com:*/**"]
+    path = ~/.config/git/.gitconfig.private
+[includeIf "hasconfig:remote.*.url:**gitlab.com:*/**"]
+    path = ~/.config/git/.gitconfig.private
+# Include private related configuration - SSH
+[includeIf "hasconfig:remote.*.url:ssh://github.com:*/**"]
+    path = ~/.config/git/.gitconfig.personal
+[includeIf "hasconfig:remote.*.url:ssh://gitlab.com:*/**"]
+    path = ~/.config/git/.gitconfig.personal
+[includeIf "gitdir/i:~/Projects/Development/Work/"]
+    path = ~/.config/git/.gitconfig.work
+[push]
+	autoSetupRemote = true
+[commit]
+    template = "~/.gitmessage"

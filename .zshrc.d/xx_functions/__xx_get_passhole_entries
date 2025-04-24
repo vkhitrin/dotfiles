@@ -1,0 +1,3 @@
+__xx_get_passhole_entries() {
+    pgrep -f passhole >/dev/null 2>&1 && (echo "Entry"; passhole grep '.*' ) || echo "passhole background server is not running"
+}
