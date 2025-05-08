@@ -1,8 +1,5 @@
 require("mason").setup({
     PATH = "append",
-    registries = {
-        "github:mason-org/mason-registry",
-    },
     ui = {
         border = "none",
         backdrop = 100,
@@ -33,6 +30,8 @@ require("mason-tool-installer").setup({
         "markdownlint",
         "marksman",
         "mypy",
+        "nginx-config-formatter",
+        "nginx-language-server",
         "prettier",
         "pyright",
         "ruby-lsp",

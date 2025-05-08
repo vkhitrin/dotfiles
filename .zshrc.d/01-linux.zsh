@@ -13,7 +13,7 @@ fi
 
 [ -f "/usr/share/zsh/plugins/zsh-autopair/autopair.zsh" ] && source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
 
-export PATH="${HOME}/.local/bin:${HOME}/go/bin:${PATH}"
+export PATH="${HOME}/.local/bin:${HOME}/go/bin:${HOME}/.cargo/bin:${PATH}"
 
 # Enable SSH Agent (based on a custom systemd service)
 [ -S "/run/user/$(id -u)/ssh-agent.socket" ] && export SSH_AUTH_SOCK="/run/user/$(id -u)/ssh-agent.socket"

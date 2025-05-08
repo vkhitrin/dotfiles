@@ -25,18 +25,18 @@ require("catppuccin").setup({
         }
     end,
     integrations = {
-        alpha = true,
-        cmp = true,
+        blink_cmp = true,
         gitsigns = true,
         nvimtree = true,
         treesitter = true,
         notify = false,
+        grug_far = true,
         mason = true,
         mini = {
             enabled = true,
             indentscope_color = "",
         },
-        snacks = true,
+        snacks = { enabled = true, indentscope_color = "" },
         illuminate = {
             enabled = true,
             lsp = false,

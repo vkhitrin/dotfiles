@@ -560,10 +560,11 @@ local plugins = {
         end,
     },
     {
-        "williamboman/mason.nvim",
+        "mason-org/mason.nvim",
+        version = "^1.0.0",
         dependencies = {
             "WhoIsSethDaniel/mason-tool-installer.nvim",
-            "williamboman/mason-lspconfig.nvim",
+            { "williamboman/mason-lspconfig.nvim", version = "^1.0.0" },
             "neovim/nvim-lspconfig",
         },
         build = ":MasonUpdate",
@@ -571,7 +572,6 @@ local plugins = {
         config = function()
             require("plugins.editor.mason")
             require("plugins.lsp.mason-lsp")
-            require("plugins.lsp.lsp")
         end,
         keys = {
             {
