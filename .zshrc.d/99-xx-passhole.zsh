@@ -1,4 +1,5 @@
-which passhole > /dev/null 2>&1 || return
+# which passhole > /dev/null 2>&1 || return
+return # Disable this tool
 
 function phx() {
     # xx ;keepass:List keepass entries@FALSE

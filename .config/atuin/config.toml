@@ -8,3 +8,8 @@ show_help = false
 enter_accept = true
 style = "compact"
 prefers_reduced_motion = true
+workspaces = true
+ctrl_n_shortcuts = false
+
+[theme]
+name = "catppuccin-mocha"

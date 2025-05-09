@@ -1,6 +1,6 @@
 palette = "catppuccin_mocha"
 add_newline = false
-format = """$aws$gcloud$azure$kubernetes$git_branch$mise${custom.mise_tools}\n$directory${character}"""
+format = """$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
 continuation_prompt = "[❯](blue) "
 
 [character]
@@ -11,16 +11,13 @@ error_symbol = "[❯](red)[❯](yellow)[❯](green)"
 style = "text"
 truncation_symbol = ""
 
-[mise]
-symbol = "󱁤 "
-disabled = false
-
 [custom.mise_tools]
-format = "[$output]($style)"
+format = "[󱁤 $output]($style)"
 command = "mise current | xargs"
 # detect_files = [".mise.toml", "mise.toml"]
-when = "mise doctor --json | jq '.toolset| flatten| .[]'"
+when = "mise doctor --json | jq -e '.toolset| flatten| .[]'"
 style = "bold purple"
+symbol = " "
 description = "display mise tools"
 
 [git_branch]

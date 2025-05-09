@@ -9,7 +9,7 @@ export FZF_DEFAULT_OPTS=" \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#f4e0dc,pointer:#f5e0dc \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#f4e0dc,hl+:#f38ba8 \
---color=selected-bg:#45475a --no-mouse --tmux 75%"
+--color=selected-bg:#45475a --highlight-line --no-mouse --tmux 75%"
 
 # PGP
 export GPG_TTY=$(tty)

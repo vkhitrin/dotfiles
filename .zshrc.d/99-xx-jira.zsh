@@ -4,8 +4,9 @@ function jipx() {
     # xx ;jira:Query Jira for projects@FALSE
      __xx_get_jira_projects | fzf --border-label " Jira Projects " --header-lines=1 --layout=reverse-list \
         --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
-        --prompt "Filter " --preview="echo 'Enter: Open Project In Browser'" \
+        --prompt "Filter " --preview="echo 'Ctrl+R: Refresh | Enter: Open Project In Browser'" \
         --preview-window=down,1,border-none \
+        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_projects;__xx_get_jira_projects)" \
         --bind "enter:become(jira open --project {1})"
 }
 # TODO: Add pagination support
@@ -20,13 +21,13 @@ function jiix() {
         CLIPBOARD_COMMAND="wl-copy"
         OPEN_COMMAND="xdg-open"
     fi
-    # Workaround https://github.com/ankitpokhrel/jira-cli/issues/834
-     __xx_get_jira_issues | sed 's/\[\]/\]/g' | fzf --border-label " Jira Issues " \
+     __xx_get_jira_issues | fzf --border-label " Jira Issues " \
         --header-lines=2 --layout=reverse-list \
         --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
+        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_issues;__xx_get_jira_issues)" \
         --bind="ctrl-u:become(jira open --no-browser {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
         --bind="ctrl-i:become(echo {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
-        --prompt "Filter " --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl-I: Copy KEY To Clipboard | Enter: Open Issue In Browser'" \
+        --prompt "Filter " --preview="echo 'Ctrl+R: Refresh | Ctrl+U: Copy URL | Ctrl-I: Copy KEY | Enter: Open Issue In Browser'" \
         --preview-window=down,1,border-none \
         --bind "enter:become(jira open {1})"
 }
