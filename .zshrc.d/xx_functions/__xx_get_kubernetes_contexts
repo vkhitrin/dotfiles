@@ -1,5 +1,5 @@
-__xx_get_kuberentes_contexts() {
-    local CONTEXTS=$(kubesess completion-context | sed -e 's/ /\n/g')
+__xx_get_kubernetes_contexts() {
+    local CONTEXTS=$(kubesess completion-context | xargs -n1)
     local CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null)
     if [[ -n "$CURRENT_CONTEXT" ]]; then
       (echo "$CONTEXTS" | awk -v cur="$CURRENT_CONTEXT" '

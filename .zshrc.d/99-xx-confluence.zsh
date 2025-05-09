@@ -13,11 +13,12 @@ function cfsx() {
     fi
 
     __xx_get_confluence_spaces | fzf --header-lines=1 --info=inline \
+        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_confluence_spaces;__xx_get_confluence_spaces)" \
         --bind="ctrl-u:become(echo {} | awk -F '   *' '{print \$3}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --bind="ctrl-i:become(echo {} | awk -F '   *' '{print \$2}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --layout=reverse-list --delimiter ' ' \
         --border-label ' Confluence Spaces ' --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa:bold,preview-fg:#89b4fa' \
-        --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy Key To Clipboard | Enter: Open'" \
+        --preview="echo 'Ctrl-R: Refresh | Ctrl+U: Copy URL | Ctrl+I: Copy Key | Enter: Open Space In Browser'" \
         --preview-window=down,1,border-none --tmux 80% \
         --bind "enter:become(echo {} | awk -F '   *' '{print \$3}' | xargs ${OPEN_COMMAND})"
 }
@@ -35,11 +36,12 @@ function cfpx() {
     fi
 
     __xx_get_confluence_pages | fzf --header-lines=1 --info=inline \
+        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_confluence_pages;__xx_get_confluence_pages)" \
         --bind="ctrl-u:become(echo {} | awk -F '   *' '{print \$3}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --bind="ctrl-i:become(echo {} | awk -F '   *' '{print \$2}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --layout=reverse-list --delimiter ' ' \
         --border-label ' Confluence Pages ' --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa:bold,preview-fg:#89b4fa' \
-        --preview="echo 'Ctrl+U: Copy URL To Clipboard | Ctrl+I: Copy Key To Clipboard | Enter: Open'" \
+        --preview="echo 'Ctrl-R: Refresh | Ctrl+U: Copy URL | Ctrl+I: Copy Key | Enter: Open Page In Browser'" \
         --preview-window=down,1,border-none --tmux 80% \
         --bind "enter:become(echo {} | awk -F '   *' '{print \$3}' | xargs ${OPEN_COMMAND})"
 }

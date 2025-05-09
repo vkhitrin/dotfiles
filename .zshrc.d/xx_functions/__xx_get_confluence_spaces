@@ -2,7 +2,7 @@ __xx_get_confluence_spaces() {
     if [[ -n "${XX_CACHE_DIR}" ]]; then
         if [[ -f "${XX_CACHE_DIR}/confluence.db" ]]; then
             sqlite3 --json "${XX_CACHE_DIR}/confluence.db" "SELECT name,key,url FROM Spaces" | \
-                jq -r '(["name","key","url"] | @csv) , (.[] | [.name, .key, .url] | @csv)' | sed 's/"//g' | column -t -s','
+                jq -r '(["NAME","KEY","URL"] | @csv) , (.[] | [.name, .key, .url] | @csv)' | sed 's/"//g' | column -t -s','
         else
             echo "confluence.db doesn't exist"
         fi
