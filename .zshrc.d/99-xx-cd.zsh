@@ -2,12 +2,12 @@ function gpx() {
     # xx ;git,shell:Navigate to local git projects@PARTIAL
     local STARTING_PATH="${1:-${HOME}/Projects/}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="Ctrl+O: Open Remote | Ctrl+T: Open Directory In New Tmux Window"
+    local TEXT_PROMPT="CTRL+O: Open Remote | CTRL+T: Open Directory In New Tmux Window"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
     BIND_OPTIONS+="--bind=ctrl-o:execute-silent(cd {}; git open)"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=enter:become(echo {})"
-        TEXT_PROMPT+=" | Enter: Navigate To Directory"
+        TEXT_PROMPT+=" | ENTER: Navigate To Directory"
     else
         BIND_OPTIONS+="--bind=enter:become()"
     fi
@@ -24,11 +24,11 @@ function cdx() {
     # xx ;shell:Navigate to directory@PARTIAL
     local STARTING_PATH="${1:-${PWD}}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="Ctrl+T: Open Directory In New Tmux Window"
+    local TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=enter:become(echo {})"
-        TEXT_PROMPT+=" | Enter: Navigate To Directory"
+        TEXT_PROMPT+=" | ENTER: Navigate To Directory"
     else
         BIND_OPTIONS+="--bind=enter:become()"
     fi

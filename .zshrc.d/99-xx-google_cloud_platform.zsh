@@ -7,7 +7,7 @@ function gcpx() {
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=ctrl-r:reload(__xx_construct_google_cloud_sdk_accounts)"
         BIND_OPTIONS+="--bind=enter:become(echo {})"
-        TEXT_PROMPT="Ctrl-R: Refresh | Enter: Activate Account"
+        TEXT_PROMPT="CTRL-R: Refresh | ENTER: Activate Account"
     fi
     local SELECTED_ACCOUNT=$(__xx_construct_google_cloud_sdk_accounts | fzf --exact --ansi --header-lines=1 --info=inline \
         --prompt="Filter " \

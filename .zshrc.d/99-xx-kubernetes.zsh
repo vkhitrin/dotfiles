@@ -8,7 +8,7 @@ function kctx() {
         BIND_OPTIONS+="--bind=ctrl-u:execute-silent(rm -rf ~/.kube/kubesess/cache/)+reload(__xx_get_kubernetes_contexts)"
         BIND_OPTIONS+="--bind=ctrl-r:reload:(__xx_get_kubernetes_contexts)"
         BIND_OPTIONS+="--bind=enter:become(kubesess -v {} context)"
-        TEXT_PROMPT="Ctrl-R: Refresh | Ctrl-U: Unset Current Context | Enter: Set Context"
+        TEXT_PROMPT="CTRL-R: Refresh | CTRL-U: Unset Current Context | ENTER: Set Context"
     fi
     local SELECTED_CONTEXT=$(__xx_get_kubernetes_contexts | fzf --info=inline --ansi \
         --prompt="Filter " \

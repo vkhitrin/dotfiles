@@ -7,6 +7,7 @@ function bkmx() {
     if [[ $(uname) == "Darwin" ]];then
         CLIPBOARD_COMMAND="pbcopy"
         OPEN_COMMAND="open"
+        OPEN_BACKGROUND_COMMAND="open --background"
     elif [[ $(uname) == "Linux" ]]; then
         CLIPBOARD_COMMAND="wl-copy"
         OPEN_COMMAND="xdg-open"
@@ -15,9 +16,10 @@ function bkmx() {
     __xx_get_cosmicding_bookmarks | fzf --header-lines=1 --info=inline \
         --bind='ctrl-r:reload:(source ~/.zshrc.d/xx_functions/__xx_get_cosmicding_bookmarks;__xx_get_cosmicding_bookmarks)' --prompt="Filter " \
         --bind="ctrl-u:become(echo {} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind "ctrl-o:execute-silent(echo {} | awk '{print \$NF}' | xargs ${OPEN_BACKGROUND_COMMAND})" \
         --layout=reverse-list \
         --border-label ' Bookmarks ' --color 'border:#b4befe,label:#b4befe,header:#b4befe:bold,preview-fg:#b4befe' \
-        --preview="echo 'Ctrl-R: Refresh | Ctrl+U: Copy URL | Enter: Open In Browser'" \
+        --preview="echo 'CTRL-R: Refresh | CTRL+U: Copy URL | CTRL+O: Open In Background | ENTER: Open In Browser'" \
         --preview-window=down,1,border-none --tmux 90% \
         --bind "enter:become(echo {} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }

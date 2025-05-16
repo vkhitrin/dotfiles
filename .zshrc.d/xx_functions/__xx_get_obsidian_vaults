@@ -1,0 +1,15 @@
+__xx_get_obsidian_vaults() { 
+    local XX_OBSIDIAN_VAULTS_ROOT_DIR=${1}
+    local VAULTS=$(find ${XX_OBSIDIAN_VAULTS_ROOT_DIR} -type d -name ".obsidian" -exec dirname {} \;)
+    if [ -n "${VAULTS}" ]; then
+        {
+            echo "VAULT,PATH"
+            while IFS= read -r vault; do
+                vault_name=$(basename "${vault}")
+                echo "${vault_name},${vault}"
+            done <<< "${VAULTS}"
+        } | column -t -s ','
+    else
+        echo "No vaults found"
+    fi
+}

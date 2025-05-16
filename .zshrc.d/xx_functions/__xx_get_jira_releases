@@ -1,0 +1,46 @@
+__xx_get_jira_releases() {
+    jira releases list | gawk '
+/^[0-9]/ || /^ID/ {
+    if (rec) print rec;
+    rec = $0;
+    next;
+}
+{
+    rec = rec " " $0;
+}
+END {
+    if (rec) print rec;
+}
+' | gawk '
+BEGIN {
+    printf "%-7s %-45s %-8s %s\n", "ID", "NAME", "RELEASED", "DESCRIPTION";
+}
+$1 == "ID" { next; }
+
+{
+    id = $1;
+
+    for (i = NF; i >= 1; i--) {
+        if ($i == "true" || $i == "false") {
+            status = $i;
+            status_pos = i;
+            break;
+        }
+    }
+
+    title = "";
+    for (i = 2; i < status_pos; i++) {
+        title = title $i " ";
+    }
+
+    desc = "";
+    for (i = status_pos + 1; i <= NF; i++) {
+        desc = desc $i " ";
+    }
+
+    gsub(/[ \t]+$/, "", title);
+    gsub(/[ \t]+$/, "", desc);
+
+    printf "%-7s %-45s %-8s %s\n", id, title, status, desc;
+}'
+} 

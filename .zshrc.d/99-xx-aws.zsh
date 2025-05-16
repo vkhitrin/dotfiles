@@ -3,13 +3,13 @@ which aws-vault > /dev/null 2>&1 || return
 function awsx() {
     # xx ;aws:Activate AWS profile for shell@TRUE
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="Ctrl-R: Refresh | Ctrl-L: Login | Ctrl-D: Clear Session"
+    local TEXT_PROMPT="CTRL-R: Refresh | CTRL-L: Login | CTRL-D: Clear Session"
     BIND_OPTIONS+="--bind=ctrl-r:reload:(source ~/.zshrc.d/xx_functions/__xx_construct_aws_profiles_mapping;__xx_construct_aws_profiles_mapping)"
     BIND_OPTIONS+="--bind=ctrl-l:execute-silent(aws-vault login {1} -s)+reload(source ~/.zshrc.d/xx_functions/__xx_construct_aws_profiles_mapping;__xx_construct_aws_profiles_mapping)"
     BIND_OPTIONS+="--bind=ctrl-d:execute-silent(aws-vault clear {1})+reload(source ~/.zshrc.d/xx_functions/__xx_construct_aws_profiles_mapping;__xx_construct_aws_profiles_mapping)"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=enter:become(aws-vault exec {1})"
-        TEXT_PROMPT+=" | Enter: Exec"
+        TEXT_PROMPT+=" | ENTER: Exec"
     else
         BIND_OPTIONS+="--bind=enter:become()"
     fi

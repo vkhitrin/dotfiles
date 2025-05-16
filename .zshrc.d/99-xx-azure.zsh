@@ -7,7 +7,7 @@ function azx() {
         --bind='ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_construct_azure_accounts;__xx_construct_azure_accounts)' --prompt="Filter " \
         --layout=reverse-list \
         --border-label ' Azure Subscriptions ' --color 'border:#74c7ec,label:#74c7ec,header:#74c7ec:bold,preview-fg:#74c7ec' \
-        --preview="echo 'Ctrl-R: Refresh | Ctrl+U: Unset Active Subscription | Enter: Activate Subscription'" \
+        --preview="echo 'CTRL-R: Refresh | CTRL+U: Unset Active Subscription | ENTER: Activate Subscription'" \
         --delimiter="[[:space:]][[:space:]]+" --accept-nth 2 \
         --preview-window=down,1,border-none)
     if [ ! -z ${SELECTED_SUBSCRIPTION} ]; then

@@ -1,6 +1,6 @@
 palette = "catppuccin_mocha"
 add_newline = false
-format = """$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
+format = """${custom.podman_machine}$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
 continuation_prompt = "[❯](blue) "
 
 [character]
@@ -15,10 +15,16 @@ truncation_symbol = ""
 format = "[󱁤 $output]($style)"
 command = "mise current | xargs"
 # detect_files = [".mise.toml", "mise.toml"]
-when = "mise doctor --json | jq -e '.toolset| flatten| .[]'"
+when = "mise doctor --json | jq -e '.toolset | flatten | .[]'"
 style = "bold purple"
 symbol = " "
 description = "display mise tools"
+
+[custom.podman_machine]
+format = "[ $output]($style) "
+when = "podman machine info --format json | jq -r '.Host.MachineState' | grep -q '^Running$'"
+command = "podman machine info --format json | jq -r '.Host.CurrentMachine'"
+style = "bold podman"
 
 [git_branch]
 symbol = " "
@@ -105,3 +111,4 @@ surface0 = "#313244"
 base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
+podman = "#2094f1"
