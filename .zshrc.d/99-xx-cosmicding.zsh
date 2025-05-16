@@ -17,7 +17,7 @@ function bkmx() {
         --bind="ctrl-u:become(echo {} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
         --layout=reverse-list \
         --border-label ' Bookmarks ' --color 'border:#b4befe,label:#b4befe,header:#b4befe:bold,preview-fg:#b4befe' \
-        --preview="echo 'Ctrl-R: Refresh | Ctrl+U: Copy URL | Enter: Open In Browser'" \
+        --preview="echo 'CTRL-R: Refresh | CTRL+U: Copy URL | ENTER: Open In Browser'" \
         --preview-window=down,1,border-none --tmux 90% \
         --bind "enter:become(echo {} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
