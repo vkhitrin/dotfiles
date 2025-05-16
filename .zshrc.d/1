@@ -1,0 +1,15 @@
+__xx_get_obsidian_notes() { 
+    local XX_OBSIDIAN_VAULT_DIR=${1}
+    local NOTES=$(find ${XX_OBSIDIAN_VAULT_DIR} -type f -name "*.md" -exec ls \;)
+    echo "${NOTES}"
+    if [ -n "${NOTES}" ]; then
+        echo "NOTE,PATH"
+        while IFS= read -r note; do
+            note_name=$(basename "${note}")
+            echo "${note_name},${note}"
+        done <<< "${NOTES}"
+    else
+        echo "No notes found"
+    fi
+}
+

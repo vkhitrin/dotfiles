@@ -808,6 +808,15 @@ local plugins = {
     {
         "m-pilia/vim-pkgbuild",
     },
+    {
+        "obsidian-nvim/obsidian.nvim",
+        version = "*",
+        lazy = true,
+        ft = "markdown",
+        config = function()
+            require("plugins.editor.obsidian")
+        end,
+    },
 }
 
 local opts = {
