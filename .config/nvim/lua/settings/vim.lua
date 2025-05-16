@@ -25,3 +25,4 @@ vim.opt.foldlevel = 99                               -- display many unfolded
 vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- default to treesitter folding
 vim.opt.foldcolumn = "0"                             -- disable fold column
+vim.opt.conceallevel = 0
