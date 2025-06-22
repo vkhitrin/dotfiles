@@ -10,6 +10,7 @@ require("obsidian").setup({
         blink = true,
     },
     picker = {
-        name = "snacks.pick"
-    }
+        name = "snacks.pick",
+    },
+    ui = { enable = false },
 })

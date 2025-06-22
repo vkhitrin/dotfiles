@@ -1,6 +1,6 @@
 palette = "catppuccin_mocha"
 add_newline = false
-format = """${custom.podman_machine}$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
+format = """$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
 continuation_prompt = "[❯](blue) "
 
 [character]
@@ -20,11 +20,11 @@ style = "bold purple"
 symbol = " "
 description = "display mise tools"
 
-[custom.podman_machine]
-format = "[ $output]($style) "
-when = "podman machine info --format json | jq -r '.Host.MachineState' | grep -q '^Running$'"
-command = "podman machine info --format json | jq -r '.Host.CurrentMachine'"
-style = "bold podman"
+# [custom.podman_machine]
+# format = "[ $output]($style) "
+# when = "podman machine info --format json | jq -r '.Host.MachineState' | grep -q '^Running$'"
+# command = "podman machine info --format json | jq -r '.Host.CurrentMachine'"
+# style = "bold podman"
 
 [git_branch]
 symbol = " "

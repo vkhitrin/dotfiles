@@ -8,7 +8,7 @@ __xx_get_obsidian_notes() {
               note_name=$(basename "${note}" ".md")
               echo "${note_name},${note}"
             done <<< "${NOTES}"
-        } | column -t -s ','
+        } | column -t -s ',' | sort -r
     else
         echo "No notes found"
     fi

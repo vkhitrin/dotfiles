@@ -657,7 +657,12 @@ local plugins = {
     { "echasnovski/mini.pairs",                          event = "InsertEnter", opts = {} },
     { "https://github.com/mfussenegger/nvim-ansible.git" },
     { "echasnovski/mini.surround",                       opts = {} },
-    { "echasnovski/mini.diff",                           opts = {} },
+    {
+        "echasnovski/mini.diff",
+        config = function()
+            require("plugins.ui.mini-diff")
+        end,
+    },
     { "b0o/schemastore.nvim" },
     {
         "Saghen/blink.cmp",
@@ -795,16 +800,16 @@ local plugins = {
             require("plugins.editor.mcphub")
         end,
     },
-    {
-        "milanglacier/minuet-ai.nvim",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "Saghen/blink.cmp",
-        },
-        config = function()
-            require("plugins.editor.minuet-ai")
-        end,
-    },
+    -- {
+    --     "milanglacier/minuet-ai.nvim",
+    --     dependencies = {
+    --         "nvim-lua/plenary.nvim",
+    --         "Saghen/blink.cmp",
+    --     },
+    --     config = function()
+    --         require("plugins.editor.minuet-ai")
+    --     end,
+    -- },
     {
         "m-pilia/vim-pkgbuild",
     },
@@ -816,6 +821,22 @@ local plugins = {
         config = function()
             require("plugins.editor.obsidian")
         end,
+    },
+    {
+        "HakonHarnes/img-clip.nvim",
+        event = "VeryLazy",
+        opts = {
+            filetypes = {
+                codecompanion = {
+                    prompt_for_file_name = false,
+                    template = "[Image]($FILE_PATH)",
+                    use_absolute_path = true,
+                },
+            },
+        },
+        keys = {
+            { "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from system clipboard" },
+        },
     },
 }
 

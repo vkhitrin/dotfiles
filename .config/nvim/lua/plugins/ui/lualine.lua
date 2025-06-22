@@ -75,7 +75,7 @@ require("lualine").setup({
                     end
                 end,
             },
-            require("minuet.lualine"),
+            -- require("minuet.lualine"),
             "encoding",
             "fileformat",
             "filetype",
