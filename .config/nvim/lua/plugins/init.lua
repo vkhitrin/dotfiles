@@ -561,10 +561,9 @@ local plugins = {
     },
     {
         "mason-org/mason.nvim",
-        version = "^1.0.0",
         dependencies = {
             "WhoIsSethDaniel/mason-tool-installer.nvim",
-            { "williamboman/mason-lspconfig.nvim", version = "^1.0.0" },
+            { "williamboman/mason-lspconfig.nvim" },
             "neovim/nvim-lspconfig",
         },
         build = ":MasonUpdate",

@@ -15,8 +15,8 @@ require("mason-tool-installer").setup({
     ensure_installed = {
         "actionlint",
         "ansible-language-server",
+        "autotools-language-server",
         "bash-language-server",
-        "checkmake",
         "codelldb",
         "esbonio",
         "gitlab-ci-ls",

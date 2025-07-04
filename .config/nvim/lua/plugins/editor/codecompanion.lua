@@ -33,6 +33,18 @@ require("codecompanion").setup({
         },
     },
     adapters = {
+        gemini = function()
+            return require("codecompanion.adapters").extend("gemini", {
+                schema = {
+                    model = {
+                        default = "gemini-2.5-flash-preview-05-20",
+                    },
+                },
+                env = {
+                    api_key = "cmd:security find-generic-password -ga 'gemini' -w",
+                },
+            })
+        end,
         swama = function()
             return require("codecompanion.adapters").extend("openai_compatible", {
                 env = {
