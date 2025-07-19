@@ -24,9 +24,10 @@ function jiix() {
         --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_issues;__xx_get_jira_issues)" \
         --bind="ctrl-u:become(jira open --no-browser {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
         --bind="ctrl-i:become(echo {1} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
-        --prompt "Filter " --preview="echo 'CTRL+R: Refresh | CTRL+U: Copy URL | CTRL-I: Copy KEY | ENTER: Open Issue In Browser'" \
+        --prompt "Filter " --preview="echo 'CTRL+R: Refresh | CTRL+U: Copy URL | CTRL-I: Copy KEY | CTRL+O: Open In Browser | ENTER: View Issue'" \
         --preview-window=down,1,border-none \
-        --bind "enter:become(jira open {1})"
+        --bind "enter:become(source ~/.zshrc.d/xx_functions/__xx_view_jira_issue;__xx_view_jira_issue {1})" \
+        --bind "ctrl-o:execute-silent(jira open {1})"
 }
 function jirx() {
     # xx ;jira:Query Jira for releases@FALSE

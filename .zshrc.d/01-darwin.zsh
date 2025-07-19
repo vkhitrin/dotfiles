@@ -12,7 +12,8 @@ fi
 if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
     source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
     FAST_HIGHLIGHT[chroma-man]=
-    fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
+    # NOTE: After upgrading to 1.56, this theme doesn't work anymore
+    # fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
 fi
 
 [ -f "/opt/homebrew/share/zsh-autopair/autopair.zsh" ] && source /opt/homebrew/share/zsh-autopair/autopair.zsh
@@ -53,7 +54,7 @@ fi
 alias sudoedit='sudo -e'
 alias less='less -rf'
 alias lsregister='/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister'
-alias gcc='/opt/homebrew/bin/gcc-14'
+alias gcc='/opt/homebrew/bin/gcc-15'
 alias java_home='/usr/libexec/java_home'
 
 # Custom aliases
