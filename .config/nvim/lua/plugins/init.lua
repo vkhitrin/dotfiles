@@ -586,9 +586,13 @@ local plugins = {
         },
     },
     {
+        "nvimtools/none-ls.nvim",
+        dir = "/Users/vkhitrin/Projects/Development/nvim/none-ls.nvim",
+    },
+    {
         "jay-babu/mason-null-ls.nvim",
         event = { "BufReadPre", "BufNewFile" },
-        dependencies = { "nvimtools/none-ls.nvim" },
+        -- dependencies = { "nvimtools/none-ls.nvim" },
         config = function()
             require("plugins.lsp.mason-null-ls")
         end,
@@ -653,7 +657,11 @@ local plugins = {
             require("plugins.editor.which-key")
         end,
     },
-    { "echasnovski/mini.pairs",                          event = "InsertEnter", opts = {} },
+    {
+        "echasnovski/mini.pairs",
+        event = "InsertEnter",
+        opts = {},
+    },
     { "https://github.com/mfussenegger/nvim-ansible.git" },
     { "echasnovski/mini.surround",                       opts = {} },
     {
