@@ -1,10 +1,10 @@
 function obsx() {
-    # xx ;obsidian:View Obsidian notes@FALSE
-    local EXTRA_BIND_OPTIONS="ctrl-t:execute-silent(tmux new-window -d '$EDITOR {2}')"
+    # xx ;obsidian:View Obsidian notes@PARTIAL
+    local EXTRA_BIND_OPTIONS="ctrl-t:execute-silent(printf %s {} | awk '{\$1=\"\"; sub(/^ /,\"\"); print}' | sed 's/.* \(\/.*\)/\1/' | while IFS= read -r line; do tmux new-window -d \"\$EDITOR '\$line'\"; done)"
     local NOTES_TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window"
     local INITIAL_PREVIEW="ENTER: Browse Vault Content"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
-        EXTRA_BIND_OPTIONS+=",ctrl-o:become(printf %s {} | awk '{\$1=\"\"; sub(/^ /,\"\"); print}' | sed 's/.* \(\/.*\)/\1/' | while IFS= read -r line; do echo \$line; \$EDITOR \"\$line\"; done)"
+        EXTRA_BIND_OPTIONS+=",ctrl-o:become(printf %s {} | awk '{\$1=\"\"; sub(/^ /,\"\"); print}' | sed 's/.* \(\/.*\)/\1/' | while IFS= read -r line; do \$EDITOR \"\$line\"; done)"
         NOTES_TEXT_PROMPT+=" | CTRL+O: Open Note"
         INITIAL_PREVIEW+=" | CTRL+O: Open Vault"
     fi

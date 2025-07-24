@@ -1,0 +1,19 @@
+__xx_trace_gitlab_project_pipeline() {
+    local GITLAB_HOST="${1}"
+    local GITLAB_PROJECT="${2}"
+    local GITLAB_CI_PIPELINE_ID=$(echo "${3}" | gsed -n 's/.*#\([0-9]\+\)$/\1/p')
+
+    [[ ! -z ${GITLAB_CI_PIPELINE_ID} ]] || exit
+
+    for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
+        if [[ -n "${TMUX}" ]]; then
+            # NOTE: Workaround to enable "paging" output
+            local TEMPFILE=$(mktemp)
+            tmux display-popup -h 80% -w 80% \
+                -S 'fg=#fca326' -T "#[align=absolute-centre] GitLab - ${GITLAB_PROJECT} Pipeline #${GITLAB_CI_PIPELINE_ID} Trace #[align=right]" \
+                -E "tmux new-session -s xx_popup 'GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo ${GITLAB_PROJECT} ci trace -p ${GITLAB_CI_PIPELINE_ID} | tee ${TEMPFILE}; less -r ${TEMPFILE} && rm ${TEMPFILE}; tmux kill-session -t xx_popup' \; set-option status off" && break
+        else
+            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' ci trace -p '${GITLAB_CI_PIPELINE_ID}'" && break
+        fi
+    done
+}

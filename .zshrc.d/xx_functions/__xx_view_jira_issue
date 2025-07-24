@@ -4,7 +4,8 @@ __xx_view_jira_issue() {
     [[ ! -z ${JIRA_ISSUE_KEY} ]] || exit
     if [[ -n "${TMUX}" ]]; then
         tmux display-popup -h 80% -w 80% \
-            -S 'fg=#89b4fa' -T "#[align=absolute-centre] Jira - ${JIRA_ISSUE_KEY} #[align=right]" -E "${JIRA_COMMAND} ${JIRA_ISSUE_KEY}"
+            -S 'fg=#89b4fa' -T "#[align=absolute-centre] Jira - ${JIRA_ISSUE_KEY} #[align=right]" \
+            -E "tmux new-session -s xx_popup '${JIRA_COMMAND} ${JIRA_ISSUE_KEY}; tmux kill-session -t xx_popup' \; set-option status off"
     else
         zsh -i -c "${JIRA_COMMAND} ${JIRA_ISSUE_KEY}"
     fi

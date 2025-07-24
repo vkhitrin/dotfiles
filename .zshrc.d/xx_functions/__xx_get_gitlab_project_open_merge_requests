@@ -1,0 +1,19 @@
+__xx_get_gitlab_project_open_merge_requests() {
+    local GITLAB_HOST=$(echo "${1}" | sed -E 's|^[a-z]+://([^/.:]+(\.[^/.:]+)*).*|\1|')
+    local GITLAB_PROJECT="${2}"
+    for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
+        OUTPUT=$(GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab mr list \
+                --per-page 100 --repo "${GITLAB_PROJECT}" 2>/dev/null | tail -n +3)
+        if [ -n "${OUTPUT}" ]; then
+        CONTENT="true"
+        { 
+            echo "ID\tPath\tDescription\tBranch\tHost"
+            echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" '{print $0 "\t" h}'
+        } | column -ts $'\t'
+        break
+        fi
+    done
+    if [ -z "${CONTENT}" ]; then
+       echo "This project has no merge requests"
+    fi
+}

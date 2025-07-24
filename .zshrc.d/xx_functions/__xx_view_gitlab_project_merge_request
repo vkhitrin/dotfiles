@@ -1,0 +1,20 @@
+__xx_view_gitlab_project_merge_request() {
+    local GITLAB_HOST="${1}"
+    local GITLAB_MERGE_REQUEST_IDENTIFIER="${2}"
+
+    local GITLAB_PROJECT=${GITLAB_MERGE_REQUEST_IDENTIFIER%%!*}
+    local GITLAB_MERGE_REQUEST_ID=${GITLAB_MERGE_REQUEST_IDENTIFIER#*!}
+
+    [[ ! -z ${GITLAB_MERGE_REQUEST_ID} ]] || exit
+
+    for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
+        if [[ -n "${TMUX}" ]]; then
+            tmux display-popup -h 80% -w 80% \
+                -S 'fg=#fca326' -T "#[align=absolute-centre] GitLab - ${GITLAB_MERGE_REQUEST_IDENTIFIER} #[align=right]" \
+                -E "tmux new-session -s xx_popup 'GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo ${GITLAB_PROJECT} mr view ${GITLAB_MERGE_REQUEST_ID} | less -r; tmux kill-session -t xx_popup' \; set-option status off" && break
+
+        else
+            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' mr view '${GITLAB_MERGE_REQUEST_ID}'" && break
+        fi
+    done
+}

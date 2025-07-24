@@ -6,7 +6,11 @@ export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/
 if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
     FPATH="/opt/homebrew/share/zsh-completions:/opt/homebrew/share/zsh/site-functions:${FPATH}"
     autoload -Uz compinit promptipnit bashcompinit
-    compinit; bashcompinit
+    if [ "$(date +'%j')" != "$(stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null)" ]; then
+        compinit; bashcompinit
+    else
+        compinit -C; bashcompinit
+    fi
 fi
 
 if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
@@ -96,3 +100,14 @@ fi
 
 # Workaround for libcosmic https://github.com/pop-os/libcosmic/discussions/860
 export XDG_DATA_DIRS="/opt/homebrew/share:${XDG_DATA_DIRS}"
+
+# Spacship
+SPACESHIP_PROMPT_ASYNC=true
+SPACESHIP_PROMPT_ORDER=(
+    aws
+    gcloud
+    azure
+    kuberenetes
+    directory
+    char
+)
