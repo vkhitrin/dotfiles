@@ -59,8 +59,9 @@ function glgx() {
 
     __xx_get_gitlab_groups | fzf --header-lines=1 --info=inline \
         --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_groups;__xx_get_gitlab_groups)" \
-        --bind="ctrl-u:become(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
-        --bind="ctrl-i:become(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-u:become(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+        --bind="ctrl-i:become(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+        --prompt="Filter " \
         --bind "ctrl-o:execute-silent(echo {3} | awk '{print \$NF}' | xargs ${OPEN_BACKGROUND_COMMAND})" \
         --layout=reverse-list \
         --border-label ' GitLab Groups ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
@@ -69,3 +70,46 @@ function glgx() {
         --bind "enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})"
 }
 
+function glomx() {
+    # xx ;gitlab:Display my open GitLab Merge Requests@FALSE
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open"
+        OPEN_BACKGROUND_COMMAND="open --background"
+        ALT_KEY_NAME="Option"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+        ALT_KEY_NAME="ALT"
+    fi
+
+    __xx_get_gitlab_my_open_merge_requests | fzf --header-lines=1 --info=inline \
+        --delimiter="[[:space:]][[:space:]]+" \
+        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_my_open_merge_requests;__xx_get_gitlab_my_open_merge_requests)" \
+        --bind="ctrl-u:become(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+        --bind "ctrl-o:execute-silent(echo {3} | awk '{print \$NF}' | xargs ${OPEN_BACKGROUND_COMMAND})" \
+        --prompt="Filter " \
+        --layout=reverse-list \
+        --border-label ' My Open GitLab Merge Requests ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
+        --preview="echo 'CTRL-R: Refresh | CTRL+U: Copy URL | CTRL+O: Open In Background | ${ALT_KEY_NAME}+ENTER: Open In Browser | ENTER: View MR'" \
+        --preview-window=down,1,border-none --tmux 80% \
+        --bind "alt-enter:become(echo {3} | awk '{print \$NF}' | xargs ${OPEN_COMMAND})" \
+        --bind "enter:become(echo \${3} | awk '
+        BEGIN { FS=\"/\" }
+        {
+          host = \$3;
+          ns_proj = \$4;
+          for (i=5; i<=NF; i++) {
+            if (\$i == \"-\") {
+              break;
+            }
+            ns_proj = ns_proj \"/\" \$i;
+          }
+          mr = \$NF;
+          print host, \"\\x27\" ns_proj \"!\" mr \"\\x27\"
+        }' | xargs -n2 zsh -c '
+        __xx_view_gitlab_project_merge_request \"\$0\" \"\$1\"
+        ')"
+}

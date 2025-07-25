@@ -1,4 +1,4 @@
-local default_adapter = vim.loop.os_uname().sysname == "Darwin" and "swama" or "ollama"
+local default_adapter = vim.loop.os_uname().sysname == "Darwin" and "gemini" or "ollama"
 
 require("codecompanion").setup({
     extensions = {
@@ -41,7 +41,7 @@ require("codecompanion").setup({
             return require("codecompanion.adapters").extend("gemini", {
                 schema = {
                     model = {
-                        default = "gemini-2.5-flash-preview-05-20",
+                        default = "gemini-2.5-flash",
                     },
                 },
                 env = {

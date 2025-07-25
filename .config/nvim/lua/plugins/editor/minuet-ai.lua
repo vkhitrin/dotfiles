@@ -1,24 +1,45 @@
-local default_model = vim.loop.os_uname().sysname == "Darwin" and "gemma3:27b-it-qat" or "gemma3:12b-it-qat"
+local default_model = vim.loop.os_uname().sysname == "Darwin" and "mlx-community/Mistral-Small-24B-Instruct-2501-3bit"
+    or "gemma3:12b-it-qat"
+local default_endpoint = vim.loop.os_uname().sysname == "Darwin" and "http://localhost:28100/v1/chat/completions"
+    or "http://localhost:11434/v1/chat/completions"
 
 require("minuet").setup({
-    provider = "openai_compatible",
-    n_completions = 1, -- recommend for local model for resource saving
-    -- I recommend beginning with a small context window size and incrementally
-    -- expanding it, depending on your local computing power. A context window
-    -- of 512, serves as an good starting point to estimate your computing
-    -- power. Once you have a reliable estimate of your local computing power,
-    -- you should adjust the context window to a larger value.
-    context_window = 512,
+    -- NOTE: For local models
+    -- provider = "openai_compatible",
+    -- n_completions = 1,
+    -- context_window = 512,
+    provider = "gemini",
     provider_options = {
         openai_compatible = {
             api_key = "TERM",
             name = "Ollama",
-            end_point = "http://localhost:11434/v1/chat/completions",
+            end_point = default_endpoint,
             stream = true,
             model = default_model,
             optional = {
                 max_tokens = 56,
                 top_p = 0.9,
+            },
+        },
+        gemini = {
+            model = "gemini-2.0-flash",
+            api_key = function()
+                local stdout = vim.fn.system("security find-generic-password -ga 'gemini' -w")
+                return vim.trim(stdout)
+            end,
+            optional = {
+                generationConfig = {
+                    maxOutputTokens = 256,
+                    thinkingConfig = {
+                        thinkingBudget = 0,
+                    },
+                },
+                safetySettings = {
+                    {
+                        category = "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold = "BLOCK_ONLY_HIGH",
+                    },
+                },
             },
         },
     },

@@ -73,8 +73,8 @@ local plugins = {
                 },
                 {
                     "<F12>",
-                    ":CopilotChatToggle<cr>",
-                    desc = "Toggle Copilot Chat",
+                    ":CodeCompanionChat Toggle<cr>",
+                    desc = "Toggle CodeCompanion Chat",
                 },
             },
         },
@@ -587,7 +587,6 @@ local plugins = {
     },
     {
         "nvimtools/none-ls.nvim",
-        dir = "/Users/vkhitrin/Projects/Development/nvim/none-ls.nvim",
     },
     {
         "jay-babu/mason-null-ls.nvim",
@@ -681,7 +680,7 @@ local plugins = {
             --     "hrsh7th/cmp-cmdline",
             --     "hrsh7th/cmp-vsnip",
             "rafamadriz/friendly-snippets",
-            --     "onsails/lspkind.nvim",
+            "onsails/lspkind.nvim",
             --     "saadparwaiz1/cmp_luasnip",
             --     "petertriho/cmp-git",
             --     -- "lukas-reineke/cmp-rg",
@@ -706,7 +705,11 @@ local plugins = {
             require("plugins.lsp.lsp-signature")
         end,
     },
-    { "towolf/vim-helm" },
+    {
+        "qvalentin/helm-ls.nvim",
+        ft = "helm",
+        opts = {},
+    },
     {
         "https://github.com/cenk1cenk2/schema-companion.nvim",
         ft = { "yaml" },
@@ -764,13 +767,13 @@ local plugins = {
     {
         "fladson/vim-kitty",
     },
-    {
-        "olimorris/codecompanion.nvim",
-        event = { "InsertEnter", "LspAttach" },
-        config = function()
-            require("plugins.editor.codecompanion")
-        end,
-    },
+    -- {
+    --     "olimorris/codecompanion.nvim",
+    --     event = { "InsertEnter", "LspAttach" },
+    --     config = function()
+    --         require("plugins.editor.codecompanion")
+    --     end,
+    -- },
     { "projectfluent/fluent.vim" },
     {
         "psliwka/vim-dirtytalk",
@@ -780,14 +783,14 @@ local plugins = {
             vim.opt.spelllang = { "en", "programming" }
         end,
     },
-    {
-        "Davidyz/VectorCode",
-        cmd = "VectorCode",
-        dependencies = { "nvim-lua/plenary.nvim" },
-        config = function()
-            require("plugins.editor.vectorcode")
-        end,
-    },
+    -- {
+    --     "Davidyz/VectorCode",
+    --     cmd = "VectorCode",
+    --     dependencies = { "nvim-lua/plenary.nvim" },
+    --     config = function()
+    --         require("plugins.editor.vectorcode")
+    --     end,
+    -- },
     {
         "mrcjkb/rustaceanvim",
         version = "^6",
@@ -796,27 +799,27 @@ local plugins = {
     {
         "https://gitlab.com/HiPhish/jinja.vim",
     },
-    {
-        "ravitemer/mcphub.nvim",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-        },
-        cmd = "MCPHub",
-        build = "bundled_build.lua",
-        config = function()
-            require("plugins.editor.mcphub")
-        end,
-    },
     -- {
-    --     "milanglacier/minuet-ai.nvim",
+    --     "ravitemer/mcphub.nvim",
     --     dependencies = {
     --         "nvim-lua/plenary.nvim",
-    --         "Saghen/blink.cmp",
     --     },
+    --     cmd = "MCPHub",
+    --     build = "bundled_build.lua",
     --     config = function()
-    --         require("plugins.editor.minuet-ai")
+    --         require("plugins.editor.mcphub")
     --     end,
     -- },
+    {
+        "milanglacier/minuet-ai.nvim",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "Saghen/blink.cmp",
+        },
+        config = function()
+            require("plugins.editor.minuet-ai")
+        end,
+    },
     {
         "m-pilia/vim-pkgbuild",
     },
@@ -844,6 +847,12 @@ local plugins = {
         keys = {
             { "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from system clipboard" },
         },
+    },
+    {
+        "sudo-tee/opencode.nvim",
+        config = function()
+            require("plugins.editor.opencode")
+        end,
     },
 }
 
