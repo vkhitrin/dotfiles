@@ -33,7 +33,11 @@ export ANONYMIZED_TELEMETRY="False"
 # Azure
 export AZURE_CORE_COLLECT_TELEMETRY="false"
 
+# zsh
+DISABLE_COMPFIX="true"
+
 # xx
+XX_CACHE_DIR="${HOME}/.cache/xx"
 if [ -d "${HOME}/.zshrc.d/xx_functions" ]; then
     fpath=("${HOME}/.zshrc.d/xx_functions" ${fpath})
     for fn in ${HOME}/.zshrc.d/xx_functions/*(N:t); do

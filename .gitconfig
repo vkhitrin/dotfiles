@@ -52,9 +52,9 @@
     path = ~/.config/git/.gitconfig.private
 # Include private related configuration - SSH
 [includeIf "hasconfig:remote.*.url:ssh://github.com:*/**"]
-    path = ~/.config/git/.gitconfig.personal
+    path = ~/.config/git/.gitconfig.private
 [includeIf "hasconfig:remote.*.url:ssh://gitlab.com:*/**"]
-    path = ~/.config/git/.gitconfig.personal
+    path = ~/.config/git/.gitconfig.private
 [includeIf "gitdir/i:~/Projects/Development/Work/"]
     path = ~/.config/git/.gitconfig.work
 [push]

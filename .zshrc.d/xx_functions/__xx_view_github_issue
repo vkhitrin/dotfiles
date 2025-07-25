@@ -1,0 +1,17 @@
+__xx_view_github_issue() {
+    local GITHUB_PROJECT="${1}"
+    local GITHUB_PROJECT_ISSUE="${2}"
+    local GITHUB_PROJECT_ISSUE_URL="${3}"
+    local ISSUE_OUTPUT
+
+    [[ ! -z ${GITHUB_PROJECT} ]] || exit
+    [[ ! -z ${GITHUB_PROJECT_ISSUE} ]] || exit
+
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 80% -w 80% \
+            -S 'fg=#bfffd2' -T "#[align=absolute-centre] GitHub - ${GITHUB_PROJECT} #${GITHUB_PROJECT_ISSUE} #[align=right]" \
+            -E "tmux new-session -s xx_popup 'unbuffer -p gh issue view --repo ${GITHUB_PROJECT} ${GITHUB_PROJECT_ISSUE} | less -r; tmux kill-session -t xx_popup' \; set-option status off"
+    else
+        zsh -i -c "unbuffer -p gh issue view --repo ${GITHUB_PROJECT} ${GITHUB_PROJECT_ISSUE} | less -r"
+    fi
+}

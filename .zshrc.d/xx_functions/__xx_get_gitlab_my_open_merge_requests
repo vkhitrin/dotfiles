@@ -1,0 +1,38 @@
+__xx_get_gitlab_my_open_merge_requests() {
+    OPEN_MERGE_REQUESTS=$(
+        pids=()
+        while read -r CONFIG_FILE; do
+            for GLAB_HOST in $(glab-work auth status 2>&1 | grep 'Logged in to' | sed 's/.* Logged in to \(.*\) as.*/\1/g'); do
+                {
+                    GITLAB_HOST=${GLAB_HOST} GLAB_CONFIG_DIR=$(dirname "${CONFIG_FILE}") glab api '/merge_requests?state=opened' 2>/dev/null | jq -r '.[] | ([.author.username,.title,.web_url] | join("\t"))' 2>/dev/null
+                } &
+                pids+=(${!})
+            done
+        done < <(find "${HOME}/.config/glab-cli/" -name 'config.yml' 2>/dev/null)
+
+        for pid in "${pids[@]}"; do
+            wait "${pid}"
+        done
+    )
+    if [ -n "${OPEN_MERGE_REQUESTS}" ]; then
+    {
+        printf "Author\tTitle\tID\tProject\tHost\tURL\n"
+        while IFS= read -r MERGE_REQUEST; do
+            [ -z "${MERGE_REQUEST}" ] && continue
+            AUTHOR="${MERGE_REQUEST%%$'\t'*}"
+            local rest="${MERGE_REQUEST#*$'\t'}"
+            TITLE="${rest%%$'\t'*}"
+            URL="${rest#*$'\t'}"
+            TMP="${URL#*//}"
+            HOST="${TMP%%/*}"
+            PATH_PART="${TMP#*/}"
+            MR_ID="${URL##*/}"
+            PROJECT_WITH_MR="${PATH_PART%/*}"
+            PROJECT="${PROJECT_WITH_MR%/-*}"
+            printf "%s\t%s\t%s\t%s\t%s\t%s\n" "${AUTHOR}" "${TITLE}" "${MR_ID}" "${PROJECT}" "${HOST}" "${URL}"
+        done <<< "${OPEN_MERGE_REQUESTS}"
+    } | column -ts $'\t'
+    else
+        echo "No open merge requests were found"
+    fi
+}

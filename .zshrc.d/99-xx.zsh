@@ -1,3 +1,4 @@
+export XX_CACHE_DIR="${HOME}/.cache/xx"
 xx() {
     __xx_get_functions | fzf --header-lines=1 \
         --info=inline \

@@ -4,6 +4,7 @@ require("nvim-treesitter.configs").setup({
         "bash",
         "c",
         "cmake",
+        "comment",
         "csv",
         "diff",
         "dockerfile",
@@ -41,8 +42,6 @@ require("nvim-treesitter.configs").setup({
         "vimdoc",
         "xml",
         "yaml",
-        -- "puppet",
-        -- "scala",
     },
     auto_install = true,
     highlight = {
