@@ -14,7 +14,7 @@ __xx_view_gitlab_project_merge_request() {
                 -E "tmux new-session -s xx_popup 'GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo ${GITLAB_PROJECT} mr view ${GITLAB_MERGE_REQUEST_ID} | less -r; tmux kill-session -t xx_popup' \; set-option status off" && break
 
         else
-            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' mr view '${GITLAB_MERGE_REQUEST_ID}'" && break
+            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' mr view '${GITLAB_MERGE_REQUEST_ID}' | less -r" && break
         fi
     done
 }

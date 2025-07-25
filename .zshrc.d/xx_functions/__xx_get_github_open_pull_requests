@@ -1,0 +1,30 @@
+__xx_get_github_open_pull_requests() {
+    local GITHUB_USER=$(gh api user --jq .login)
+    if [[ -z ${GITHUB_USER} ]]; then
+        echo "Not authenticated with GitHub"
+    else 
+        GITHUB_OPEN_PULL_REQUESTS=$(gh api -XGET /search/issues -f q="author:${GITHUB_USER} is:pr is:open" \
+            --jq '.items[] | ([.title,.html_url]) | join("\t")')
+    fi
+    if [ -n "${GITHUB_OPEN_PULL_REQUESTS}" ]; then
+    {
+        printf "Author\tTitle\tID\tProject\tHost\tURL\n"
+        while IFS= read -r OPEN_ISSUE; do
+            [ -z "${OPEN_ISSUE}" ] && continue
+            AUTHOR="${GITHUB_USER}"
+            TITLE="${OPEN_ISSUE%%$'\t'*}"
+            local rest="${OPEN_ISSUE#*$'\t'}"
+            URL="${rest#*$'\t'}"
+            TMP="${URL#*//}"
+            HOST="${TMP%%/*}"
+            PATH_PART="${TMP#*/}"
+            PULL_REQUEST_ID="${URL##*/}"
+            PROJECT_WITH_ISSUE="${PATH_PART%/*}"
+            PROJECT="${PROJECT_WITH_ISSUE%/pull*}"
+            printf "%s\t%s\t%s\t%s\t%s\t%s\n" "${AUTHOR}" "${TITLE}" "${PULL_REQUEST_ID}" "${PROJECT}" "${HOST}" "${URL}"
+        done <<< "${GITHUB_OPEN_PULL_REQUESTS}"
+    } | column -ts $'\t'
+    else
+        echo "No open merge requests were found"
+    fi
+}

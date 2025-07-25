@@ -1,6 +1,7 @@
 [[ "$OSTYPE" == darwin* ]] || return
 
 export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${PATH}"
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
 
 # Source zsh-completion
 if [[ -d "/opt/homebrew/share/zsh-completions" ]];then
@@ -17,7 +18,7 @@ if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-hi
     source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
     FAST_HIGHLIGHT[chroma-man]=
     # NOTE: After upgrading to 1.56, this theme doesn't work anymore
-    # fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
+    fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
 fi
 
 [ -f "/opt/homebrew/share/zsh-autopair/autopair.zsh" ] && source /opt/homebrew/share/zsh-autopair/autopair.zsh

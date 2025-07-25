@@ -1,0 +1,31 @@
+# TODO: Fetch issues assigned to me
+__xx_get_github_open_issues() {
+    local GITHUB_USER=$(gh api user --jq .login)
+    if [[ -z ${GITHUB_USER} ]]; then
+        echo "Not authenticated with GitHub"
+    else 
+        GITHUB_OPEN_ISSUES=$(gh api -X GET search/issues -f q="author:${GITHUB_USER} type:issue is:open" \
+            --jq '.items[] | ([.title,.html_url]) | join("\t")')
+    fi
+    if [ -n "${GITHUB_OPEN_ISSUES}" ]; then
+    {
+        printf "Author\tTitle\tID\tProject\tHost\tURL\n"
+        while IFS= read -r OPEN_ISSUE; do
+            [ -z "${OPEN_ISSUE}" ] && continue
+            AUTHOR="${GITHUB_USER}"
+            TITLE="${OPEN_ISSUE%%$'\t'*}"
+            local rest="${OPEN_ISSUE#*$'\t'}"
+            URL="${rest#*$'\t'}"
+            TMP="${URL#*//}"
+            HOST="${TMP%%/*}"
+            PATH_PART="${TMP#*/}"
+            ISSUE_ID="${URL##*/}"
+            PROJECT_WITH_ISSUE="${PATH_PART%/*}"
+            PROJECT="${PROJECT_WITH_ISSUE%/issues*}"
+            printf "%s\t%s\t%s\t%s\t%s\t%s\n" "${AUTHOR}" "${TITLE}" "${ISSUE_ID}" "${PROJECT}" "${HOST}" "${URL}"
+        done <<< "${GITHUB_OPEN_ISSUES}"
+    } | column -ts $'\t'
+    else
+        echo "No open issues were found"
+    fi
+}

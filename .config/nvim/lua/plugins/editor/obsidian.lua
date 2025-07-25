@@ -4,6 +4,10 @@ require("obsidian").setup({
             name = "Personal",
             path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Personal",
         },
+        {
+            name = "Work",
+            path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Work",
+        },
     },
     completion = {
         nvim_cmp = false,
@@ -13,4 +17,5 @@ require("obsidian").setup({
         name = "snacks.pick",
     },
     ui = { enable = false },
+    legacy_commands = false,
 })

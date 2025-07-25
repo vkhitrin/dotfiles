@@ -9,3 +9,7 @@ xx-widget () {
 }
 zle -N xx-widget
 bindkey "^X^X" xx-widget
+
+autoload -z edit-command-line
+zle -N edit-command-line
+bindkey "^E^E" edit-command-line

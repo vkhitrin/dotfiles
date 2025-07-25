@@ -12,7 +12,7 @@ __xx_view_gitlab_project_pipeline() {
                 -E "tmux new-session -s xx_popup '{GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo ${GITLAB_PROJECT} ci get -p ${GITLAB_CI_PIPELINE_ID} -d --with-variables; echo -e \"\n\e[90mView this pipeline on GitLab: http://${GITLAB_HOST}/${GITLAB_PROJECT}/-/pipelines/${GITLAB_CI_PIPELINE_ID}\e[0m\"} | less -r; tmux kill-session -t xx_popup' \; set-option status off" && break
 
         else
-            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' ci get -p '${GITLAB_CI_PIPELINE_ID}' -d --with-variables; echo -e '\nView this pipeline on GitLab: http://${GITLAB_HOST}/${GITLAB_PROJECT}/-/pipelines/${GITLAB_CI_PIPELINE_ID}'" && break
+            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' ci get -p '${GITLAB_CI_PIPELINE_ID}' -d --with-variables; echo -e '\nView this pipeline on GitLab: http://${GITLAB_HOST}/${GITLAB_PROJECT}/-/pipelines/${GITLAB_CI_PIPELINE_ID}' | less -r" && break
         fi
     done
 }

@@ -1,5 +1,5 @@
 __xx_get_jira_issues() {
     local JQL="${1:-(assignee = currentUser()) AND (status !='done')}"
     echo "Jira Query: ${JQL}"
-    jira issues list --jql="${JQL}" --plain --columns key,status,summary 2>&1
+    jira issues list --jql="${JQL}" --order-by priority --plain --columns priority,key,status,summary 2>&1
 }

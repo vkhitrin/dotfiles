@@ -1,0 +1,17 @@
+__xx_view_github_open_pull_request() {
+    local GITHUB_PROJECT="${1}"
+    local GITHUB_PROJECT_PR="${2}"
+    local GITHUB_PROJECT_PR_URL="${3}"
+    local ISSUE_OUTPUT
+
+    [[ ! -z ${GITHUB_PROJECT} ]] || exit
+    [[ ! -z ${GITHUB_PROJECT_PR} ]] || exit
+
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 80% -w 80% \
+            -S 'fg=#bfffd2' -T "#[align=absolute-centre] GitHub - ${GITHUB_PROJECT} #${GITHUB_PROJECT_PR} #[align=right]" \
+            -E "tmux new-session -s xx_popup 'unbuffer -p gh pr view --repo ${GITHUB_PROJECT} ${GITHUB_PROJECT_PR} --comments | less -r; tmux kill-session -t xx_popup' \; set-option status off"
+    else
+        zsh -i -c "unbuffer -p gh pr view --repo ${GITHUB_PROJECT} ${GITHUB_PROJECT_PR} --comments | less -r"
+    fi
+}
