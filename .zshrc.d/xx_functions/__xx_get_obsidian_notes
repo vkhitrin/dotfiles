@@ -3,10 +3,11 @@ __xx_get_obsidian_notes() {
     local NOTES=$(find ${XX_OBSIDIAN_VAULT_DIR} -type f -name "*.md")
     if [ -n "${NOTES}" ]; then
         {
-            echo "NOTE,PATH"
+            echo "NOTE,PATH,VAULT"
             while IFS= read -r note; do
               note_name=$(basename "${note}" ".md")
-              echo "${note_name},${note}"
+              vault_name=$(basename ${XX_OBSIDIAN_VAULT_DIR})
+              echo "${note_name},${note},${vault_name}"
             done <<< "${NOTES}"
         } | column -t -s ',' | sort -r
     else

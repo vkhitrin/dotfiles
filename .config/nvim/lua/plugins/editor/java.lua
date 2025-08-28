@@ -1,5 +1,10 @@
 require("java").setup({
-    java_test = {
-        enabled = false,
-    },
+	java_test = {
+		enabled = true,
+		version = "0.43.1",
+	},
+	spring_boot_tools = {
+		enabled = true,
+		version = "1.59.0",
+	},
 })

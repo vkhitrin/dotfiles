@@ -51,3 +51,43 @@ vim.api.nvim_create_autocmd("User", {
 		}
 	end,
 })
+
+-- vectorcode
+-- TODO: See how it can be integrated with opencode
+-- vim.api.nvim_create_autocmd("LspAttach", {
+--   callback = function()
+--     local bufpath = vim.api.nvim_buf_get_name(0)
+--     local root = vim.fs.dirname(bufpath)
+--     local vc_dir = vim.fs.find(".vectorcode", { path = root, upward = true })[1]
+--
+--     if not vc_dir then
+--       return
+--     end
+--
+--     local bufnr = vim.api.nvim_get_current_buf()
+--     local cacher = require("vectorcode.config").get_cacher_backend()
+--     local utils = require("vectorcode.cacher").utils
+--
+--     utils.async_check("config", function()
+--       cacher.register_buffer(bufnr, {
+--         n_query = 10,
+--       })
+--     end, nil)
+--   end,
+--   desc = "Register buffer for VectorCode if `.vectorcode` exists",
+-- })
+
+-- Custom support for 'dotfiles' alias-like behavior
+-- TODO: Update various plugin to look for the git dir
+vim.api.nvim_create_autocmd("VimEnter", {
+	callback = function()
+		local cwd = vim.fn.getcwd()
+		local home = vim.fn.expand("~")
+		local config = home .. "/.config"
+
+		if cwd == home or cwd == config or cwd:find(config .. "/", 1, true) == 1 then
+			vim.env.GIT_DIR = vim.fn.expand("~/Projects/Automation/Setup/dotfiles")
+			vim.env.GIT_WORK_TREE = vim.fn.expand("~")
+		end
+	end,
+})

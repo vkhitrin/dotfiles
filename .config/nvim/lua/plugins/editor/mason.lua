@@ -52,7 +52,7 @@ require("mason-tool-installer").setup({
         "tfsec",
         "trivy",
         "typescript-language-server",
-        "vscode-spring-boot-tools",
+        -- "vscode-spring-boot-tools",
         "xmlformatter",
         "yaml-language-server",
         "yamllint",

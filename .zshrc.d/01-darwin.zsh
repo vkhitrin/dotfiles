@@ -72,14 +72,20 @@ fi
 
 # Snipkit widget bind only if config file exists
 if [[ -d "${HOME}/Library/Application Support/snipkit" ]]; then
-    snipkit-snippets-copy-widget () {
+    snipkit-snippets-exec-widget () {
         echoti rmkx
         exec </dev/tty
         snipkit exec
         echoti smkx
     }
-    zle -N snipkit-snippets-copy-widget
-    bindkey "^Xc" snipkit-snippets-copy-widget
+    snipkit-snippets-copy-widget () {
+        echoti rmkx
+        exec </dev/tty
+        snipkit copy
+        echoti smkx
+    }
+    zle -N snipkit-snippets-exec-widget
+    bindkey "^X^Z" snipkit-snippets-exec-widget
 fi
 
 # Jira punchout tool
@@ -109,6 +115,8 @@ SPACESHIP_PROMPT_ORDER=(
     gcloud
     azure
     kuberenetes
+    git_branch
+    mise_tools
     directory
     char
 )

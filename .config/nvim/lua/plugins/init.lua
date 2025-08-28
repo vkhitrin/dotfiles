@@ -766,20 +766,20 @@ local plugins = {
 		end,
 	},
 	-- NOTE: Revisit when https://github.com/nvim-java/nvim-java/issues/384 is fixed
-	-- {
-	--     "nvim-java/nvim-java",
-	--     config = function()
-	--         require("plugins.editor.java")
-	--     end,
-	-- },
 	{
-		"JavaHello/spring-boot.nvim",
-		ft = { "java", "yaml", "jproperties" },
-		dependencies = {
-			"mfussenegger/nvim-jdtls",
-		},
-		opts = {},
+	    "nvim-java/nvim-java",
+	    config = function()
+	        require("plugins.editor.java")
+	    end,
 	},
+	-- {
+	-- 	"JavaHello/spring-boot.nvim",
+	-- 	ft = { "java", "yaml", "jproperties" },
+	-- 	dependencies = {
+	-- 		"mfussenegger/nvim-jdtls",
+	-- 	},
+	-- 	opts = {},
+	-- },
 	{ "Bekaboo/dropbar.nvim", opts = {} },
 	{ "chrisgrieser/nvim-justice", ft = "just", opts = {} },
 }

@@ -32,17 +32,17 @@ require("lualine").setup({
 			"filetype",
 			get_yaml_schema,
 		},
-		lualine_y = {
-			{
-				"lsp_status",
-				icon = "",
-				symbols = {
-					spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
-					done = "✓",
-					separator = " ",
-				},
-				ignore_lsp = {},
-			},
-		},
+		-- lualine_y = {
+		-- 	{
+		-- 		"lsp_status",
+		-- 		icon = "",
+		-- 		symbols = {
+		-- 			spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
+		-- 			done = "✓",
+		-- 			separator = " ",
+		-- 		},
+		-- 		ignore_lsp = {},
+		-- 	},
+		-- },
 	},
 })
