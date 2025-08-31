@@ -39,19 +39,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
--- custom treesitter parsers
-vim.api.nvim_create_autocmd("User", {
-	pattern = "TSUpdate",
-	callback = function()
-		require("nvim-treesitter.parsers").ghactions = {
-			install_info = {
-				url = "https://github.com/rmuir/tree-sitter-ghactions",
-				queries = "queries",
-			},
-		}
-	end,
-})
-
 -- vectorcode
 -- TODO: See how it can be integrated with opencode
 -- vim.api.nvim_create_autocmd("LspAttach", {
@@ -88,6 +75,22 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		if cwd == home or cwd == config or cwd:find(config .. "/", 1, true) == 1 then
 			vim.env.GIT_DIR = vim.fn.expand("~/Projects/Automation/Setup/dotfiles")
 			vim.env.GIT_WORK_TREE = vim.fn.expand("~")
+		end
+	end,
+})
+
+-- Autocmd to enable treesitter if parser is available
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function(args)
+		local ft = args.match
+		if ft == "yaml.gitlab" then
+			ft = "yaml"
+		end
+		local has_parser = pcall(vim.treesitter.language.inspect, ft)
+		if has_parser then
+			vim.treesitter.start(args.buf, ft)
+		else
+			vim.cmd("syntax on")
 		end
 	end,
 })

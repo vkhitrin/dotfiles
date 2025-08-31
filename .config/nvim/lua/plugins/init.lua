@@ -10,6 +10,9 @@ local plugins = {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
+		lazy = false,
+		branch = "main",
+		build = ":TSUpdate",
 		config = function()
 			require("plugins.editor.treesitter")
 		end,
@@ -23,7 +26,6 @@ local plugins = {
 			require("plugins.editor.snacks")
 		end,
 		keys = {
-			-- Top Pickers & Explorer
 			{
 				"<leader><space>",
 				function()
@@ -522,7 +524,7 @@ local plugins = {
 		event = { "BufReadPre", "BufNewFile" },
 		-- dependencies = { "nvimtools/none-ls.nvim" },
 		config = function()
-			require("plugins.lsp.mason-null-ls")
+			require("plugins.lsp.mason-none-ls")
 		end,
 	},
 	{
@@ -603,16 +605,9 @@ local plugins = {
 		"Saghen/blink.cmp",
 		version = "*",
 		dependencies = {
-			--     "hrsh7th/cmp-nvim-lsp",
-			--     "hrsh7th/cmp-buffer",
-			--     "https://codeberg.org/FelipeLema/cmp-async-path",
-			--     "hrsh7th/cmp-cmdline",
-			--     "hrsh7th/cmp-vsnip",
 			"rafamadriz/friendly-snippets",
 			"onsails/lspkind.nvim",
-			--     "saadparwaiz1/cmp_luasnip",
-			--     "petertriho/cmp-git",
-			--     -- "lukas-reineke/cmp-rg",
+			"Kaiser-Yang/blink-cmp-git",
 		},
 		config = function()
 			require("plugins.editor.blink")
@@ -767,10 +762,10 @@ local plugins = {
 	},
 	-- NOTE: Revisit when https://github.com/nvim-java/nvim-java/issues/384 is fixed
 	{
-	    "nvim-java/nvim-java",
-	    config = function()
-	        require("plugins.editor.java")
-	    end,
+		"nvim-java/nvim-java",
+		config = function()
+			require("plugins.editor.java")
+		end,
 	},
 	-- {
 	-- 	"JavaHello/spring-boot.nvim",
