@@ -36,6 +36,9 @@ export AZURE_CORE_COLLECT_TELEMETRY="false"
 # zsh
 DISABLE_COMPFIX="true"
 
+# 1password
+OP_BIOMETRIC_UNLOCK_ENABLED=false
+
 # xx
 XX_CACHE_DIR="${HOME}/.cache/xx"
 if [ -d "${HOME}/.zshrc.d/xx_functions" ]; then

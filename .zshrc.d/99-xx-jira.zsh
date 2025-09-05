@@ -7,7 +7,7 @@ function jipx() {
         --prompt "Filter " --preview="echo 'CTRL+R: Refresh | ENTER: Open Project In Browser'" \
         --preview-window=down,1,border-none \
         --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_projects;__xx_get_jira_projects)" \
-        --bind "enter:become(jira open --project {1})"
+        --bind "enter:become(jira open --project {1} >/dev/null)"
 }
 # TODO: Add pagination support
 function jiix() {
@@ -22,8 +22,8 @@ function jiix() {
         --header-lines=2 --layout=reverse-list \
         --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
         --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_issues;__xx_get_jira_issues)" \
-        --bind="ctrl-u:become(jira open --no-browser {2} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
-        --bind="ctrl-i:become(echo {2} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+        --bind="ctrl-u:execute-silent(jira open --no-browser {2} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
+        --bind="ctrl-i:execute-silent(echo {2} | tr -d '\n' | ${CLIPBOARD_COMMAND})" \
         --prompt "Filter " --preview="echo 'CTRL+R: Refresh | CTRL+U: Copy URL | CTRL-I: Copy KEY | CTRL+O: Open In Browser | ENTER: View Issue'" \
         --preview-window=down,1,border-none \
         --bind "enter:become(source ~/.zshrc.d/xx_functions/__xx_view_jira_issue;__xx_view_jira_issue {2})" \
@@ -32,15 +32,19 @@ function jiix() {
 function jirx() {
     # xx ;jira:Query Jira for releases@FALSE
     local OPEN_COMMAND
+    local CLIPBOARD_COMMAND
     if [[ $(uname) == "Darwin" ]];then
-        OPEN_COMMAND="open"
+        OPEN_COMMAND="open --background"
+        CLIPBOARD_COMMAND="pbcopy"
     elif [[ $(uname) == "Linux" ]]; then
         OPEN_COMMAND="xdg-open"
+        CLIPBOARD_COMMAND="wl-copy"
     fi
      __xx_get_jira_releases | fzf --border-label " Jira Releases " --header-lines=1 --layout=reverse-list \
         --info=inline --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa,header:#89b4fa:bold' \
-        --prompt "Filter " --preview="echo 'CTRL+R: Refresh | ENTER: Open Release In Browser'" \
+        --prompt "Filter " --preview="echo 'CTRL+R: Refresh | CTRL+U: Copy URL | ENTER: Open Release In Browser'" \
         --preview-window=down,1,border-none \
         --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_releases;__xx_get_jira_releases)" \
-        --bind "enter:become(echo 'https://plainid.atlassian.net/projects/$(cat ${HOME}/.config/.jira/.config.yml | yq '.project.key')/versions/{1}' | xargs ${OPEN_COMMAND})"
+        --bind "ctrl-u:execute-silent(echo 'https://plainid.atlassian.net/projects/$(cat ${HOME}/.config/.jira/.config.yml | yq '.project.key')/versions/{1}' | ${CLIPBOARD_COMMAND})"
+        --bind "enter:execute-silent(echo 'https://plainid.atlassian.net/projects/$(cat ${HOME}/.config/.jira/.config.yml | yq '.project.key')/versions/{1}' | xargs ${OPEN_COMMAND})"
 }

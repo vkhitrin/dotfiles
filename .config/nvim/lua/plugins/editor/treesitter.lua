@@ -7,10 +7,13 @@ require("nvim-treesitter").install({
 	"csv",
 	"diff",
 	"dockerfile",
+	"ghactions",
 	"go",
+	"gotmpl",
 	"graphql",
 	"groovy",
 	"hcl",
+	"helm",
 	"html",
 	"http",
 	"ini",
@@ -33,6 +36,7 @@ require("nvim-treesitter").install({
 	"requirements",
 	"rst",
 	"ruby",
+	"rust",
 	"sql",
 	"swift",
 	"terraform",
@@ -42,12 +46,11 @@ require("nvim-treesitter").install({
 	"vimdoc",
 	"xml",
 	"yaml",
-	"ghactions",
 })
 
-require("ts_context_commentstring").setup({})
-local get_option = vim.filetype.get_option
-vim.filetype.get_option = function(filetype, option)
-	return option == "commentstring" and require("ts_context_commentstring.internal").calculate_commentstring()
-		or get_option(filetype, option)
-end
+require("nvim-treesitter.parsers").ghactions = {
+	install_info = {
+		url = "https://github.com/rmuir/tree-sitter-ghactions",
+		queries = "queries",
+	},
+}

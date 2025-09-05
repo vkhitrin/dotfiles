@@ -1,0 +1,6 @@
+__xx_open_aws_sso_url() {
+    local AWS_PROFILE="${1}"
+    local URL
+    URL=$(initool get "${HOME}/.aws/config" "profile ${AWS_PROFILE}" "sso_start_url" -v)
+    echo -n "${URL}"
+}

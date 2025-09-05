@@ -1,0 +1,49 @@
+__xx_smart_gitlab_open() {
+    local CLIPBOARD_COMMAND
+    local OPEN_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+        OPEN_COMMAND="open --background"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+        OPEN_COMMAND="xdg-open"
+    fi
+    local ACTION="${1}"
+    local DETAILS="${2}"
+    case "$DETAILS" in
+        "("*")"*)
+            PIPELINE_ID=$(echo "$DETAILS" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+            GITLAB_DOMAIN=$(echo "$DETAILS" | awk '{print $(NF-1)}')
+            PROJECT_PATH=$(echo "$DETAILS" | awk '{print $NF}')
+            PIPELINE_URL="https://${GITLAB_DOMAIN}/${PROJECT_PATH}/-/pipelines/${PIPELINE_ID}"
+            case "${ACTION}" in
+                browser)
+                    echo "${PIPELINE_URL}" | xargs -I{} zsh -c "${OPEN_COMMAND} {}"
+                    ;;
+                open)
+                    source ~/.zshrc.d/xx_functions/__xx_view_gitlab_project_pipeline
+                    echo "$GITLAB_DOMAIN" "${PROJECT_PATH}" "${PIPELINE_ID}"
+                    __xx_view_gitlab_project_pipeline "${GITLAB_DOMAIN}" "${PROJECT_PATH}" "#${PIPELINE_ID}"
+                    ;;
+            esac
+            ;;
+        ![0-9]*)
+            MR_ID=$(echo "$DETAILS" | grep -oE '^![0-9]+' | tr -d '!')
+            GITLAB_DOMAIN=$(echo "$DETAILS" | awk '{print $NF}')
+            PROJECT_PATH=$(echo "$DETAILS" | awk '{print $2}' | sed "s/!${MR_ID}$//")
+            MR_URL="https://${GITLAB_DOMAIN}/${PROJECT_PATH}/-/merge_requests/${MR_ID}"
+            case "${ACTION}" in
+                browser)
+                    echo "${MR_URL}" | xargs -I{} zsh -c "${OPEN_COMMAND} {}"
+                    ;;
+                open)
+                    source ~/.zshrc.d/xx_functions/__xx_view_gitlab_project_merge_request
+                    __xx_view_gitlab_project_merge_request "${GITLAB_DOMAIN}" "${PROJECT_PATH}!${MR_ID}"
+                    ;;
+            esac
+            ;;
+        *)
+            echo "${DETAILS}" | awk '{print $3}' | xargs -I{} zsh -c "${OPEN_COMMAND} {}"
+            ;;
+    esac
+}

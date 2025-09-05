@@ -1,0 +1,22 @@
+__xx_copy_kdbx_totp() {
+    local CLIPBOARD_COMMAND
+    if [[ $(uname) == "Darwin" ]];then
+        CLIPBOARD_COMMAND="pbcopy"
+    elif [[ $(uname) == "Linux" ]]; then
+        CLIPBOARD_COMMAND="wl-copy"
+    fi
+    local KDBX_DESCRIPTION_FILE="${1}"
+    local ENTRY="${2}"
+    if [ -f "${KDBX_DESCRIPTION_FILE}" ]; then
+        local KDBX_FILE=$(cat "${KDBX_DESCRIPTION_FILE}")
+        local KDBX_ENTRY_PASSWORD=$(kdbx totp "${ENTRY}" --database="${KDBX_FILE}" --use-keyring | cat)
+        if [ -z "${KDBX_ENTRY_PASSWORD}" ]; then
+            tmux display-message -d '1000' "#[fg=#d20f39,bold]KeePass Entry '${ENTRY}' has no TOTP#[default]" > /dev/null 2>&1 || true
+        else
+            echo "${KDBX_ENTRY_PASSWORD}" | ${CLIPBOARD_COMMAND}
+            tmux display-message -d '1000' "Copied TOTP from KeePass entry '${ENTRY}'" > /dev/null 2>&1 || true
+        fi
+    else
+        echo "File '${KDBX_DESCRIPTION_FILE}' doesn't exist!"
+    fi
+}

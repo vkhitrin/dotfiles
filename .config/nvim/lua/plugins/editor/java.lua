@@ -5,6 +5,6 @@ require("java").setup({
 	},
 	spring_boot_tools = {
 		enabled = true,
-		version = "1.59.0",
+		version = "1.64.0",
 	},
 })

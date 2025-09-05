@@ -1,7 +1,7 @@
 require("mason").setup({
     PATH = "append",
     ui = {
-        border = "none",
+        border = "rounded",
         backdrop = 100,
         height = 0.8,
         icons = {
@@ -32,11 +32,9 @@ require("mason-tool-installer").setup({
         "lua-language-server",
         "markdownlint",
         "marksman",
-        "mypy",
         "nginx-config-formatter",
         "nginx-language-server",
         "prettier",
-        "pyright",
         "ruby-lsp",
         "rubyfmt",
         "ruff",
@@ -51,8 +49,8 @@ require("mason-tool-installer").setup({
         "tflint",
         "tfsec",
         "trivy",
+        "ty",
         "typescript-language-server",
-        -- "vscode-spring-boot-tools",
         "xmlformatter",
         "yaml-language-server",
         "yamllint",

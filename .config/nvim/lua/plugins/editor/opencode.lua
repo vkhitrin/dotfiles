@@ -2,9 +2,12 @@ require("opencode").setup({
 	prefered_picker = "snacks",
 	ui = {
 		layout = "left",
-		window_highlight = "NormalFloat:OpencodeModePlan",
 		icons = {
 			preset = "text",
+			overrides = {
+				header_user = "",
+				header_assistant = "",
+			},
 		},
 		input = {
 			text = {

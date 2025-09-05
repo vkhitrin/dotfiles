@@ -3,13 +3,24 @@ __xx_get_gitlab_project_pipelines() {
     local GITLAB_PROJECT="${2}"
     for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
         OUTPUT=$(GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab ci list \
-                --per-page 100 --repo "${GITLAB_PROJECT}" 2>/dev/null | tail -n +4)
+                --per-page 100 --repo "${GITLAB_PROJECT}" 2>/dev/null | tail -n +4 | awk '
+                {
+                    if ($0 ~ /\(failed\)/) {
+                        print "\033[31m" $0 "\033[0m"
+                    } else if ($0 ~ /\(success\)/) {
+                        print "\033[32m" $0 "\033[0m"
+                    } else if ($0 ~ /\(manual\)/ || $0 ~ /\(canceled\)/) {
+                        print "\033[90m" $0 "\033[0m"
+                    } else {
+                        print $0
+                    }
+            }')
         if [ -n "${OUTPUT}" ]; then
         CONTENT=true;
         { 
             echo "State\tIID\tRef\tCreated\tHost\tRepository"
             echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" -v r="${GITLAB_PROJECT}" '{print $0 "\t" h "\t" r}'
-        } | column -ts $'\t'
+        } | ansicolumn -ts $'\t'
         break
         fi
     done
