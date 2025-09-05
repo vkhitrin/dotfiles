@@ -1,0 +1,8 @@
+__xx_get_harlequin_connections() {
+    local KEYCHAIN_FILE="${HOME}/Library/Keychains/harlequin.keychain-db"
+    if [ -f "${KEYCHAIN_FILE}" ]; then
+        security dump-keychain "${KEYCHAIN_FILE}" | grep '"svce"' | awk -F'"' '{print $4}'
+    else
+        echo "Keychain '${KEYCHAIN_FILE}' doesn't exist"
+    fi
+}

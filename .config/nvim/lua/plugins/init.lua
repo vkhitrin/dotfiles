@@ -16,7 +16,6 @@ local plugins = {
 		config = function()
 			require("plugins.editor.treesitter")
 		end,
-		dependencies = { "JoosepAlviste/nvim-ts-context-commentstring" },
 	},
 	{
 		"folke/snacks.nvim",
@@ -575,7 +574,6 @@ local plugins = {
 			},
 		},
 	},
-	"christoomey/vim-tmux-navigator",
 	{
 		"folke/which-key.nvim",
 		event = "VeryLazy",
@@ -587,11 +585,6 @@ local plugins = {
 			require("plugins.editor.which-key")
 		end,
 	},
-	-- {
-	-- 	"echasnovski/mini.pairs",
-	-- 	event = "InsertEnter",
-	-- 	opts = {},
-	-- },
 	{ "https://github.com/mfussenegger/nvim-ansible.git" },
 	{ "echasnovski/mini.surround", opts = {} },
 	{
@@ -608,12 +601,12 @@ local plugins = {
 			"rafamadriz/friendly-snippets",
 			"onsails/lspkind.nvim",
 			"Kaiser-Yang/blink-cmp-git",
+            "bydlw98/blink-cmp-env"
 		},
 		config = function()
 			require("plugins.editor.blink")
 		end,
 	},
-	-- { "L3MON4D3/LuaSnip", build = "make install_jsregexp" },
 	{ "romainl/vim-cool" },
 	{
 		"RRethy/vim-illuminate",
@@ -639,7 +632,7 @@ local plugins = {
 		},
 	},
 	{
-		"https://github.com/cenk1cenk2/schema-companion.nvim",
+		"cenk1cenk2/schema-companion.nvim",
 		ft = { "yaml" },
 		dependencies = {
 			"neovim/nvim-lspconfig",
@@ -694,13 +687,6 @@ local plugins = {
 	{
 		"fladson/vim-kitty",
 	},
-	-- {
-	--     "olimorris/codecompanion.nvim",
-	--     event = { "InsertEnter", "LspAttach" },
-	--     config = function()
-	--         require("plugins.editor.codecompanion")
-	--     end,
-	-- },
 	{ "projectfluent/fluent.vim" },
 	{
 		"psliwka/vim-dirtytalk",
@@ -760,21 +746,12 @@ local plugins = {
 			require("plugins.editor.opencode")
 		end,
 	},
-	-- NOTE: Revisit when https://github.com/nvim-java/nvim-java/issues/384 is fixed
 	{
 		"nvim-java/nvim-java",
 		config = function()
 			require("plugins.editor.java")
 		end,
 	},
-	-- {
-	-- 	"JavaHello/spring-boot.nvim",
-	-- 	ft = { "java", "yaml", "jproperties" },
-	-- 	dependencies = {
-	-- 		"mfussenegger/nvim-jdtls",
-	-- 	},
-	-- 	opts = {},
-	-- },
 	{ "Bekaboo/dropbar.nvim", opts = {} },
 	{ "chrisgrieser/nvim-justice", ft = "just", opts = {} },
 }

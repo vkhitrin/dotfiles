@@ -8,3 +8,5 @@ vim.keymap.set("x", "A", function()
 end, { expr = true })
 
 vim.keymap.set("i", "<C-l>", "<C-g>u<Esc>[s1z=gi<C-g>u", { noremap = true, silent = true })
+-- Unmap CTRL-J from cmdline
+vim.api.nvim_set_keymap('c', '<C-J>', '<Nop>', { noremap = true, silent = true })

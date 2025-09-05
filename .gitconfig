@@ -59,5 +59,3 @@
     path = ~/.config/git/.gitconfig.work
 [push]
 	autoSetupRemote = true
-[commit]
-    template = "~/.gitmessage"
