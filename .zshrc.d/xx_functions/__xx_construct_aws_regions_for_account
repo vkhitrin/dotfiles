@@ -1,0 +1,23 @@
+__xx_construct_aws_regions_for_account() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        (
+            echo "REGION"
+            aws ec2 describe-regions --query "Regions[].RegionName" | jq -r '.[]'
+        ) | awk -v active="$AWS_REGION" '
+            BEGIN {
+                yellow = "\033[1;33m";
+                reset = "\033[0m";
+            }
+            NR==1 { print $0; next }
+            {
+                if ($0 == active) {
+                    print yellow $0 reset
+                } else {
+                    print $0
+                }
+            }
+        '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

@@ -1,0 +1,16 @@
+__xx_view_kdbx_entry() {
+    local KDBX_DESCRIPTION_FILE="${1}"
+    local ENTRY="${2}"
+    if [ -f "${KDBX_DESCRIPTION_FILE}" ]; then
+        local KDBX_FILE=$(cat "${KDBX_DESCRIPTION_FILE}")
+        if [[ -n "${TMUX}" ]]; then
+            tmux display-popup -h 80% -w 80% \
+                -S 'fg=#7391e8' -T "#[align=absolute-centre] KeePass - ${ENTRY} #[align=right]" \
+                -E "tmux new-session -s xx_popup 'kdbx show \"${ENTRY}\" --database=\"${KDBX_FILE}\" --use-keyring --show-sensitive | less; tmux kill-session -t xx_popup' \; set-option status off"
+        else
+            zsh -i -c "kdbx show \"${ENTRY}\" --database=\"${KDBX_FILE}\" --use-keyring --show-sensitive | less"
+        fi
+    else
+        echo "File '${KDBX_DESCRIPTION_FILE}' doesn't exist!"
+    fi
+}

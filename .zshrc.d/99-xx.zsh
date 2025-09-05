@@ -6,7 +6,7 @@ xx() {
         --layout=reverse-list \
         --accept-nth 1 \
         --border-label " xx " \
-        --color 'border:#F4E0DC,label:#F4E0DC,header:#F4E0DC:bold,preview-fg:#F4E0DC' \
+        --color 'border:#f4e0dc,label:#f4e0dc,header:#f4e0dc:bold,preview-fg:#f4e0dc' \
         --preview="echo 'ENTER: Execute Command'" \
         --preview-window=down,1,border-none --tmux 80%
 }

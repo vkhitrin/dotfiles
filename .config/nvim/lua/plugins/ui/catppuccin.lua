@@ -15,9 +15,18 @@ require("catppuccin").setup({
 				bg = colors.mantle,
 				fg = colors.overlay2,
 			},
+			FloatBorder = { fg = colors.rosewater },
 			BlinkCmpMenuSelection = { bg = colors.surface0, bold = true },
 			BlinkCmpScrollBarGutter = { bg = colors.crust },
 			BlinkCmpScrollBarThumb = { bg = colors.surface0 },
+			OpencodeBackground = { link = "NormalFloat" },
+			BlinkCmpMenuBorder = { link = "FloatBorder" },
+			OpencodeBorder = { link = "FloatBorder" },
+			OpencodeInputLegend = { link = "FloatShadow" },
+			OpencodeAgentBuild = { link = "NormalSB" },
+			OpencodeAgentPlan = { bg = colors.pink, fg = colors.mantle },
+			OpencodeDiffAdd = { link = "DiffAdd" },
+			OpencodeDiffDelete = { link = "DiffDelete" },
 		}
 	end,
 	integrations = {

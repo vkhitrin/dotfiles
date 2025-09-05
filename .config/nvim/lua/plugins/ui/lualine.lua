@@ -1,11 +1,3 @@
-local function get_yaml_schema()
-	local schema = require("schema-companion.context").get_buffer_schema()
-	if schema.name == "none" then
-		return ""
-	end
-	return schema.name
-end
-
 require("lualine").setup({
 	options = {
 		icons_enabled = true,
@@ -30,7 +22,13 @@ require("lualine").setup({
 			"encoding",
 			"fileformat",
 			"filetype",
-			get_yaml_schema,
+			{
+				function()
+					return ("%s")
+						:format(require("schema-companion").get_current_schemas() or "")
+						:sub(0, 128)
+				end,
+			},
 		},
 		-- lualine_y = {
 		-- 	{

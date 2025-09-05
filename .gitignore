@@ -10,3 +10,5 @@
 .config/nvim/lua/settings/private
 # local binaries
 .local/bin
+# local fzf scripts
+~/.zshrc.d/fzf

@@ -14,5 +14,5 @@ function tdx() {
         --bind='ctrl-e:become:(source ~/.zshrc.d/xx_functions/__xx_edit_todo;__xx_edit_todo {})' \
         --bind='ctrl-n:become:(source ~/.zshrc.d/xx_functions/__xx_new_todo;__xx_new_todo)' \
         --bind='ctrl-r:reload:(source ~/.zshrc.d/xx_functions/__xx_get_todo;__xx_get_todo)' \
-        --bind "enter:become()"
+        --bind "start:unbind(enter)"
 }

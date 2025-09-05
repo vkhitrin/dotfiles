@@ -1,0 +1,77 @@
+__xx_delete_path() {
+    if [ -z "${TMUX}" ]; then
+        echo "This option is only available inside tmux!"
+    else
+        local PATH_OF_INTEREST="${1}"
+        local PROTECTED_PATHS=("${HOME}/.config")
+        PATH_OF_INTEREST_EXPANDED=${(e)PATH_OF_INTEREST}
+
+        if [ -e "$PATH_OF_INTEREST_EXPANDED" ]; then
+            if [[ "$PATH_OF_INTEREST_EXPANDED" == "$PROTECTED_PATHS"* ]]; then
+                tmux display-message -d '1000' "#[fg=#d20f39,bold]Path '${PATH_OF_INTEREST}' is protected!#[default]" > /dev/null 2>&1 || true
+            else
+                path_length=${#PATH_OF_INTEREST}
+                pane_width=$(tmux display-message -p '#{pane_width}')
+                pane_height=$(tmux display-message -p '#{pane_height}')
+
+                popup_width=$(( path_length + 20 ))
+                if [ $popup_width -lt 40 ]; then
+                    popup_width=40
+                elif [ $popup_width -gt $((pane_width - 4)) ]; then
+                    popup_width=$((pane_width - 4))
+                fi
+
+                popup_height=$(( (path_length / 50) + 8 ))
+
+                if [ $popup_height -lt 8 ]; then
+                    popup_height=8
+                elif [ $popup_height -gt 20 ]; then
+                    popup_height=20
+                fi
+                pad_tb=$(( popup_height / 10 ))
+                if [ $pad_tb -lt 2 ]; then
+                    pad_tb=2
+                elif [ $pad_tb -gt 10 ]; then
+                    pad_tb=10
+                fi
+
+                base_lr=$(( popup_width / 12 ))
+
+                if [ $path_length -gt 50 ]; then
+                    pad_lr=$(( base_lr / 2 ))
+                else
+                    pad_lr=$base_lr
+                fi
+
+                if [ $pad_lr -lt 2 ]; then
+                    pad_lr=2
+                elif [ $pad_lr -gt 10 ]; then
+                    pad_lr=10
+                fi
+
+                padding="${pad_tb} ${pad_lr} ${pad_tb} ${pad_lr}"
+
+                tmux display-popup \
+                    -h ${popup_height} \
+                    -w ${popup_width} \
+                    -S 'fg=#f5e0dc' \
+                    -T '#[align=absolute-centre] Confirm Deletion #[align=right]' \
+                    -E "gum confirm '${PATH_OF_INTEREST}' \
+                        --padding='${padding}' \
+                        --affirmative='Delete' \
+                        --negative='Keep' \
+                        --no-show-help \
+                        --prompt.foreground='#f5e0dc' \
+                        --prompt.background='' \
+                        --selected.foreground='#313244' \
+                        --selected.background='#f5e0dc' \
+                        --unselected.foreground='#e0def4' \
+                        --unselected.background='#313244'" \
+                    && rm -rf ${PATH_OF_INTEREST}
+
+            fi
+        else
+            tmux display-message -d '1000' "#[fg=#d20f39,bold]Path '${PATH_OF_INTEREST}' does not exist!#[default]" > /dev/null 2>&1 || true
+        fi
+    fi
+}

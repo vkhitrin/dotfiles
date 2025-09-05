@@ -11,6 +11,9 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#f4e0dc,hl+:#f38ba8 \
 --color=selected-bg:#45475a --highlight-line --no-mouse --tmux 75%"
 
+# bat
+export BAT_THEME='Catppuccin Mocha'
+
 # PGP
 export GPG_TTY=$(tty)
 
@@ -34,13 +37,22 @@ export ANONYMIZED_TELEMETRY="False"
 export AZURE_CORE_COLLECT_TELEMETRY="false"
 
 # zsh
-DISABLE_COMPFIX="true"
+export DISABLE_COMPFIX="true"
+
+# 1password
+export OP_BIOMETRIC_UNLOCK_ENABLED=false
+export OP_CACHE=true
 
 # xx
-XX_CACHE_DIR="${HOME}/.cache/xx"
+export XX_CACHE_DIR="${HOME}/.cache/xx"
 if [ -d "${HOME}/.zshrc.d/xx_functions" ]; then
     fpath=("${HOME}/.zshrc.d/xx_functions" ${fpath})
     for fn in ${HOME}/.zshrc.d/xx_functions/*(N:t); do
       autoload -Uz "$fn"
     done
+fi
+
+# If socktainer exists and running in macOS
+if [[ -f "/opt/homebrew/bin/socktainer" && $(uname) == "Darwin" ]];then
+    export DOCKER_HOST=unix://${HOME}/.socktainer/container.sock
 fi

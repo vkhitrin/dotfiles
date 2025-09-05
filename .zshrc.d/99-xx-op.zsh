@@ -1,0 +1,13 @@
+which op >/dev/null 2>&1 || return
+[[ "$OSTYPE" == darwin* ]] || return
+
+function opx() {
+    # xx ;1password:Query 1password database for items@FALSE
+     __xx_get_1password_items | fzf --border-label " 1password Items " \
+        --header-lines=1 --layout=reverse-list \
+        --info=inline --color 'border:#f9fafe,label:#f9fafe,preview-fg:#f9fafe,header:#f9fafe:bold' \
+        --bind="ctrl-t:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_1password_totp;__xx_copy_1password_totp {-1})" \
+        --prompt "Filter " --preview="echo 'ENTER: Show Item | CTRL+T: Copy TOTP'" \
+        --preview-window=down,1,border-none \
+        --bind "enter:become(source ~/.zshrc.d/xx_functions/__xx_view_1password_item;__xx_view_1password_item {-1})"
+}

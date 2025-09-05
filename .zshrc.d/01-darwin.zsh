@@ -1,6 +1,6 @@
 [[ "$OSTYPE" == darwin* ]] || return
 
-export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${PATH}"
+export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${HOME}/.local/share/nvim/mason/bin:${PATH}"
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
 
 # Source zsh-completion
@@ -98,12 +98,9 @@ fi
 [ -f "${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
     export COSMICDING_SQLITE_DATABASE="${HOME}/Library/Caches/com.vkhitrin.cosmicding/com.vkhitrin.cosmicding-db.sqlite"
 
-# XX
+# xx
 [ -d "${HOME}/Library/Caches/com.vkhitrin.xx" ] && \
     export XX_CACHE_DIR="${HOME}/Library/Caches/com.vkhitrin.xx"
-
-# If Twingate Python Script is present
-[ -d "/Users/vkhitrin/Projects/Automation/Tools/Twingate-CLI" ] && alias tgcli="uv --directory='${HOME}/Projects/Automation/Tools/Twingate-CLI' run --no-project --with 'requests' --with 'pandas' ${HOME}/Projects/Automation/Tools/Twingate-CLI/tgcli.py"
 
 # Workaround for libcosmic https://github.com/pop-os/libcosmic/discussions/860
 export XDG_DATA_DIRS="/opt/homebrew/share:${XDG_DATA_DIRS}"

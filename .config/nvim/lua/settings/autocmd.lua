@@ -73,24 +73,36 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		local config = home .. "/.config"
 
 		if cwd == home or cwd == config or cwd:find(config .. "/", 1, true) == 1 then
-			vim.env.GIT_DIR = vim.fn.expand("~/Projects/Automation/Setup/dotfiles")
+			vim.env.GIT_DIR = vim.fn.expand("~/Projects/Personal/Automation/Setup/dotfiles")
 			vim.env.GIT_WORK_TREE = vim.fn.expand("~")
 		end
 	end,
 })
 
--- Autocmd to enable treesitter if parser is available
 vim.api.nvim_create_autocmd("FileType", {
-	callback = function(args)
-		local ft = args.match
-		if ft == "yaml.gitlab" then
-			ft = "yaml"
-		end
-		local has_parser = pcall(vim.treesitter.language.inspect, ft)
-		if has_parser then
-			vim.treesitter.start(args.buf, ft)
-		else
-			vim.cmd("syntax on")
+	callback = function(ev)
+		local filetype = ev.match
+		local lang = vim.treesitter.language.get_lang(filetype)
+		if vim.treesitter.language.add(lang) then
+			if vim.treesitter.query.get(filetype, "indents") then
+				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			end
+			if vim.treesitter.query.get(filetype, "folds") then
+				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+			end
+			vim.treesitter.start()
 		end
 	end,
+})
+
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'TSUpdate',
+  callback = function()
+    require('nvim-treesitter.parsers').ghactions = {
+      install_info = {
+        url = 'https://github.com/rmuir/tree-sitter-ghactions',
+        queries = 'queries',
+      },
+    }
+  end,
 })

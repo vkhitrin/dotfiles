@@ -24,12 +24,12 @@
     prune = true
 [feature]
     manyFiles = true
-[filter "lfs"]
-    clean = git-lfs clean -- %f
-    smudge = git-lfs smudge -- %f
-    process = git-lfs filter-process
-    required = true
-# Color scheme for delta
+; [filter "lfs"]
+;     clean = git-lfs clean -- %f
+;     smudge = git-lfs smudge -- %f
+;     process = git-lfs filter-process
+;     required = true
+; Color scheme for delta
 [include]
 	path = ~/.config/delta/catppuccin.gitconfig
 [core]
@@ -55,9 +55,9 @@
     path = ~/.config/git/.gitconfig.private
 [includeIf "hasconfig:remote.*.url:ssh://gitlab.com:*/**"]
     path = ~/.config/git/.gitconfig.private
-[includeIf "gitdir/i:~/Projects/Development/Work/"]
+[includeIf "gitdir/i:~/Projects/Work/"]
     path = ~/.config/git/.gitconfig.work
 [push]
 	autoSetupRemote = true
-[commit]
-    template = "~/.gitmessage"
+[format]
+    signoff = true

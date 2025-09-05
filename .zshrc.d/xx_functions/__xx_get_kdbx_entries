@@ -1,0 +1,10 @@
+__xx_get_kdbx_entries() {
+    local KDBX_DESCRIPTION_FILE="${1}"
+    if [ -f "${KDBX_DESCRIPTION_FILE}" ]; then
+        local KDBX_FILE=$(cat "${KDBX_DESCRIPTION_FILE}")
+        echo "${KDBX_FILE}"
+        kdbx list --database="${KDBX_FILE}" --use-keyring
+    else
+        echo "File '${KDBX_DESCRIPTION_FILE}' doesn't exist!"
+    fi
+}

@@ -1,0 +1,9 @@
+__xx_execute_harlequin_connection() {
+    local KEYCHAIN_FILE="${HOME}/Library/Keychains/harlequin.keychain-db"
+    local HQ_CONNECTION="${1}"
+    if [ -f "${KEYCHAIN_FILE}" ]; then
+        eval $(security find-generic-password -s "${HQ_CONNECTION}" -w "${KEYCHAIN_FILE}")
+    else
+        echo "Keychain '${KEYCHAIN_FILE}' doesn't exist"
+    fi
+}

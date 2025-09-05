@@ -25,4 +25,5 @@ local config = {
 		},
 	},
 }
-require("lspconfig").jdtls.setup({ config })
+-- require("lspconfig").jdtls.setup({ config })
+vim.lsp.config("jdtls", config)
