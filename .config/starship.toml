@@ -1,6 +1,6 @@
 palette = "catppuccin_mocha"
 add_newline = false
-format = """$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
+format = """${custom.apple_container}${custom.socktainer}$aws$gcloud$azure$kubernetes$git_branch${custom.mise_tools}\n$directory${character}"""
 continuation_prompt = "[❯](blue) "
 
 [character]
@@ -25,6 +25,20 @@ description = "display mise tools"
 # when = "podman machine info --format json | jq -r '.Host.MachineState' | grep -q '^Running$'"
 # command = "podman machine info --format json | jq -r '.Host.CurrentMachine'"
 # style = "bold podman"
+
+[custom.apple_container]
+format = "[ container]($style) "
+when = "uname | grep Darwin && container system status"
+style = "bold teal"
+symbol = " "
+description = "display if Apple container is running"
+
+[custom.socktainer]
+format = "[  socktainer]($style) "
+when = "uname | grep Darwin && pgrep socktainer"
+style = "bold teal"
+symbol = " "
+description = "display if socktainer is running"
 
 [git_branch]
 symbol = " "

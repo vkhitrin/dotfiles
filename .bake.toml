@@ -1,0 +1,9 @@
+[formatter]
+space_around_assignment = true
+space_after_colon = true
+normalize_line_continuations = true
+remove_trailing_whitespace = true
+fix_missing_recipe_tabs = true
+auto_insert_phony_declarations = true
+group_phony_declarations = false
+phony_at_top = false

@@ -1,0 +1,70 @@
+__xx_complete_todo() {
+    if [ -z "${TMUX}" ]; then
+        echo "This option is only available inside tmux!"
+    else
+        local TODO_ID="${1}"
+        local TODO_DETAILS=$(todo --porcelain list | jq -r ".[] | select(.id==${TODO_ID}) | .summary")
+        if [ -n "${TODO_DETAILS}" ]; then
+            TODO_LENGTH=${#TODO_DETAILS}
+            PANE_WIDTH=$(tmux display-message -p '#{pane_width}')
+
+            POPUP_WIDTH=$((TODO_LENGTH + 20))
+            if [ $POPUP_WIDTH -lt 40 ]; then
+                POPUP_WIDTH=40
+            elif [ $POPUP_WIDTH -gt $((PANE_WIDTH - 4)) ]; then
+                POPUP_WIDTH=$((PANE_WIDTH - 4))
+            fi
+
+            POPUP_HEIGHT=$(((TODO_LENGTH / 50) + 8))
+
+            if [ $POPUP_HEIGHT -lt 8 ]; then
+                POPUP_HEIGHT=8
+            elif [ $POPUP_HEIGHT -gt 20 ]; then
+                POPUP_HEIGHT=20
+            fi
+            PAD_TB=$((POPUP_HEIGHT / 10))
+            if [ $PAD_TB -lt 2 ]; then
+                PAD_TB=2
+            elif [ $PAD_TB -gt 10 ]; then
+                PAD_TB=10
+            fi
+
+            BASE_LR=$((POPUP_WIDTH / 12))
+
+            if [ ${TODO_LENGTH} -gt 50 ]; then
+                PAD_LR=$((BASE_LR / 2))
+            else
+                PAD_LR=$BASE_LR
+            fi
+
+            if [ $PAD_LR -lt 2 ]; then
+                PAD_LR=2
+            elif [ $PAD_LR -gt 10 ]; then
+                PAD_LR=10
+            fi
+
+            PADDING="${PAD_TB} ${PAD_LR} ${PAD_TB} ${PAD_LR}"
+
+            tmux display-popup \
+                -h ${POPUP_HEIGHT} \
+                -w ${POPUP_WIDTH} \
+                -S 'fg=#f5e0dc' \
+                -T '#[align=absolute-centre] Complete Task #[align=right]' \
+                -E "gum confirm '${TODO_DETAILS}' \
+                    --padding='${PADDING}' \
+                    --affirmative='Complete' \
+                    --negative='Cancel' \
+                    --no-show-help \
+                    --prompt.foreground='#f5e0dc' \
+                    --prompt.background='' \
+                    --selected.foreground='#313244' \
+                    --selected.background='#f5e0dc' \
+                    --unselected.foreground='#e0def4' \
+                    --unselected.background='#313244'" &&
+                todo done ${TODO_ID}
+
+        else
+            tmux display-message -d '1000' "#[fg=#d20f39,bold]Task '${TODO_ID}' does not exist!#[default]" >/dev/null 2>&1 || true
+        fi
+    fi
+}

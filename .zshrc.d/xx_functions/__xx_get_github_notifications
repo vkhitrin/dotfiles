@@ -1,0 +1,15 @@
+__xx_get_github_notifications() {
+    if [[ -f "${XX_CACHE_DIR}/github.db" ]]; then
+        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog;")
+        echo "Last cached: ${CACHE_TIMESTAMP}"
+        sqlite3 --json "${XX_CACHE_DIR}/github.db" "SELECT
+          json_extract(json, '$.repository.full_name') AS repo,
+          json_extract(json, '$.subject.title') AS title,
+          json_extract(json, '$.reason') AS reason,
+          json_extract(json, '$.unread') AS unread
+        FROM Notifications;
+        " | jq -r '(["REPOSITORY","TITLE","REASON"] | @csv), (.[] | [.repo, .title, .reason] | @csv)' | sed 's/"//g' | column -t -s','
+    else
+        echo "github.db doesn't exist"
+    fi
+}

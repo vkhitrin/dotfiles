@@ -63,7 +63,7 @@ alias gcc='/opt/homebrew/bin/gcc-15'
 alias java_home='/usr/libexec/java_home'
 
 # Custom aliases
-alias _backup_my_macos="mackup backup -vf && mackup uninstall --force; cp -rf ${HOME}/Library/Preferences/ByHost \"${HOME}/.iCloudDrive/OperatingSystems/macOS/Mackup/Library/Preferences\"; open raycast://extensions/raycast/raycast/export-settings-data"
+alias _backup_my_macos="mackup backup -vf && mackup link uninstall --force; cp -rf ${HOME}/Library/Preferences/ByHost \"${HOME}/.iCloudDrive/OperatingSystems/macOS/Mackup/Library/Preferences\"; open raycast://extensions/raycast/raycast/export-settings-data"
 
 # Custom GitLab configuration
 if [[ -d "${HOME}/.config/glab-cli/work" ]];then
@@ -108,6 +108,8 @@ export XDG_DATA_DIRS="/opt/homebrew/share:${XDG_DATA_DIRS}"
 # Spacship
 SPACESHIP_PROMPT_ASYNC=true
 SPACESHIP_PROMPT_ORDER=(
+    apple_container
+    socktainer
     aws
     gcloud
     azure

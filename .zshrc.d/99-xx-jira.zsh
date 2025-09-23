@@ -48,3 +48,10 @@ function jirx() {
         --bind "ctrl-u:execute-silent(echo 'https://plainid.atlassian.net/projects/$(cat ${HOME}/.config/.jira/.config.yml | yq '.project.key')/versions/{1}' | ${CLIPBOARD_COMMAND})"
         --bind "enter:execute-silent(echo 'https://plainid.atlassian.net/projects/$(cat ${HOME}/.config/.jira/.config.yml | yq '.project.key')/versions/{1}' | xargs ${OPEN_COMMAND})"
 }
+
+which jiratui > /dev/null 2>&1 || return
+
+function jtui() {
+    # xx ;jira:Launch jiratui@FALSE
+    __xx_jira_launch_tui
+}

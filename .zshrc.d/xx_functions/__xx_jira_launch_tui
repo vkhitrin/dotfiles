@@ -1,0 +1,8 @@
+__xx_jira_launch_tui() {
+    local JIRATUI_COMMAND="jiratui ui --search-on-startup -j 1"
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 90% -w 90% -S 'fg=#89b4fa' -T '#[align=absolute-centre] JiraTUI #[align=right]' -E "${JIRATUI_COMMAND}"
+    else
+        zsh -i -c "${JIRATUI_COMMAND}"
+    fi
+}

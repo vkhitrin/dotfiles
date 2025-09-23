@@ -1,0 +1,67 @@
+__xx_cache_github_projects_to_sqlite() {
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        echo "Environment variable XX_CACHE_DIR is not defined, quitting"
+    fi
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Starting to fetch GitHub Projects!#[default]" > /dev/null 2>&1 || true
+    fi
+
+    echo "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/github.db"
+
+    echo "Checking if authenticated with GitHub"
+    if ! gh auth status; then
+        echo "Failed to contact or not authenticated with GitHub"
+    fi
+
+    echo "Creating 'Repositories' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Repositories (svn_url TEXT NOT NULL, full_name TEXT NOT NULL, id INTEGER NOT NULL, UNIQUE (svn_url, full_name, id));"
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        echo "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Repositories;"
+    fi
+    # Fetch repositories "owned" by current user
+    gh api /user/repos --paginate -q '.[] | select(.fork == false) | [.svn_url, .full_name, .id] | @csv' | while IFS= read -r PROJECT_DETAILS; do
+        sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Repositories (svn_url, full_name, id) VALUES (${PROJECT_DETAILS});"
+    done
+
+    # Fetch repositories I contributed in the last 6 months
+    six_months_ago=$(date -d '6 months ago' +%Y-%m-%d)
+
+    gh api \
+      -X GET \
+      -F q="author:@me type:pr created:>=$six_months_ago" \
+      -F per_page=100 \
+      /search/issues \
+      --paginate \
+      -q '.items[].repository_url' \
+    | sed 's|https://api.github.com/repos/||' \
+    | sort -u \
+    | while IFS= read -r REPO_FULL_NAME; do
+        # Fetch repo details via API
+        REPO_JSON=$(gh api "/repos/${REPO_FULL_NAME}")
+        
+        # Extract svn_url and id
+        SVN_URL=$(echo "$REPO_JSON" | jq -r '.svn_url')
+        REPO_ID=$(echo "$REPO_JSON" | jq -r '.id')
+        
+        # Quote strings for SQLite
+        SVN_URL_SQL="'$SVN_URL'"
+        FULL_NAME_SQL="'$REPO_FULL_NAME'"
+        
+        sqlite3 "$SQLITE_DATABASE_PATH" \
+          "INSERT OR IGNORE INTO Repositories (svn_url, full_name, id) VALUES (${SVN_URL_SQL}, ${FULL_NAME_SQL}, ${REPO_ID});"
+    done
+
+    echo "Creating 'SyncLog' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (sync_timestamp TEXT NOT NULL);"
+    # Insert or replace sync timestamp into SyncLog table (single row)
+    SYNC_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (rowid, sync_timestamp) VALUES (1, '$SYNC_TIMESTAMP');"
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Finished fetching GitHub Projects!#[default]" > /dev/null 2>&1 || true
+    fi
+}

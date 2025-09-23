@@ -10,6 +10,10 @@ require("mason").setup({
             package_uninstalled = "✗",
         },
     },
+    registries = {
+        "github:mason-org/mason-registry",
+        "github:vkhitrin/mason-registry@2025-10-25-second-silk",
+    }
 })
 require("mason-tool-installer").setup({
     ensure_installed = {
@@ -32,6 +36,7 @@ require("mason-tool-installer").setup({
         "lua-language-server",
         "markdownlint",
         "marksman",
+        "mbake",
         "nginx-config-formatter",
         "nginx-language-server",
         "prettier",

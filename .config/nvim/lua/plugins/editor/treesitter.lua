@@ -46,6 +46,7 @@ require("nvim-treesitter").install({
 	"vimdoc",
 	"xml",
 	"yaml",
+	"zsh",
 })
 
 require("nvim-treesitter.parsers").ghactions = {
@@ -53,4 +54,12 @@ require("nvim-treesitter.parsers").ghactions = {
 		url = "https://github.com/rmuir/tree-sitter-ghactions",
 		queries = "queries",
 	},
+}
+require("nvim-treesitter.parsers").zsh = {
+	install_info = {
+		url = "https://github.com/georgeharker/tree-sitter-zsh",
+		generate_from_json = false,
+		queries = "nvim-queries",
+	},
+	tier = 3,
 }

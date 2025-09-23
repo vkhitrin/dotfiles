@@ -1,0 +1,3 @@
+__xx_get_macos_launchctl() {
+    launchctl list | awk 'NR==1 {print; next} $1 ~ /^[0-9]+$/ {print "\033[32m" $0 "\033[0m"; next} {print "\033[31m" $0 "\033[0m"}'
+}

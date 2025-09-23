@@ -11,5 +11,6 @@ vim.filetype.add({
 		[".*/templates/.*%.ya?ml"] = "helm",
 		["helmfile.*%.ya?ml"] = "helm",
 		["Brewfile"] = "ruby",
+		[".tmux_floating_note.md"] = "markdown.floating_window", -- custom syntax
 	},
 })

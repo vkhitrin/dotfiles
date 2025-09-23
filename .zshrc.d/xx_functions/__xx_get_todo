@@ -1,16 +1,17 @@
 __xx_get_todo() {
     todo --porcelain list | \
     jq -r '
-      (["SUMMARY", "DESCRIPTION", "PRIORITY", "LIST", "ID"] | @csv),
+      (["LIST", "SUMMARY", "DESCRIPTION", "PRIORITY", "ID"] | @csv),
       (.[] |
-        [.summary,
+        [
+         .list,
+         .summary,
          .description,
          (if .priority == 9 then "low"
           elif .priority == 5 then "medium"
           elif .priority == 1 then "high"
           elif .priority == 0 then ""
           else .priority end),
-         .list,
          .id] | @csv
       )
     ' | sed 's/"//g' | ansicolumn -t -s','

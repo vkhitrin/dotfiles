@@ -1,0 +1,34 @@
+__xx_cache_github_notifications_to_sqlite() {
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        echo "Environment variable XX_CACHE_DIR is not defined, quitting"
+    fi
+
+    echo "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/github.db"
+
+    echo "Checking if authenticated with GitHub"
+    if ! gh auth status; then
+        echo "Failed to contact or not authenticated with GitHub"
+    fi
+
+    echo "Creating 'Notifications' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Notifications (id TEXT PRIMARY KEY, json TEXT);"
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        echo "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Notifications;"
+    fi
+    # Fetch notifications
+    gh api --paginate  --method GET '/notifications?per_page=50&all=true' |
+    jq -c '.[]' | while read -r row; do
+      id=$(echo "$row" | jq -r '.id')
+      sqlite3 "${SQLITE_DATABASE_PATH}" \
+        "INSERT OR REPLACE INTO Notifications (id, json) VALUES ('$id', '$row');"
+    done
+
+    echo "Creating 'SyncLog' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (sync_timestamp TEXT NOT NULL);"
+    # Insert or replace sync timestamp into SyncLog table (single row)
+    SYNC_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (rowid, sync_timestamp) VALUES (1, '$SYNC_TIMESTAMP');"
+}

@@ -13,8 +13,8 @@ require("snacks").setup({
 			backdrop = false,
 		},
 		sources = {
-			files = { hidden = true },
-			explorer = { hidden = true },
+			files = { hidden = true, ignored = true },
+			explorer = { hidden = true, ignored = true },
 		},
 	},
 	quickfile = { enabled = true },
