@@ -55,4 +55,5 @@ fi
 # If socktainer exists and running in macOS
 if [[ -f "/opt/homebrew/bin/socktainer" && $(uname) == "Darwin" ]];then
     export DOCKER_HOST=unix://${HOME}/.socktainer/container.sock
+    export DOCKER_BUILDKIT=0
 fi

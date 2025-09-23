@@ -1,0 +1,10 @@
+__xx_get_github_repositories() {
+    if [[ -f "${XX_CACHE_DIR}/github.db" ]]; then
+        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog;")
+        echo "Last cached: ${CACHE_TIMESTAMP}"
+        sqlite3 --json "${XX_CACHE_DIR}/github.db" "SELECT full_name,id,svn_url FROM Repositories" | \
+            jq -r '(["REPOSITORY","ID","URL"] | @csv) , (.[] | [.full_name, .id, .svn_url] | @csv)' | sed 's/"//g' | column -t -s','
+    else
+        echo "github.db doesn't exist"
+    fi
+}

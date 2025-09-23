@@ -6,7 +6,6 @@
 # vectorcode
 .vectorcode
 # neovim
-.config/nvim/lazy-lock.json
 .config/nvim/lua/settings/private
 # local binaries
 .local/bin

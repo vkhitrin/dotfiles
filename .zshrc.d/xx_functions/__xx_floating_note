@@ -1,0 +1,38 @@
+__xx_floating_note() {
+    local TMUX_SESSION="xx-notes-session"
+    local PANE_NAME="xx-notes-pane"
+    local NOTES_FILE="${HOME}/.local/share/xx/.tmux_floating_note.md"
+
+    mkdir -p "$(dirname "${NOTES_FILE}")"
+    touch "${NOTES_FILE}"
+
+    TMUX_SESSION_EXISTS=$(tmux list-sessions | grep "${TMUX_SESSION}")
+
+    if [ -n "${TMUX_SESSION_EXISTS}" ]; then
+        tmux kill-session -t "${TMUX_SESSION}"
+    else
+        WIDTH=$(tmux display -p '#{window_width}')
+        HEIGHT=$(tmux display -p '#{window_height}')
+
+        POPUP_WIDTH_PERCENT=40
+
+        POPUP_WIDTH=$((WIDTH * POPUP_WIDTH_PERCENT / 100))
+        POPUP_HEIGHT=${HEIGHT}
+
+        # Calculate x and y for top-right, full height
+        # x = total width - popup width - some padding (e.g., 2 for border/margin)
+        # y = 0 to start from the very top (or 1 for a small margin)
+        # POS_X=$((WIDTH - POPUP_WIDTH - 1))
+        POS_X=${WIDTH}
+        POS_Y=0
+
+        if [ "${POS_X}" -lt 0 ]; then POS_X=0; fi # Ensure x is not negative
+
+        tmux popup -d "#{pane_current_path}" \
+            -S 'fg=#b4befe' \
+            -T '#[align=absolute-centre] Floating Note #[align=right]' \
+            -w "${POPUP_WIDTH}" -h "${POPUP_HEIGHT}" \
+            -x "${POS_X}" -y "${POS_Y}" \
+            -E "tmux new-session -s ${TMUX_SESSION} 'nvim ${NOTES_FILE}; tmux kill-session -t ${TMUX_SESSION}' \; set-option status off"
+    fi
+}
