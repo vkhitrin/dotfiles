@@ -108,6 +108,8 @@ export XDG_DATA_DIRS="/opt/homebrew/share:${XDG_DATA_DIRS}"
 # Spacship
 SPACESHIP_PROMPT_ASYNC=true
 SPACESHIP_PROMPT_ORDER=(
+    apple_container
+    socktainer
     aws
     gcloud
     azure
