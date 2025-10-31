@@ -2,7 +2,7 @@ __xx_get_github_open_pull_requests() {
     local GITHUB_USER=$(gh api user --jq .login)
     if [[ -z ${GITHUB_USER} ]]; then
         echo "Not authenticated with GitHub"
-    else 
+    else
         GITHUB_OPEN_PULL_REQUESTS=$(gh api -XGET /search/issues -f q="author:${GITHUB_USER} is:pr is:open" \
             --jq '.items[] | ([.title,.html_url]) | join("\t")')
     fi

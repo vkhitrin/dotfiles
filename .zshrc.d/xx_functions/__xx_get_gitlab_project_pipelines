@@ -17,10 +17,10 @@ __xx_get_gitlab_project_pipelines() {
             }')
         if [ -n "${OUTPUT}" ]; then
         CONTENT=true;
-        { 
+        {
             echo "State\tIID\tRef\tCreated\tHost\tRepository"
             echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" -v r="${GITLAB_PROJECT}" '{print $0 "\t" h "\t" r}'
-        } | ansicolumn -ts $'\t'
+        } | __xx_format_columns_ansi $'\t'
         break
         fi
     done

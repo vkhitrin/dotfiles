@@ -3,7 +3,7 @@ __xx_get_github_open_issues() {
     local GITHUB_USER=$(gh api user --jq .login)
     if [[ -z ${GITHUB_USER} ]]; then
         echo "Not authenticated with GitHub"
-    else 
+    else
         GITHUB_OPEN_ISSUES=$(gh api -X GET search/issues -f q="author:${GITHUB_USER} type:issue is:open" \
             --jq '.items[] | ([.title,.html_url]) | join("\t")')
     fi

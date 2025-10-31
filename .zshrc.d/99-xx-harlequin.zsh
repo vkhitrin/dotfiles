@@ -2,7 +2,7 @@ which harlequin >/dev/null 2>&1 || return
 [[ "$OSTYPE" == darwin* ]] || return
 
 function hqx() {
-    # xx ;harlequin:Connect to databases using harlequin@PARTIAL
+    # xx {"tags": "harlequin", "description": "Connect to databases using harlequin", "subshell": "PARTIAL", "cache": false}
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL+T: Execute Harlequin In New Tmux Window"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d '__xx_execute_harlequin_connection {}')"

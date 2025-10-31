@@ -1,0 +1,47 @@
+__xx_open_github_notification() {
+    local NOTIFICATION_ID=$1
+    
+    # Strip ANSI color codes from the ID if present (use printf to interpret escape sequence)
+    NOTIFICATION_ID=$(printf '%s' "${NOTIFICATION_ID}" | sed $'s/\033\\[[0-9;]*m//g' | tr -d '[:space:]')
+    
+    if [[ -z "${NOTIFICATION_ID}" ]]; then
+        echo "Error: Notification ID is required"
+        return 1
+    fi
+    
+    if [[ ! -f "${XX_CACHE_DIR}/github.db" ]]; then
+        echo "Error: github.db cache doesn't exist"
+        return 1
+    fi
+    
+    # Fetch the notification JSON from the cache
+    local NOTIFICATION_JSON=$(sqlite3 --json "${XX_CACHE_DIR}/github.db" \
+        "SELECT json FROM Notifications WHERE id='${NOTIFICATION_ID}';" 2>/dev/null | jq -r '.[0].json')
+    
+    if [[ -z "${NOTIFICATION_JSON}" || "${NOTIFICATION_JSON}" == "null" ]]; then
+        echo "Error: Notification ID ${NOTIFICATION_ID} not found in cache"
+        return 1
+    fi
+    
+    # Extract the subject URL and type
+    local SUBJECT_URL=$(echo "${NOTIFICATION_JSON}" | jq -r '.subject.url')
+    local SUBJECT_TYPE=$(echo "${NOTIFICATION_JSON}" | jq -r '.subject.type')
+    
+    if [[ -z "${SUBJECT_URL}" || "${SUBJECT_URL}" == "null" ]]; then
+        echo "Error: Could not extract URL from notification"
+        return 1
+    fi
+    
+    # Convert API URL to HTML URL
+    # API URLs look like: https://api.github.com/repos/owner/repo/issues/123
+    # HTML URLs look like: https://github.com/owner/repo/issues/123
+    local HTML_URL=$(echo "${SUBJECT_URL}" | sed -E 's|https://api\.github\.com/repos/|https://github.com/|')
+    
+    # For Pull Requests, we might need to adjust the path
+    if [[ "${SUBJECT_TYPE}" == "PullRequest" ]]; then
+        HTML_URL=$(echo "${HTML_URL}" | sed -E 's|/pulls/|/pull/|')
+    fi
+    
+    echo "Opening notification ${NOTIFICATION_ID}: ${HTML_URL}"
+    ${XX_OPEN_COMMAND} "${HTML_URL}"
+}

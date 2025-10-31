@@ -1,7 +1,7 @@
 which kubesess > /dev/null 2>&1 || return
 
 function kctx() {
-    # xx ;kubernetes:Activate Kubernetes context for shell@TRUE
+    # xx {"tags": "kubernetes", "description": "Activate Kubernetes context for shell", "subshell": true, "cache": false}
     local BIND_OPTIONS=()
     local TEXT_PROMPT=""
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
@@ -23,3 +23,9 @@ function kctx() {
     [ ! -z ${SELECTED_CONTEXT} ] && export KUBECONFIG="${SELECTED_CONTEXT}"
 }
 
+which k9s > /dev/null 2>&1 || return
+
+function ktui() {
+    # xx {"tags": "kubernetes,tui", "description": "Launch k9s", "subshell": false, "cache": false}
+    __xx_k9s
+}

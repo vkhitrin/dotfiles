@@ -1,0 +1,52 @@
+__xx_format_columns_ansi() {
+    local separator="${1:-,}"  # Default to comma if no argument
+
+    # Use awk to format columns with proper alignment and ANSI color support
+    ${XX_GNU_AWK_COMMAND} -v sep="${separator}" '
+    BEGIN {
+        FS = sep;
+        OFS = "  ";
+    }
+    {
+        # Store all lines for two-pass processing
+        for (i = 1; i <= NF; i++) {
+            lines[NR, i] = $i;
+            # Calculate display width (excluding ANSI codes)
+            display_text = $i;
+            gsub(/\033\[[0-9;]*m/, "", display_text);
+            len = length(display_text);
+            if (len > max_width[i]) {
+                max_width[i] = len;
+            }
+        }
+        num_fields[NR] = NF;
+        max_nf = (NF > max_nf) ? NF : max_nf;
+    }
+    END {
+        # Print all lines with proper padding
+        for (row = 1; row <= NR; row++) {
+            for (col = 1; col <= num_fields[row]; col++) {
+                value = lines[row, col];
+
+                # Calculate display width (excluding ANSI codes)
+                display_text = value;
+                gsub(/\033\[[0-9;]*m/, "", display_text);
+                display_len = length(display_text);
+
+                # Calculate padding needed
+                # Add extra padding for ANSI codes if present
+                full_len = length(value);
+                ansi_extra = full_len - display_len;
+                padding = max_width[col] - display_len + ansi_extra;
+
+                # Print with padding (except last column)
+                if (col < num_fields[row]) {
+                    printf "%-*s%s", padding + display_len, value, OFS;
+                } else {
+                    printf "%s", value;
+                }
+            }
+            printf "\n";
+        }
+    }'
+}

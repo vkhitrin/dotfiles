@@ -14,5 +14,5 @@ __xx_get_todo() {
           else .priority end),
          .id] | @csv
       )
-    ' | sed 's/"//g' | ansicolumn -t -s','
+    ' | sed 's/"//g' | __xx_format_columns_ansi ','
 }

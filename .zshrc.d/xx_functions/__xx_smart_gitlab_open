@@ -1,13 +1,4 @@
 __xx_smart_gitlab_open() {
-    local CLIPBOARD_COMMAND
-    local OPEN_COMMAND
-    if [[ $(uname) == "Darwin" ]];then
-        CLIPBOARD_COMMAND="pbcopy"
-        OPEN_COMMAND="open --background"
-    elif [[ $(uname) == "Linux" ]]; then
-        CLIPBOARD_COMMAND="wl-copy"
-        OPEN_COMMAND="xdg-open"
-    fi
     local ACTION="${1}"
     local DETAILS="${2}"
     case "$DETAILS" in
@@ -18,7 +9,7 @@ __xx_smart_gitlab_open() {
             PIPELINE_URL="https://${GITLAB_DOMAIN}/${PROJECT_PATH}/-/pipelines/${PIPELINE_ID}"
             case "${ACTION}" in
                 browser)
-                    echo "${PIPELINE_URL}" | xargs -I{} zsh -c "${OPEN_COMMAND} {}"
+                    echo "${PIPELINE_URL}" | xargs -I{} zsh -c "${XX_OPEN_COMMAND} {}"
                     ;;
                 open)
                     source ~/.zshrc.d/xx_functions/__xx_view_gitlab_project_pipeline
@@ -34,7 +25,7 @@ __xx_smart_gitlab_open() {
             MR_URL="https://${GITLAB_DOMAIN}/${PROJECT_PATH}/-/merge_requests/${MR_ID}"
             case "${ACTION}" in
                 browser)
-                    echo "${MR_URL}" | xargs -I{} zsh -c "${OPEN_COMMAND} {}"
+                    echo "${MR_URL}" | xargs -I{} zsh -c "${XX_OPEN_COMMAND} {}"
                     ;;
                 open)
                     source ~/.zshrc.d/xx_functions/__xx_view_gitlab_project_merge_request
@@ -43,7 +34,7 @@ __xx_smart_gitlab_open() {
             esac
             ;;
         *)
-            echo "${DETAILS}" | awk '{print $3}' | xargs -I{} zsh -c "${OPEN_COMMAND} {}"
+            echo "${DETAILS}" | awk '{print $3}' | xargs -I{} zsh -c "${XX_OPEN_COMMAND} {}"
             ;;
     esac
 }

@@ -42,5 +42,5 @@ $1 == "ID" { next; }
     gsub(/[ \t]+$/, "", desc);
 
     printf "%-7s %-45s %-8s %s\n", id, title, status, desc;
-}'
-} 
+}' | (read -r header; echo "$header"; sort -rn -k1)
+}

@@ -1,45 +1,353 @@
 __xx_get_functions() {
-    local GNU_SED_COMMAND
-    local GNU_AWK_COMMNAD
     local XX_FUNCTIONS
-    if [[ $(uname) == "Darwin" ]];then
-        GNU_AWK_COMMNAD="gawk"
-        GNU_SED_COMMAND="gsed"
-    elif [[ $(uname) == "Linux" ]]; then
-        GNU_AWK_COMMNAD="awk"
-        GNU_SED_COMMAND="sed"
+    local SQLITE_DATABASE_PATH
+    local USE_CACHE=0
+
+    # Check if caching is available and enabled
+    if [[ -n "${XX_CACHE_DIR}" ]]; then
+        SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/xx_functions.db"
+        USE_CACHE=1
     fi
-    
+
+    # If caching is enabled, check if cache is valid
+    if [[ ${USE_CACHE} -eq 1 ]]; then
+        local CACHE_VALID=1
+
+        # Check if database exists
+        if [[ ! -f "${SQLITE_DATABASE_PATH}" ]]; then
+            CACHE_VALID=0
+        else
+            # Quick check: if cache is less than 5 seconds old, assume it's valid
+            # This avoids expensive validation on rapid successive calls
+            local cache_age=999999
+            if [[ $(uname) == "Darwin" ]]; then
+                local cache_mtime=$(stat -f "%m" "${SQLITE_DATABASE_PATH}" 2>/dev/null)
+                local current_time=$(date +%s)
+                cache_age=$((current_time - cache_mtime))
+            elif [[ $(uname) == "Linux" ]]; then
+                cache_age=$(stat -c "%Y" "${SQLITE_DATABASE_PATH}" 2>/dev/null)
+                local current_time=$(date +%s)
+                cache_age=$((current_time - cache_age))
+            fi
+
+            if [[ ${cache_age} -lt 5 ]]; then
+                # Cache is very recent, skip validation
+                CACHE_VALID=1
+            else
+                # Perform full validation by checking file mtimes
+                # Get all cached mtimes in a single query
+                local cached_data=$(sqlite3 "${SQLITE_DATABASE_PATH}" \
+                    "SELECT filepath, mtime FROM file_mtimes;" 2>/dev/null)
+
+                # Check each file's mtime
+                while IFS='|' read -r filepath mtime; do
+                    if [[ -f "$filepath" ]]; then
+                        if [[ $(uname) == "Darwin" ]]; then
+                            current_mtime=$(stat -f "%m" "$filepath" 2>/dev/null)
+                        elif [[ $(uname) == "Linux" ]]; then
+                            current_mtime=$(stat -c "%Y" "$filepath" 2>/dev/null)
+                        fi
+
+                        if [[ "${current_mtime}" != "${mtime}" ]]; then
+                            CACHE_VALID=0
+                            break
+                        fi
+                    else
+                        # File was deleted
+                        CACHE_VALID=0
+                        break
+                    fi
+                done <<< "${cached_data}"
+            fi
+        fi
+
+        # If cache is invalid, rebuild it
+        if [[ ${CACHE_VALID} -eq 0 ]]; then
+            # Initialize database
+            mkdir -p "${XX_CACHE_DIR}"
+            sqlite3 "${SQLITE_DATABASE_PATH}" "
+                CREATE TABLE IF NOT EXISTS functions (
+                    name TEXT PRIMARY KEY,
+                    tags TEXT,
+                    subshell TEXT,
+                    description TEXT,
+                    supports_cache TEXT,
+                    cached_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS file_mtimes (
+                    filepath TEXT PRIMARY KEY,
+                    mtime INTEGER NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+            " >&2
+
+            # Clear existing cache
+            sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM functions; DELETE FROM file_mtimes;" >&2
+
+            # Get active files
+            XX_ACTIVE_FILES=$(
+                for fn in ${(ok)functions[(I)*x]}; do
+                    type "$fn" | grep '99-xx' | grep 'shell function from' | ${XX_GNU_SED_COMMAND} 's/.*is a shell function from //g'
+                done | sort | uniq | ${XX_GNU_SED_COMMAND} ':a;N;$!ba;s/\n/ /g'
+            )
+
+            # Parse functions from active files
+            XX_FUNCTIONS=$(rg --follow --type zsh --color always --field-context-separator '' --color never \
+                --no-filename --no-context-separator --only-matching -e '^\s*function\s+(?P<fname>([^\s(]+))' \
+                -r '$fname' -A 1 --field-match-separator ' ' ${(z)XX_ACTIVE_FILES} --max-depth 1 | ${XX_GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
+                | ${XX_GNU_SED_COMMAND} "s!${HOME}!!" | ${XX_GNU_SED_COMMAND} 'N;s/\n/ /' | ${XX_GNU_AWK_COMMAND} '{$2=$3="";print}' | sort)
+
+            # Store each function in the database
+            echo "${XX_FUNCTIONS}" | ${XX_GNU_AWK_COMMAND} -v db="${SQLITE_DATABASE_PATH}" '
+            {
+                # Split on first whitespace: field 1 = function name, rest = metadata
+                match($0, /^([^ ]+) +(.*)$/, arr);
+                name = arr[1];
+                metadata = arr[2];
+
+                # Check if using JSON format or old format
+                if (match(metadata, /^\{.*\}$/)) {
+                    # JSON format: {"tags": "azure", "description": "...", "subshell": false, "cache": true}
+                    json = metadata;
+
+                    # Extract tags
+                    if (match(json, /"tags"\s*:\s*"([^"]*)"/)) {
+                        tags = substr(json, RSTART, RLENGTH);
+                        gsub(/.*"tags"\s*:\s*"/, "", tags);
+                        gsub(/".*/, "", tags);
+                        gsub(",", " ", tags);
+                    } else {
+                        tags = "";
+                    }
+
+                    # Extract description
+                    if (match(json, /"description"\s*:\s*"([^"]*)"/)) {
+                        desc = substr(json, RSTART, RLENGTH);
+                        gsub(/.*"description"\s*:\s*"/, "", desc);
+                        gsub(/".*/, "", desc);
+                    } else {
+                        desc = "";
+                    }
+
+                    # Extract subshell (boolean or string like "PARTIAL")
+                    if (match(json, /"subshell"\s*:\s*"([^"]*)"/)) {
+                        # String value (e.g., "PARTIAL")
+                        subshell = substr(json, RSTART, RLENGTH);
+                        gsub(/.*"subshell"\s*:\s*"/, "", subshell);
+                        gsub(/".*/, "", subshell);
+                    } else if (match(json, /"subshell"\s*:\s*(true|false)/)) {
+                        # Boolean value
+                        subshell_val = substr(json, RSTART, RLENGTH);
+                        gsub(/.*"subshell"\s*:\s*/, "", subshell_val);
+                        if (subshell_val == "true") {
+                            subshell = "TRUE";
+                        } else {
+                            subshell = "FALSE";
+                        }
+                    } else {
+                        subshell = "";
+                    }
+
+                    # Extract cache (boolean)
+                    if (match(json, /"cache"\s*:\s*(true|false)/)) {
+                        cache_val = substr(json, RSTART, RLENGTH);
+                        gsub(/.*"cache"\s*:\s*/, "", cache_val);
+                        if (cache_val == "true") {
+                            cache = "TRUE";
+                        } else {
+                            cache = "FALSE";
+                        }
+                    } else {
+                        cache = "FALSE";
+                    }
+                } else {
+                    # Old format: ;tags:description@SUBSHELL
+                    # Remove leading semicolon and split on first colon
+                    gsub(/^;/, "", metadata);
+                    split(metadata, a, ":");
+                    gsub(",", " ", a[1]);
+                    subshell = "";
+                    if (match(a[2], /@[^ ]+/)) {
+                        subshell = substr(a[2], RSTART + 1, RLENGTH - 1);
+                    }
+                    gsub(/@[^\s]+/, "", a[2]);
+
+                    tags = a[1];
+                    desc = a[2];
+                    cache = "FALSE";  # Default for old format
+                }
+
+                # Escape single quotes for SQL
+                # name already set above from arr[1]
+                gsub(/'\''/, "'\'''\''", name);
+                gsub(/'\''/, "'\'''\''", tags);
+                gsub(/'\''/, "'\'''\''", desc);
+                gsub(/'\''/, "'\'''\''", subshell);
+                gsub(/'\''/, "'\'''\''", cache);
+
+                system("sqlite3 \"" db "\" \"INSERT INTO functions (name, tags, subshell, description, supports_cache, cached_at) VALUES ('\''" name "'\'', '\''" tags "'\'', '\''" subshell "'\'', '\''" desc "'\'', '\''" cache "'\'', datetime('\''now'\''));\" 2>&1");
+            }' >&2
+
+            # Store file modification times
+            local CACHE_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            for file in ${(z)XX_ACTIVE_FILES}; do
+                if [[ -f "$file" ]]; then
+                    if [[ $(uname) == "Darwin" ]]; then
+                        mtime=$(stat -f "%m" "$file" 2>/dev/null)
+                    elif [[ $(uname) == "Linux" ]]; then
+                        mtime=$(stat -c "%Y" "$file" 2>/dev/null)
+                    fi
+
+                    # Escape single quotes in filepath
+                    escaped_file="${file//\'/\'\'}"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" \
+                        "INSERT INTO file_mtimes (filepath, mtime, updated_at) VALUES ('${escaped_file}', ${mtime}, '${CACHE_TIMESTAMP}');" >&2
+                fi
+            done
+        fi
+
+        # Return cached functions with formatting
+        (
+            echo "COMMAND|TAGS|SUBSHELL|CACHE|DESCRIPTION"
+            sqlite3 "${SQLITE_DATABASE_PATH}" \
+                "SELECT name, tags, subshell, supports_cache, description FROM functions ORDER BY name;" |
+            ${XX_GNU_AWK_COMMAND} -F '|' '{
+                subshell_colored = $3;
+                if ($3 == "FALSE") {
+                    subshell_colored = "\033[32m" $3 "\033[0m";
+                } else if ($3 == "TRUE") {
+                    subshell_colored = "\033[31m" $3 "\033[0m";
+                } else if ($3 == "PARTIAL") {
+                    subshell_colored = "\033[33m" $3 "\033[0m";
+                }
+
+                cache_colored = $4;
+                if ($4 == "TRUE") {
+                    cache_colored = "\033[32m" $4 "\033[0m";
+                } else if ($4 == "FALSE") {
+                    cache_colored = "\033[31m" $4 "\033[0m";
+                }
+
+                print $1 "|" $2 "|" subshell_colored "|" cache_colored "|" $5;
+            }'
+        ) | __xx_format_columns_ansi '|'
+
+        return
+    fi
+
+    # Fall back to non-cached version if caching is disabled
     XX_ACTIVE_FILES=$(
         for fn in ${(ok)functions[(I)*x]}; do
-            type "$fn" | grep '99-xx' | grep 'shell function from' | ${GNU_SED_COMMAND} 's/.*is a shell function from //g'
-        done | sort | uniq | ${GNU_SED_COMMAND} ':a;N;$!ba;s/\n/ /g'
+            type "$fn" | grep '99-xx' | grep 'shell function from' | ${XX_GNU_SED_COMMAND} 's/.*is a shell function from //g'
+        done | sort | uniq | ${XX_GNU_SED_COMMAND} ':a;N;$!ba;s/\n/ /g'
     )
 
     XX_FUNCTIONS=$(rg --follow --type zsh --color always --field-context-separator '' --color never \
         --no-filename --no-context-separator --only-matching -e '^\s*function\s+(?P<fname>([^\s(]+))' \
-        -r '$fname' -A 1 --field-match-separator ' ' ${(z)XX_ACTIVE_FILES} --max-depth 1 | ${GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
-        | ${GNU_SED_COMMAND} "s!${HOME}!!" | ${GNU_SED_COMMAND} 'N;s/\n/ /' | ${GNU_AWK_COMMNAD} '{$2=$3="";print}' | sort)
+        -r '$fname' -A 1 --field-match-separator ' ' ${(z)XX_ACTIVE_FILES} --max-depth 1 | ${XX_GNU_SED_COMMAND} -E 's!(\s*)(# xx )!\2!' \
+        | ${XX_GNU_SED_COMMAND} "s!${HOME}!!" | ${XX_GNU_SED_COMMAND} 'N;s/\n/ /' | ${XX_GNU_AWK_COMMAND} '{$2=$3="";print}' | sort)
 
 
-    echo "${XX_FUNCTIONS}" | ${GNU_AWK_COMMNAD} -F \
-' *; *' 'BEGIN { print "COMMAND,TAGS,SUBSHELL,DESCRIPTION" }
-{
-    split($2, a, ":");
-    gsub(",", " ", a[1]);
-    subshell = "";
-    if (match(a[2], /@[^ ]+/)) {
-        subshell = substr(a[2], RSTART + 1, RLENGTH - 1);
-    }
-    gsub(/@[^\s]+/, "", a[2]);
-    subshell_colored = subshell;
-    if (subshell == "FALSE") {
-        subshell_colored = "\033[32m" subshell "\033[0m";
-    } else if (subshell == "TRUE") {
-        subshell_colored = "\033[31m" subshell "\033[0m";
-    } else if (subshell == "PARTIAL") {
-        subshell_colored = "\033[33m" subshell "\033[0m";
-    }
-    print $1 "," a[1] "," subshell_colored "," a[2];
-}' | ansicolumn -t -s ','
+    (
+        echo "COMMAND|TAGS|SUBSHELL|CACHE|DESCRIPTION"
+        echo "${XX_FUNCTIONS}" | ${XX_GNU_AWK_COMMAND} '{
+            # Split on first whitespace: field 1 = function name, rest = metadata
+            match($0, /^([^ ]+) +(.*)$/, arr);
+            name = arr[1];
+            metadata = arr[2];
+
+            # Check if using JSON format or old format
+            if (match(metadata, /^\{.*\}$/)) {
+                # JSON format
+                json = metadata;
+
+                # Extract tags
+                if (match(json, /"tags"\s*:\s*"([^"]*)"/)) {
+                    tags = substr(json, RSTART, RLENGTH);
+                    gsub(/.*"tags"\s*:\s*"/, "", tags);
+                    gsub(/".*/, "", tags);
+                    gsub(",", " ", tags);
+                } else {
+                    tags = "";
+                }
+
+                # Extract description
+                if (match(json, /"description"\s*:\s*"([^"]*)"/)) {
+                    desc = substr(json, RSTART, RLENGTH);
+                    gsub(/.*"description"\s*:\s*"/, "", desc);
+                    gsub(/".*/, "", desc);
+                } else {
+                    desc = "";
+                }
+
+                # Extract subshell (boolean or string like "PARTIAL")
+                if (match(json, /"subshell"\s*:\s*"([^"]*)"/)) {
+                    # String value (e.g., "PARTIAL")
+                    subshell = substr(json, RSTART, RLENGTH);
+                    gsub(/.*"subshell"\s*:\s*"/, "", subshell);
+                    gsub(/".*/, "", subshell);
+                } else if (match(json, /"subshell"\s*:\s*(true|false)/)) {
+                    # Boolean value
+                    subshell_val = substr(json, RSTART, RLENGTH);
+                    gsub(/.*"subshell"\s*:\s*/, "", subshell_val);
+                    if (subshell_val == "true") {
+                        subshell = "TRUE";
+                    } else {
+                        subshell = "FALSE";
+                    }
+                } else {
+                    subshell = "";
+                }
+
+                # Extract cache (boolean)
+                if (match(json, /"cache"\s*:\s*(true|false)/)) {
+                    cache_val = substr(json, RSTART, RLENGTH);
+                    gsub(/.*"cache"\s*:\s*/, "", cache_val);
+                    if (cache_val == "true") {
+                        cache = "TRUE";
+                    } else {
+                        cache = "FALSE";
+                    }
+                } else {
+                    cache = "FALSE";
+                }
+            } else {
+                # Old format: ;tags:description@SUBSHELL
+                # Remove leading semicolon and split on first colon
+                gsub(/^;/, "", metadata);
+                split(metadata, a, ":");
+                gsub(",", " ", a[1]);
+                subshell = "";
+                if (match(a[2], /@[^ ]+/)) {
+                    subshell = substr(a[2], RSTART + 1, RLENGTH - 1);
+                }
+                gsub(/@[^\s]+/, "", a[2]);
+
+                tags = a[1];
+                desc = a[2];
+                cache = "FALSE";  # Default for old format
+            }
+
+            # Add colors to subshell value
+            subshell_colored = subshell;
+            if (subshell == "FALSE") {
+                subshell_colored = "\033[32m" subshell "\033[0m";
+            } else if (subshell == "TRUE") {
+                subshell_colored = "\033[31m" subshell "\033[0m";
+            } else if (subshell == "PARTIAL") {
+                subshell_colored = "\033[33m" subshell "\033[0m";
+            }
+
+            # Add colors to cache value
+            cache_colored = cache;
+            if (cache == "TRUE") {
+                cache_colored = "\033[32m" cache "\033[0m";
+            } else if (cache == "FALSE") {
+                cache_colored = "\033[31m" cache "\033[0m";
+            }
+
+            print name "|" tags "|" subshell_colored "|" cache_colored "|" desc;
+        }'
+    ) | __xx_format_columns_ansi '|'
 }

@@ -3,6 +3,10 @@ __xx_cache_github_notifications_to_sqlite() {
         echo "Environment variable XX_CACHE_DIR is not defined, quitting"
     fi
 
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Starting to fetch GitHub Notifications!#[default]" > /dev/null 2>&1 || true
+    fi
+
     echo "Ensuring ${XX_CACHE_DIR} directory exists"
     mkdir -p "${XX_CACHE_DIR}"
     SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/github.db"
@@ -27,8 +31,12 @@ __xx_cache_github_notifications_to_sqlite() {
     done
 
     echo "Creating 'SyncLog' table if not exists in SQLITE database"
-    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (sync_timestamp TEXT NOT NULL);"
-    # Insert or replace sync timestamp into SyncLog table (single row)
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (operation TEXT PRIMARY KEY, sync_timestamp TEXT NOT NULL);"
+    # Insert or replace sync timestamp into SyncLog table
     SYNC_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (rowid, sync_timestamp) VALUES (1, '$SYNC_TIMESTAMP');"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (operation, sync_timestamp) VALUES ('notifications', '$SYNC_TIMESTAMP');"
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Finished fetching GitHub Notifications!#[default]" > /dev/null 2>&1 || true
+    fi
 }

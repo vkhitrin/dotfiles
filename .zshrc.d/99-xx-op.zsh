@@ -2,7 +2,7 @@ which op >/dev/null 2>&1 || return
 [[ "$OSTYPE" == darwin* ]] || return
 
 function opx() {
-    # xx ;1password:Query 1password database for items@FALSE
+    # xx {"tags": "1password", "description": "Query 1password database for items", "subshell": false, "cache": false}
      __xx_get_1password_items | fzf --border-label " 1password Items " \
         --header-lines=1 --layout=reverse-list \
         --info=inline --color 'border:#f9fafe,label:#f9fafe,preview-fg:#f9fafe,header:#f9fafe:bold' \

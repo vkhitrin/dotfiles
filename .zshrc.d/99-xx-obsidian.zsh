@@ -1,5 +1,5 @@
 function obsx() {
-    # xx ;obsidian:View Obsidian notes@PARTIAL
+    # xx {"tags": "obsidian", "description": "View Obsidian notes", "subshell": "PARTIAL", "cache": false}
     local EXTRA_BIND_OPTIONS="ctrl-t:execute-silent(printf %s {} | awk '{\$1=\"\"; sub(/^ /,\"\"); print}' | sed 's/.* \(\/.*\)/\1/' | while IFS= read -r line; do tmux new-window -d \"\$EDITOR '\$line'\"; done),ctrl-d:become(obsidian-cli daily --vault {-1}),ctrl-n:become(obsidian-cli create --vault {-1} $(uuidgen))"
     local NOTES_TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window | CTRL+D: New Daily Note | CTRL+N: New Note"
     local INITIAL_PREVIEW="ENTER: Browse Vault Content"

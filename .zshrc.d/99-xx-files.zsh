@@ -1,8 +1,8 @@
 function gpx() {
-    # xx ;git,shell:Navigate to local git projects@PARTIAL
+    # xx {"tags": "git,shell", "description": "Navigate to local git projects", "subshell": "PARTIAL", "cache": false}
     local STARTING_PATH="${1:-${HOME}/Projects/}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="CTRL+O: Open In Browser | CTRL+T: Open In New Tmux Window"
+    local TEXT_PROMPT="CTRL+O: Browse | CTRL+T: Open In New Tmux Window"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
     BIND_OPTIONS+="--bind=ctrl-o:execute-silent(cd {}; git open)"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
@@ -21,14 +21,8 @@ function gpx() {
 }
 
 function cdx() {
-    # xx ;shell:Navigate to directory@PARTIAL
+    # xx {"tags": "shell", "description": "Navigate to directory", "subshell": "PARTIAL", "cache": false}
     local STARTING_PATH
-    local CLIPBOARD_COMMAND
-    if [[ $(uname) == "Darwin" ]];then
-        CLIPBOARD_COMMAND="pbcopy"
-    elif [[ $(uname) == "Linux" ]]; then
-        CLIPBOARD_COMMAND="wl-copy"
-    fi
     if [ -n "$1" ]; then
         STARTING_PATH="${1}"
     elif [ -n "${XX_CALLBACK_FROM_TMUX_CWD}" ]; then
@@ -39,7 +33,7 @@ function cdx() {
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window | CTRL+B: Copy Relative Path"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
-    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${CLIPBOARD_COMMAND})"
+    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${XX_CLIPBOARD_COMMAND})"
     BIND_OPTIONS+="--bind=start:unbind(ctrl-d)"
     if [ ! -z "${TMUX}" ]; then
         BIND_OPTIONS+="--bind=f12:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; cdx)"
@@ -62,14 +56,8 @@ function cdx() {
 }
 
 function fdx() {
-    # xx ;shell:List files in directory@PARTIAL
+    # xx {"tags": "shell", "description": "List files in directory", "subshell": "PARTIAL", "cache": false}
     local STARTING_PATH
-    local CLIPBOARD_COMMAND
-    if [[ $(uname) == "Darwin" ]];then
-        CLIPBOARD_COMMAND="pbcopy"
-    elif [[ $(uname) == "Linux" ]]; then
-        CLIPBOARD_COMMAND="wl-copy"
-    fi
     if [ -n "$1" ]; then
         STARTING_PATH="${1}"
     elif [ -n "${XX_CALLBACK_FROM_TMUX_CWD}" ]; then
@@ -80,7 +68,7 @@ function fdx() {
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL+T: Edit File In New Tmux Window | CTRL+B: Copy Relative Path"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d ${EDITOR} {})"
-    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${CLIPBOARD_COMMAND})"
+    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${XX_CLIPBOARD_COMMAND})"
     BIND_OPTIONS+="--bind=start:unbind(ctrl-d)"
     if [ ! -z "${TMUX}" ]; then
         BIND_OPTIONS+="--bind=f12:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; fdx)"

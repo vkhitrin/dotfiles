@@ -1,16 +1,10 @@
 which aws-vault > /dev/null 2>&1 || return
 
 function awsx() {
-    # xx ;aws:Activate AWS profile for shell@TRUE
-    local OPEN_COMMAND
-    if [[ $(uname) == "Darwin" ]];then
-        OPEN_COMMAND="open --background"
-    elif [[ $(uname) == "Linux" ]]; then
-        OPEN_COMMAND="xdg-open"
-    fi
+    # xx {"tags": "aws", "description": "Activate AWS profile for shell", "subshell": true, "cache": false}
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-O: Open SSO URL | CTRL-L: Login | CTRL-D: Clear Session"
-    BIND_OPTIONS+="--bind=ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_open_aws_sso_url; ${OPEN_COMMAND} \$(__xx_open_aws_sso_url {1}))"
+    BIND_OPTIONS+="--bind=ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_open_aws_sso_url; ${XX_OPEN_COMMAND} \$(__xx_open_aws_sso_url {1}))"
     BIND_OPTIONS+="--bind=ctrl-l:execute-silent(aws-vault login {1} -s)+reload(source ~/.zshrc.d/xx_functions/__xx_construct_aws_profiles_mapping;__xx_construct_aws_profiles_mapping)"
     BIND_OPTIONS+="--bind=ctrl-d:execute-silent(aws-vault clear {1})+reload(source ~/.zshrc.d/xx_functions/__xx_construct_aws_profiles_mapping;__xx_construct_aws_profiles_mapping)"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
@@ -29,7 +23,7 @@ function awsx() {
 }
 
 function awsrx() {
-    # xx ;aws:Change AWS region for active AWS vault in shell@TRUE
+    # xx {"tags": "aws", "description": "Change AWS region for active AWS vault in shell", "subshell": true, "cache": false}
     local BIND_OPTIONS=()
     local TEXT_PROMPT=""
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then

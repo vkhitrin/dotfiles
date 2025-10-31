@@ -1,7 +1,7 @@
 [[ "$OSTYPE" == darwin* ]] || return
 
 function lctlx() {
-    # xx ;macOS:macOS launchctl@FALSE
+    # xx {"tags": "macOS", "description": "macOS launchctl", "subshell": false, "cache": false}
     __xx_get_macos_launchctl | fzf \
         --ansi \
         --border-label ' macOS launchctl ' --color 'border:#ffffff,label:#ffffff,header:#ffffff:bold,preview-fg:#ffffff' \

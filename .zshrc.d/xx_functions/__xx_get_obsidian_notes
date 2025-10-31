@@ -1,4 +1,4 @@
-__xx_get_obsidian_notes() { 
+__xx_get_obsidian_notes() {
     local XX_OBSIDIAN_VAULT_DIR=${1}
     local NOTES=$(find ${XX_OBSIDIAN_VAULT_DIR} -type f -name "*.md")
     if [ -n "${NOTES}" ]; then

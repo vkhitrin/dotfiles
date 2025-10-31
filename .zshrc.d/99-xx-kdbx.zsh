@@ -1,7 +1,7 @@
 which kdbx >/dev/null 2>&1 || return
 
 function kdx() {
-    # xx ;keepass:Query KeePass database for entries@FALSE
+    # xx {"tags": "keepass", "description": "Query KeePass database for entries", "subshell": false, "cache": false}
      __xx_get_kdbx_entries "${HOME}/.config/kdbx_database.txt" | fzf --border-label " KeePass Entries " \
         --header-lines=1 --layout=reverse-list \
         --info=inline --color 'border:#7391e8,label:#7391e8,preview-fg:#7391e8,header:#7391e8:bold' \

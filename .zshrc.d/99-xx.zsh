@@ -1,3 +1,15 @@
+if [[ $(uname) == "Darwin" ]]; then
+    export XX_CLIPBOARD_COMMAND="pbcopy"
+    export XX_OPEN_COMMAND="open --background"
+    export XX_GNU_AWK_COMMAND="gawk"
+    export XX_GNU_SED_COMMAND="gsed"
+elif [[ $(uname) == "Linux" ]]; then
+    export XX_CLIPBOARD_COMMAND="wl-copy"
+    export XX_OPEN_COMMAND="xdg-open"
+    export XX_GNU_AWK_COMMAND="awk"
+    export XX_GNU_SED_COMMAND="sed"
+fi
+
 export XX_CACHE_DIR="${HOME}/.cache/xx"
 xx() {
     __xx_get_functions | fzf --header-lines=1 \

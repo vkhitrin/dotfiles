@@ -1,0 +1,11 @@
+__xx_k9s() {
+    local K9S_COMMNAD
+
+    K9S_COMMNAD="k9s"
+
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 90% -w 90% -S 'fg=#89b4fa' -T '#[align=absolute-centre] k9s #[align=right]' -E "${K9S_COMMNAD}"
+    else
+        zsh -i -c "${K9S_COMMNAD}"
+    fi
+}

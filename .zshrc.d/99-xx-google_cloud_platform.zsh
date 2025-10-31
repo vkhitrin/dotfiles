@@ -1,13 +1,7 @@
 which gcloud > /dev/null 2>&1 || return
 
 function gcpx() {
-    # xx ;gcp:Activate GCP Account for shell@TRUE
-    local OPEN_COMMAND
-    if [[ $(uname) == "Darwin" ]];then
-        OPEN_COMMAND="open --background"
-    elif [[ $(uname) == "Linux" ]]; then
-        OPEN_COMMAND="xdg-open"
-    fi
+    # xx {"tags": "gcp", "description": "Activate GCP Account for shell", "subshell": true, "cache": false}
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL+O: Open Console"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
@@ -22,7 +16,7 @@ function gcpx() {
         --border-label ' GCP Accounts ' --color 'border:#a6e3a1,label:#a6e3a1,header:#a6e3a1:bold,preview-fg:#a6e3a1' \
         --preview="echo '${TEXT_PROMPT}'" \
         --preview-window=down,1,border-none --tmux 40% \
-        --bind="ctrl-o:execute-silent(${OPEN_COMMAND} 'http://console.cloud.google.com')" \
+        --bind="ctrl-o:execute-silent(${XX_OPEN_COMMAND} 'http://console.cloud.google.com')" \
         ${BIND_OPTIONS[@]}
     )
     if [ ! -z ${SELECTED_ACCOUNT} ]; then

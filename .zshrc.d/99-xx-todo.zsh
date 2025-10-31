@@ -1,7 +1,7 @@
 which todo > /dev/null 2>&1 || return
 
 function tdx() {
-    # xx ;todo:List todo@FALSE
+    # xx {"tags": "todo", "description": "List todo", "subshell": false, "cache": false}
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL+R: Refresh | CTRL+E: Edit Task | CTRL+N: New Task"
     BIND_OPTIONS+="--bind=ctrl-e:become:(source ~/.zshrc.d/xx_functions/__xx_edit_todo;__xx_edit_todo {})"

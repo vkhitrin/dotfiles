@@ -1,15 +1,63 @@
 __xx_get_github_notifications() {
+    local QUIET_MODE=${1:-false}
+    local SHOULD_REFRESH=0
+
+    # Check if force refresh is requested
+    if [[ -n "${XX_FORCE_REFRESH}" ]]; then
+        SHOULD_REFRESH=1
+    elif [[ -f "${XX_CACHE_DIR}/github.db" ]]; then
+        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='notifications';" 2>/dev/null)
+
+        if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+            # Convert cache timestamp to epoch (GNU date)
+            local CACHE_EPOCH=$(gdate -d "${CACHE_TIMESTAMP}" +%s 2>&1)
+
+            # Check if date parsing succeeded (result should be a number)
+            if [[ "${CACHE_EPOCH}" =~ ^[0-9]+$ ]]; then
+                local CURRENT_EPOCH=$(date +%s)
+                local AGE_SECONDS=$((CURRENT_EPOCH - CACHE_EPOCH))
+                local ONE_HOUR=3600
+
+                if [[ ${AGE_SECONDS} -gt ${ONE_HOUR} ]]; then
+                    [[ "${QUIET_MODE}" == "false" ]] && echo "Cache is older than 1 hour, refreshing..."
+                    SHOULD_REFRESH=1
+                fi
+            else
+                SHOULD_REFRESH=1
+            fi
+        else
+            [[ "${QUIET_MODE}" == "false" ]] && echo "No sync timestamp found, refreshing cache..."
+            SHOULD_REFRESH=1
+        fi
+    else
+        [[ "${QUIET_MODE}" == "false" ]] && echo "Cache doesn't exist, creating..."
+        SHOULD_REFRESH=1
+    fi
+
+    if [[ ${SHOULD_REFRESH} -eq 1 ]]; then
+        if [[ "${QUIET_MODE}" == "true" ]]; then
+            __xx_cache_github_notifications_to_sqlite >/dev/null 2>&1
+            # Re-fetch the timestamp after refresh
+            CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='notifications';" 2>/dev/null)
+        else
+            __xx_cache_github_notifications_to_sqlite
+            CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='notifications';" 2>/dev/null)
+        fi
+    fi
+
     if [[ -f "${XX_CACHE_DIR}/github.db" ]]; then
-        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog;")
+        # Always show the cache timestamp
         echo "Last cached: ${CACHE_TIMESTAMP}"
+
         sqlite3 --json "${XX_CACHE_DIR}/github.db" "SELECT
+          json_extract(json, '$.id') AS id,
           json_extract(json, '$.repository.full_name') AS repo,
           json_extract(json, '$.subject.title') AS title,
           json_extract(json, '$.reason') AS reason,
           json_extract(json, '$.unread') AS unread
         FROM Notifications;
-        " | jq -r '(["REPOSITORY","TITLE","REASON"] | @csv), (.[] | [.repo, .title, .reason] | @csv)' | sed 's/"//g' | column -t -s','
+        " | jq -r '(["ID","REPOSITORY","TITLE","REASON"] | join("│")), (.[] | if .unread == 1 then ["\u001b[1m" + .id, .repo, .title, .reason + "\u001b[0m"] else ["\u001b[37m" + .id, .repo, .title, .reason + "\u001b[0m"] end | join("│"))' | __xx_format_columns_ansi '│'
     else
-        echo "github.db doesn't exist"
+        [[ "${QUIET_MODE}" == "false" ]] && echo "github.db doesn't exist"
     fi
 }

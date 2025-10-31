@@ -1,4 +1,4 @@
-__xx_get_obsidian_vaults() { 
+__xx_get_obsidian_vaults() {
     local XX_OBSIDIAN_VAULTS_ROOT_DIR=${1}
     local VAULTS=$(find ${XX_OBSIDIAN_VAULTS_ROOT_DIR} -type d -name ".obsidian" -exec dirname {} \;)
     if [ -n "${VAULTS}" ]; then

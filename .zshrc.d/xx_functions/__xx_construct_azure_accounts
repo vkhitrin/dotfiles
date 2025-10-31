@@ -10,5 +10,5 @@ __xx_construct_azure_accounts() {
               else
                 print $0;
             }'
-    ) | ansicolumn -t -s','
+    ) | __xx_format_columns_ansi ','
 }
