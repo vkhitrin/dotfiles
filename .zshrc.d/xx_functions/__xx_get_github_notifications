@@ -1,4 +1,8 @@
 __xx_get_github_notifications() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    source ~/.zshrc.d/xx_functions/__xx_notify
+    __xx_setup_commands
     local QUIET_MODE=${1:-false}
     local SHOULD_REFRESH=0
 
@@ -9,8 +13,8 @@ __xx_get_github_notifications() {
         local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/github.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='notifications';" 2>/dev/null)
 
         if [[ -n "${CACHE_TIMESTAMP}" ]]; then
-            # Convert cache timestamp to epoch (GNU date)
-            local CACHE_EPOCH=$(gdate -d "${CACHE_TIMESTAMP}" +%s 2>&1)
+            # Convert cache timestamp to epoch
+            local CACHE_EPOCH=$(${XX_GNU_DATE_COMMAND} -d "${CACHE_TIMESTAMP}" +%s 2>&1)
 
             # Check if date parsing succeeded (result should be a number)
             if [[ "${CACHE_EPOCH}" =~ ^[0-9]+$ ]]; then
@@ -19,18 +23,18 @@ __xx_get_github_notifications() {
                 local ONE_HOUR=3600
 
                 if [[ ${AGE_SECONDS} -gt ${ONE_HOUR} ]]; then
-                    [[ "${QUIET_MODE}" == "false" ]] && echo "Cache is older than 1 hour, refreshing..."
+                    [[ "${QUIET_MODE}" == "false" ]] && __xx_notify "Cache is older than 1 hour, refreshing..."
                     SHOULD_REFRESH=1
                 fi
             else
                 SHOULD_REFRESH=1
             fi
         else
-            [[ "${QUIET_MODE}" == "false" ]] && echo "No sync timestamp found, refreshing cache..."
+            [[ "${QUIET_MODE}" == "false" ]] && __xx_notify "No sync timestamp found, refreshing cache..."
             SHOULD_REFRESH=1
         fi
     else
-        [[ "${QUIET_MODE}" == "false" ]] && echo "Cache doesn't exist, creating..."
+        [[ "${QUIET_MODE}" == "false" ]] && __xx_notify "Cache doesn't exist, creating..."
         SHOULD_REFRESH=1
     fi
 

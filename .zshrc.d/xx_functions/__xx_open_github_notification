@@ -1,4 +1,7 @@
 __xx_open_github_notification() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
     local NOTIFICATION_ID=$1
     
     # Strip ANSI color codes from the ID if present (use printf to interpret escape sequence)

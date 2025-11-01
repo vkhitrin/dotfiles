@@ -13,11 +13,10 @@ function kctx() {
         BIND_OPTIONS+="--bind=start:unbind(enter)"
     fi
     local SELECTED_CONTEXT=$(__xx_get_kubernetes_contexts | fzf --info=inline --ansi \
-        --prompt="Filter " \
+        --prompt="> Filter " \
         --layout=reverse-list \
-        --border-label " Kubernetes Contexts " --color 'border:#89b4fa,label:#89b4fa,preview-fg:#89b4fa' \
-        --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none \
+        --border-label " Kubernetes Contexts " --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa' \
+        --header "${TEXT_PROMPT}" \
         ${BIND_OPTIONS[@]}
     )
     [ ! -z ${SELECTED_CONTEXT} ] && export KUBECONFIG="${SELECTED_CONTEXT}"

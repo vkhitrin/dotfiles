@@ -14,11 +14,10 @@ function awsx() {
         BIND_OPTIONS+="--bind=start:unbind(enter)"
     fi
     __xx_construct_aws_profiles_mapping | fzf --exact --ansi --header-lines=1 --info=inline \
-        --prompt="Filter " \
+        --prompt="> Filter " \
         --layout=reverse-list \
-        --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,preview-fg:#f9e2af' \
-        --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none --tmux 80% \
+        --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,header:#f9e2af' \
+        --header "${TEXT_PROMPT}" --tmux 80% \
         ${BIND_OPTIONS[@]}
 }
 
@@ -33,11 +32,10 @@ function awsrx() {
         BIND_OPTIONS+="--bind=start:unbind(enter)"
     fi
     local SELECTED_REGION=$(__xx_construct_aws_regions_for_account | fzf --exact --ansi --header-lines=1 --info=inline \
-        --prompt="Filter " \
+        --prompt="> Filter " \
         --layout=reverse-list \
-        --border-label ' Enabled Regions For AWS Account ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,preview-fg:#f9e2af' \
-        --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none --tmux 40% \
+        --border-label ' Enabled Regions For AWS Account ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,header:#f9e2af' \
+        --header "${TEXT_PROMPT}" --tmux 40% \
         ${BIND_OPTIONS[@]}
     )
     if [ ! -z ${SELECTED_REGION} ]; then

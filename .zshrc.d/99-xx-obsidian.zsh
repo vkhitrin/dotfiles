@@ -12,12 +12,12 @@ function obsx() {
         --info=inline \
         --layout=reverse-list \
         --border-label " Obsidian Vaults " \
-        --color 'border:#9B73EC,label:#9B73EC,header:#9B73EC:bold,preview-fg:#9B73EC' \
-        --preview="echo '${INITIAL_PREVIEW}'" \
+        --color 'border:#9B73EC,label:#9B73EC,header:#9B73EC:bold,header:#9B73EC' \
+        --header "${INITIAL_PREVIEW}" \
         --bind='enter:'\
 'transform-border-label(printf " %s Notes " {1})'\
 '+reload(source ~/.zshrc.d/xx_functions/__xx_get_obsidian_notes;__xx_get_obsidian_notes {2})'\
-"+change-preview(echo '${NOTES_TEXT_PROMPT}')+unbind(enter),"\
+"+change-header(${NOTES_TEXT_PROMPT})+unbind(enter),"\
 ${EXTRA_BIND_OPTIONS}\
-        --preview-window=down,1,border-none --tmux 80%
+        --tmux 80%
 }

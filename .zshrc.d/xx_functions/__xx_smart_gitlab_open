@@ -1,4 +1,7 @@
 __xx_smart_gitlab_open() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
     local ACTION="${1}"
     local DETAILS="${2}"
     case "$DETAILS" in

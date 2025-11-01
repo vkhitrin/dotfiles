@@ -14,8 +14,7 @@ function hqx() {
     fi
      __xx_get_harlequin_connections | fzf --border-label " Harlequin Connections " \
         --layout=reverse-list \
-        --info=inline --color 'border:#f9fafe,label:#feffac,preview-fg:#feffac,header:#feffac:bold' \
-        --prompt "Filter " --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none \
+        --info=inline --color 'border:#f9fafe,label:#feffac,header:#feffac,header:#feffac:bold' \
+        --prompt "> Filter " --header "${TEXT_PROMPT}" \
         ${BIND_OPTIONS[@]}
 }

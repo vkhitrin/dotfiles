@@ -1,0 +1,12 @@
+__xx_notify() {
+    local message="$1"
+    local duration="${2:-1000}"  # Default 1 second for tmux
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d "${duration}" "${message}" > /dev/null 2>&1 || true
+    else
+        # Strip tmux formatting codes for non-tmux notifications
+        local clean_message=$(echo "${message}" | sed -E 's/#\[[^]]*\]//g')
+        /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type banner --title "xx" --message "${clean_message}" > /dev/null 0>&1 || true
+    fi
+}

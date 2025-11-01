@@ -12,9 +12,8 @@ function gpx() {
         BIND_OPTIONS+="--bind=start:unbind(enter)"
     fi
     local SELECTED_DIR=$(__xx_get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
-        --info=inline --color 'border:#fab387,label:#fab387,preview-fg:#fab387' \
-        --prompt "Filter " --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none --scheme=path \
+        --info=inline --color 'border:#fab387,label:#fab387,header:#fab387' \
+        --prompt "> Filter " --header "${TEXT_PROMPT}" --scheme=path \
         ${BIND_OPTIONS[@]}
     )
     [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
@@ -36,8 +35,8 @@ function cdx() {
     BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${XX_CLIPBOARD_COMMAND})"
     BIND_OPTIONS+="--bind=start:unbind(ctrl-d)"
     if [ ! -z "${TMUX}" ]; then
-        BIND_OPTIONS+="--bind=f12:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; cdx)"
-        TEXT_PROMPT+=" | F12: Delete Path"
+        BIND_OPTIONS+="--bind=delete:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; cdx)"
+        TEXT_PROMPT+=" | Delete: Delete Path"
     fi
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=enter:become(echo {})"
@@ -47,9 +46,8 @@ function cdx() {
     fi
     local SELECTED_DIR=$(fd --full-path -H -t d "${STARTING_PATH}" | fzf \
         --border-label " Directories Under '$(basename ${STARTING_PATH})' " \
-        --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
-        --prompt "Filter " --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none --scheme=path \
+        --info=inline --color 'border:#f38ba8,label:#f38ba8,header:#f38ba8' \
+        --prompt "> Filter " --header "${TEXT_PROMPT}" --scheme=path \
         ${BIND_OPTIONS[@]}
     )
     [ ! -z ${SELECTED_DIR} ] && cd "${SELECTED_DIR}"
@@ -71,8 +69,8 @@ function fdx() {
     BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${XX_CLIPBOARD_COMMAND})"
     BIND_OPTIONS+="--bind=start:unbind(ctrl-d)"
     if [ ! -z "${TMUX}" ]; then
-        BIND_OPTIONS+="--bind=f12:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; fdx)"
-        TEXT_PROMPT+=" | F12: Delete Path"
+        BIND_OPTIONS+="--bind=delete:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; fdx)"
+        TEXT_PROMPT+=" | Delete: Delete Path"
     fi
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=enter:become(echo {})"
@@ -82,9 +80,8 @@ function fdx() {
     fi
     local SELECTED_DIR=$(fd --full-path -H -t f "${STARTING_PATH}" | fzf \
         --border-label " Files Under '$(basename ${STARTING_PATH})' " \
-        --info=inline --color 'border:#f38ba8,label:#f38ba8,preview-fg:#f38ba8' \
-        --prompt "Filter " --preview="echo '${TEXT_PROMPT}'" \
-        --preview-window=down,1,border-none --scheme=path \
+        --info=inline --color 'border:#f38ba8,label:#f38ba8,header:#f38ba8' \
+        --prompt "> Filter " --header "${TEXT_PROMPT}" --scheme=path \
         ${BIND_OPTIONS[@]}
     )
     [ ! -z ${SELECTED_DIR} ] && ${EDITOR} "${SELECTED_DIR}"

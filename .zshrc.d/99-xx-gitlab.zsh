@@ -8,8 +8,8 @@ function glpx() {
 
     __xx_get_gitlab_projects | fzf --ansi --header-lines=1 --info=inline \
         --bind="start:unbind(ctrl-v,ctrl-t,enter)" \
-        --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="Filter " \
-        --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="Filter " \
+        --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="> Filter " \
+        --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="> Filter " \
         --bind "ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_smart_gitlab_open;__xx_smart_gitlab_open 'browser' {})" \
         --bind='ctrl-a:'\
 'transform-border-label(printf " %s Open Merge Requests " {1})'\
@@ -23,9 +23,9 @@ function glpx() {
 "+transform-query(echo ''),${CI_PIPELINE_EXTRA_BIND_OPTIONS}"\
         --delimiter="[[:space:]][[:space:]]+" \
         --layout=reverse-list \
-        --border-label ' GitLab Projects ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
-        --preview="echo 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+A: Show 100 Open MR | CTRL+P: Show 100 Pipelines | CTRL+O: Browse'" \
-        --preview-window=down,1,border-none --tmux 80% \
+        --border-label ' GitLab Projects ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,header:#fca326' \
+        --header 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+A: Show 100 Open MR | CTRL+P: Show 100 Pipelines | CTRL+O: Browse' \
+        --tmux 80% \
         --bind="enter:become(source ~/.zshrc.d/xx_functions/__xx_smart_gitlab_open;__xx_smart_gitlab_open 'open' {})"
 }
 
@@ -34,12 +34,12 @@ function glgx() {
     __xx_get_gitlab_groups | fzf --header-lines=1 --info=inline \
         --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
-        --prompt="Filter " \
+        --prompt="> Filter " \
         --bind "ctrl-o:execute-silent(echo {3} | awk '{print \$NF}' | xargs ${XX_OPEN_COMMAND})" \
         --layout=reverse-list \
-        --border-label ' GitLab Groups ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
-        --preview="echo 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+O: Browse'" \
-        --preview-window=down,1,border-none --tmux 80% \
+        --border-label ' GitLab Groups ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,header:#fca326' \
+        --header 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+O: Browse' \
+        --tmux 80% \
         --bind "start:unbind(enter)"
 }
 
@@ -56,10 +56,10 @@ function glomx() {
         --delimiter="[[:space:]][[:space:]]+" \
         --bind="ctrl-u:execute-silent(echo {6} | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --bind "ctrl-o:execute-silent(echo {6} | xargs ${XX_OPEN_COMMAND})" \
-        --prompt="Filter " \
+        --prompt="> Filter " \
         --layout=reverse-list \
-        --border-label ' My Open GitLab Merge Requests ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,preview-fg:#fca326' \
-        --preview="echo 'CTRL+U: Copy URL | CTRL+O: Browse | ENTER: View MR'" \
-        --preview-window=down,1,border-none --tmux 80% \
+        --border-label ' My Open GitLab Merge Requests ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,header:#fca326' \
+        --header 'CTRL+U: Copy URL | CTRL+O: Browse | ENTER: View MR' \
+        --tmux 80% \
         --bind "enter:become(source ~/.zshrc.d/xx_functions/__xx_view_gitlab_project_merge_request; __xx_view_gitlab_project_merge_request {5} {4}!{3})"
 }
