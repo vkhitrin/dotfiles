@@ -30,7 +30,7 @@ bindkey "^[[1;3C" forward-word
 bindkey "^[[1;3D" backward-word
 
 # Custom aliases
-alias _backup_my_linux="mackup backup -vf"
+alias _backup_my_linux="mackup backup -vf && mackup link uninstall --force"
 #
 # Cosmicding
 [ -f "${HOME}/.cache/cosmicding/com.vkhitrin.cosmicding-db.sqlite" ] && \
