@@ -675,14 +675,14 @@ local plugins = {
 			vim.opt.spelllang = { "en", "programming" }
 		end,
 	},
-	{
-		"https://github.com/Davidyz/VectorCode",
-		cmd = "VectorCode",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		config = function()
-			require("plugins.editor.vectorcode")
-		end,
-	},
+	-- {
+	-- 	"https://github.com/Davidyz/VectorCode",
+	-- 	cmd = "VectorCode",
+	-- 	dependencies = { "nvim-lua/plenary.nvim" },
+	-- 	config = function()
+	-- 		require("plugins.editor.vectorcode")
+	-- 	end,
+	-- },
 	{
 		"https://github.com/mrcjkb/rustaceanvim",
 		version = "^6",
