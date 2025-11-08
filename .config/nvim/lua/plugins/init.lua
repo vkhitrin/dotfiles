@@ -577,7 +577,6 @@ local plugins = {
 	{
 		"https://github.com/Saghen/blink.cmp",
 		dependencies = {
-			"https://github.com/rafamadriz/friendly-snippets",
 			"https://github.com/onsails/lspkind.nvim",
 			"https://github.com/Kaiser-Yang/blink-cmp-git",
 			"https://github.com/bydlw98/blink-cmp-env",
@@ -675,14 +674,6 @@ local plugins = {
 			vim.opt.spelllang = { "en", "programming" }
 		end,
 	},
-	-- {
-	-- 	"https://github.com/Davidyz/VectorCode",
-	-- 	cmd = "VectorCode",
-	-- 	dependencies = { "nvim-lua/plenary.nvim" },
-	-- 	config = function()
-	-- 		require("plugins.editor.vectorcode")
-	-- 	end,
-	-- },
 	{
 		"https://github.com/mrcjkb/rustaceanvim",
 		version = "^6",
