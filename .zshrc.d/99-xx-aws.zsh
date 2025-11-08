@@ -17,7 +17,7 @@ function awsx() {
         --prompt="> Filter " \
         --layout=reverse-list \
         --border-label ' AWS Accounts ' --color 'border:#f9e2af,label:#f9e2af,header:#f9e2af:bold,header:#f9e2af' \
-        --header "${TEXT_PROMPT}" --tmux 80% \
+        --header "${TEXT_PROMPT}" --tmux 60% \
         ${BIND_OPTIONS[@]}
 }
 

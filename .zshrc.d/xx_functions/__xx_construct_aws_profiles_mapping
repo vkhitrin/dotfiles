@@ -1,7 +1,7 @@
 __xx_construct_aws_profiles_mapping() {
     AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
     (
-        echo "Profile,Account ID,Role,Session,Description"
+        echo "Profile,Account ID,Role"
         for PROFILE in $(aws configure list-profiles | grep -v default); do
             PROFILE_ACCOUNT_ID=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_account_id" -v)
             PROFILE_ROLE=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_role_name" -v)
@@ -11,15 +11,14 @@ __xx_construct_aws_profiles_mapping() {
                 PROFILE_SESSION=" "
             fi
 
-            PROFILE_DESCRIPTION=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "description" -v)
-
-            echo "${PROFILE},${PROFILE_ACCOUNT_ID},${PROFILE_ROLE},${PROFILE_SESSION},${PROFILE_DESCRIPTION}" | awk -F ',' -v cur="$PROFILE_SESSION" '
+            echo "${PROFILE},${PROFILE_ACCOUNT_ID},${PROFILE_ROLE},${PROFILE_SESSION}" | awk -F ',' '
             {
+              output = $1 "," $2 "," $3;
               if ($4 ~ / /)
-                print $0;
+                print output;
               else
-                printf "\033[33m%s\033[0m\n", $0;
+                printf "\033[33m%s\033[0m\n", output;
             }'
         done
-    ) | awk 'NR==1 {print toupper($0); next} {print}' | awk -F ',' '{print $1,$2,$3,$5}' OFS=',' | __xx_format_columns_ansi ',' | sed 's/\([^,]*,[^,]*,[^,]*,[^,]*\),/\1,/'
+    ) | awk 'NR==1 {print toupper($0); next} {print}' | __xx_format_columns_ansi ','
 }

@@ -9,9 +9,9 @@ function tdx() {
     BIND_OPTIONS+="--bind=ctrl-r:reload:(source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi;source ~/.zshrc.d/xx_functions/__xx_get_todo;__xx_get_todo)"
     BIND_OPTIONS+="--bind=start:unbind(enter)"
     if [ ! -z "${TMUX}" ]; then
-        BIND_OPTIONS+="--bind=ctrl-p:become(source ~/.zshrc.d/xx_functions/__xx_complete_todo; __xx_complete_todo {-1};source ~/.zshrc.d/99-xx-todo.zsh; tdx)"
+        BIND_OPTIONS+="--bind=ctrl-y:become(source ~/.zshrc.d/xx_functions/__xx_complete_todo; __xx_complete_todo {-1};source ~/.zshrc.d/99-xx-todo.zsh; tdx)"
         BIND_OPTIONS+="--bind=delete:become(source ~/.zshrc.d/xx_functions/__xx_delete_todo; __xx_delete_todo {-1};source ~/.zshrc.d/99-xx-todo.zsh; tdx)"
-        TEXT_PROMPT+=" | CTRL-P: Complete | Delete: Delete"
+        TEXT_PROMPT+=" | CTRL-Y: Complete | Delete: Delete"
     fi
      __xx_get_todo | fzf --border-label " TODO " \
         --tmux 80% \
