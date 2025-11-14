@@ -1,9 +1,16 @@
 __xx_get_gitlab_project_pipelines() {
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
     local GITLAB_HOST=$(echo "${1}" | sed -E 's|^[a-z]+://([^/.:]+(\.[^/.:]+)*).*|\1|')
     local GITLAB_PROJECT="${2}"
     for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
         OUTPUT=$(GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab ci list \
-                --per-page 100 --repo "${GITLAB_PROJECT}" 2>/dev/null | tail -n +4 | awk '
+                --per-page 100 --repo "${GITLAB_PROJECT}" 2>/dev/null | tail -n +4)
+        if [ -n "${OUTPUT}" ]; then
+        CONTENT=true;
+        {
+            echo "State\tIID\tRef\tCreated\tHost\tRepository"
+            echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" -v r="${GITLAB_PROJECT}" '{print $0 "\t" h "\t" r}'
+        } | __xx_format_columns_ansi $'\t' | awk '
                 {
                     if ($0 ~ /\(failed\)/) {
                         print "\033[31m" $0 "\033[0m"
@@ -14,13 +21,7 @@ __xx_get_gitlab_project_pipelines() {
                     } else {
                         print $0
                     }
-            }')
-        if [ -n "${OUTPUT}" ]; then
-        CONTENT=true;
-        {
-            echo "State\tIID\tRef\tCreated\tHost\tRepository"
-            echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" -v r="${GITLAB_PROJECT}" '{print $0 "\t" h "\t" r}'
-        } | __xx_format_columns_ansi $'\t'
+            }'
         break
         fi
     done

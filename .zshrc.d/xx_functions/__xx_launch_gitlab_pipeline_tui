@@ -1,0 +1,38 @@
+__xx_launch_gitlab_pipeline_tui() {
+    local GITLAB_HOST="${1}"
+    local GITLAB_PROJECT="${2}"
+    local PIPELINE_STATE="${3}"
+
+    # Strip ANSI codes from the state field
+    local CLEAN_STATE=$(printf '%s' "${PIPELINE_STATE}" | sed -E 's/\x1b\[[0-9;]*m//g')
+    
+    # Extract pipeline ID from the state field (format: "(status) • #ID")
+    local GITLAB_CI_PIPELINE_ID=$(printf '%s' "${CLEAN_STATE}" | sed -E 's/.*#([0-9]+).*/\1/')
+    
+    if [[ -z "${GITLAB_CI_PIPELINE_ID}" ]]; then
+        echo "Unable to extract pipeline ID from: ${CLEAN_STATE}"
+        return 1
+    fi
+
+    [[ ! -z ${GITLAB_CI_PIPELINE_ID} ]] || return 1
+
+    # Create a temporary git directory since glab ci view requires being in a git repo
+    local TEMP_DIR=$(mktemp -d)
+    trap "rm -rf ${TEMP_DIR}" EXIT
+    
+    local GLAB_COMMAND
+    for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
+        GLAB_COMMAND="cd ${TEMP_DIR}; git init -q; GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab ci view -p ${GITLAB_CI_PIPELINE_ID} -R ${GITLAB_PROJECT}"
+        break
+    done
+
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 95% -w 95% \
+            -S 'fg=#fca326' -T "#[align=absolute-centre] GitLab - ${GITLAB_PROJECT} Pipeline #${GITLAB_CI_PIPELINE_ID} #[align=right]" \
+            -E "${GLAB_COMMAND}"
+    else
+        eval "${GLAB_COMMAND}"
+    fi
+    
+    rm -rf ${TEMP_DIR}
+}

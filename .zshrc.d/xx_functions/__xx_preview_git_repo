@@ -1,0 +1,58 @@
+#!/usr/bin/env zsh
+
+function __xx_preview_git_repo() {
+    local REPO_PATH="${1}"
+    
+    if [[ ! -d "${REPO_PATH}" ]]; then
+        echo "Not a valid directory"
+        return 1
+    fi
+    
+    cd "${REPO_PATH}" || return 1
+    
+    # Branch
+    printf '\033[1;33mBranch:\033[0m\n'
+    git branch --show-current 2>/dev/null
+    echo
+    
+    # Last Fetched
+    printf '\033[1;33mLast Fetched:\033[0m\n'
+    stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' .git/FETCH_HEAD 2>/dev/null || echo 'Never'
+    echo
+    
+    # Remote
+    printf '\033[1;33mRemote:\033[0m\n'
+    git remote -v 2>/dev/null
+    echo
+    
+    # Local Branches
+    printf '\033[1;33mLocal Branches:\033[0m\n'
+    local branches=($(git branch --format='%(refname:short)' 2>/dev/null))
+    if [[ ${#branches[@]} -eq 1 ]]; then
+        echo "${branches[1]}"
+    elif [[ ${#branches[@]} -gt 1 ]]; then
+        git branch --format='%(refname:short)' 2>/dev/null | tr '\n' ',' | sed 's/,/, /g' | sed 's/, $/\n/'
+    fi
+    echo
+    
+    # Recent Tags
+    printf '\033[1;33mRecent Tags:\033[0m\n'
+    local tags=($(git tag --sort=-creatordate 2>/dev/null | head -n 10))
+    if [[ ${#tags[@]} -eq 0 ]]; then
+        echo "No tags"
+    elif [[ ${#tags[@]} -eq 1 ]]; then
+        echo "${tags[1]}"
+    else
+        git tag --sort=-creatordate 2>/dev/null | head -n 10 | tr '\n' ',' | sed 's/,/, /g' | sed 's/, $/\n/'
+    fi
+    echo
+    
+    # Recent Commits
+    printf '\033[1;33mRecent Commits:\033[0m\n'
+    git log --oneline --color=always -n 10 2>/dev/null
+    echo
+    
+    # Status
+    printf '\033[1;33mStatus:\033[0m\n'
+    git status --short 2>/dev/null
+}

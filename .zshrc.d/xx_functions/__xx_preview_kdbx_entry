@@ -1,0 +1,10 @@
+__xx_preview_kdbx_entry() {
+    local KDBX_DESCRIPTION_FILE="${1}"
+    local ENTRY="${2}"
+    if [ -f "${KDBX_DESCRIPTION_FILE}" ]; then
+        local KDBX_FILE=$(cat "${KDBX_DESCRIPTION_FILE}")
+        kdbx show "${ENTRY}" --database="${KDBX_FILE}" --use-keyring --show-sensitive 2>/dev/null
+    else
+        echo "Error: Database configuration file '${KDBX_DESCRIPTION_FILE}' not found"
+    fi
+}

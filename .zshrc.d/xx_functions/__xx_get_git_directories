@@ -1,4 +1,78 @@
 __xx_get_git_directories() {
+    source ~/.zshrc.d/xx_functions/__xx_notify
     local STARTING_PATH="${1}"
-    fd -H -t d -g '.git' "${1}" | xargs -I {} dirname {}
+    local REFRESH_CACHE="${2:-false}"
+    
+    # Create cache directory and database if they don't exist
+    local CACHE_DIR="${HOME}/.cache/xx"
+    local DB_FILE="${CACHE_DIR}/git"
+    mkdir -p "${CACHE_DIR}"
+    
+    # Initialize database with schema if it doesn't exist
+    sqlite3 "${DB_FILE}" "CREATE TABLE IF NOT EXISTS git_directories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        starting_path TEXT NOT NULL,
+        directory TEXT NOT NULL,
+        last_updated INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_starting_path ON git_directories(starting_path);"
+    
+    # Check if cache exists and determine if it needs refresh
+    local SHOULD_REFRESH="${REFRESH_CACHE}"
+    
+    if [[ "${REFRESH_CACHE}" != "true" ]]; then
+        # Check if cache exists and get last update time
+        local CACHE_TIMESTAMP=$(sqlite3 "${DB_FILE}" "SELECT last_updated FROM git_directories WHERE starting_path = '${STARTING_PATH}' LIMIT 1;")
+        
+        if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+            # Check if cache is older than 24 hours (86400 seconds)
+            local CURRENT_TIMESTAMP=$(date +%s)
+            local AGE_SECONDS=$((CURRENT_TIMESTAMP - CACHE_TIMESTAMP))
+            local ONE_DAY=86400
+            
+            if [[ ${AGE_SECONDS} -gt ${ONE_DAY} ]]; then
+                __xx_notify "Cache is older than 24 hours, refreshing..."
+                SHOULD_REFRESH="true"
+            else
+                # Return cached results
+                local CACHED_DIRS=$(sqlite3 "${DB_FILE}" "SELECT directory FROM git_directories WHERE starting_path = '${STARTING_PATH}' ORDER BY directory;")
+                echo "${CACHED_DIRS}"
+                return 0
+            fi
+        else
+            # No cache exists
+            SHOULD_REFRESH="true"
+        fi
+    fi
+    
+    # Notify about cache refresh
+    if [[ "${REFRESH_CACHE}" == "true" ]]; then
+        __xx_notify "Refreshing git directories cache for ${STARTING_PATH}..."
+    else
+        __xx_notify "Cache doesn't exist, scanning for git directories..."
+    fi
+    
+    # Generate fresh list
+    local GIT_DIRS=$(fd -H -t d -g '.git' "${STARTING_PATH}" 2>/dev/null | xargs -I {} dirname {})
+    
+    if [[ -z "${GIT_DIRS}" ]]; then
+        __xx_notify "No git directories found"
+        return 0
+    fi
+    
+    local TIMESTAMP=$(date +%s)
+    local COUNT=$(echo "${GIT_DIRS}" | wc -l | tr -d ' ')
+    
+    # Clear old entries for this path
+    sqlite3 "${DB_FILE}" "DELETE FROM git_directories WHERE starting_path = '${STARTING_PATH}';"
+    
+    # Store each directory as a separate row
+    echo "${GIT_DIRS}" | while IFS= read -r dir; do
+        sqlite3 "${DB_FILE}" "INSERT INTO git_directories (starting_path, directory, last_updated) 
+                              VALUES ('${STARTING_PATH}', '${dir}', ${TIMESTAMP});"
+    done
+    
+    __xx_notify "Cached ${COUNT} git directories"
+    
+    echo "${GIT_DIRS}"
 }

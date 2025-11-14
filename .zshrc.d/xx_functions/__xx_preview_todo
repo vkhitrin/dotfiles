@@ -1,0 +1,4 @@
+__xx_preview_todo() {
+    local TODO_ID="${1}"
+    todo --porcelain show "${TODO_ID}" | jq -r "\"\u001b[1;35mSummary:\u001b[0m \(.summary)\n\n\u001b[1;35mDescription:\u001b[0m\n\(.description // \"N/A\")\n\n\u001b[1;35mList:\u001b[0m \(.list)\n\u001b[1;35mPriority:\u001b[0m \(.priority)\n\u001b[1;35mTags:\u001b[0m \((.tags // []) | join(\", \"))\n\u001b[1;35mID:\u001b[0m \(.id)\""
+}

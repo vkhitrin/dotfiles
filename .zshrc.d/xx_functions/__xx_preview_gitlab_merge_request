@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+
+function __xx_preview_gitlab_merge_request() {
+    local MR_ID="${1}"
+    local MR_PATH="${2}"
+    local GITLAB_HOST="${3}"
+    
+    if [[ -z "${MR_ID}" || -z "${MR_PATH}" || -z "${GITLAB_HOST}" ]]; then
+        echo "Invalid merge request information"
+        return 1
+    fi
+    
+    # Extract project and MR number
+    local GITLAB_PROJECT=${MR_PATH%%!*}
+    local GITLAB_MERGE_REQUEST_ID=${MR_PATH#*!}
+    
+    # Find the correct config file for this GitLab host
+    local CONFIG_FOUND=false
+    local CONFIG_DIR=""
+    
+    for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
+        local TEST_CONFIG_DIR=$(dirname ${CONFIG_FILE})
+        # Test if this config works
+        local test_result=$(GLAB_CONFIG_DIR="${TEST_CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab --repo "${GITLAB_PROJECT}" mr view "${GITLAB_MERGE_REQUEST_ID}" --comments=false 2>/dev/null | head -1)
+        if [[ -n "${test_result}" ]]; then
+            CONFIG_FOUND=true
+            CONFIG_DIR="${TEST_CONFIG_DIR}"
+            break
+        fi
+    done
+    
+    if [[ "${CONFIG_FOUND}" == "false" ]]; then
+        echo "Unable to find credentials for ${GITLAB_HOST}"
+        return 1
+    fi
+    
+    # Display MR details
+    GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab --repo "${GITLAB_PROJECT}" mr view "${GITLAB_MERGE_REQUEST_ID}" --comments=false 2>/dev/null
+}

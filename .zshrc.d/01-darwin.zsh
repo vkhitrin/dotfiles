@@ -1,6 +1,7 @@
 [[ "$OSTYPE" == darwin* ]] || return
 
-export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${HOME}/.local/share/nvim/mason/bin:${PATH}"
+export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${HOME}/.local/share/nvim/mason/bin:/Users/vkhitrin/.lmstudio/bin:${PATH}"
+
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
 
 # Source zsh-completion

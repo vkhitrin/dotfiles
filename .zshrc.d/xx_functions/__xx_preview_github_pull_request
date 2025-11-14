@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+
+function __xx_preview_github_pull_request() {
+    local GITHUB_PROJECT="${1}"
+    local GITHUB_PROJECT_PR="${2}"
+    local GITHUB_PROJECT_PR_URL="${3}"
+    
+    if [[ -z "${GITHUB_PROJECT}" || -z "${GITHUB_PROJECT_PR}" ]]; then
+        echo "Invalid pull request information"
+        return 1
+    fi
+    
+    # Display PR details without comments for preview
+    gh pr view --repo "${GITHUB_PROJECT}" "${GITHUB_PROJECT_PR}" 2>/dev/null
+}

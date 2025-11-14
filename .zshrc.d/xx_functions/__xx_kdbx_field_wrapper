@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+
+read -r ENTRY
+
+if [ -z "${ENTRY}" ]; then
+    echo "Error: No entry received"
+    exit 1
+fi
+
+if [ -z "${TMUX}" ]; then
+    echo "Error: Not in tmux"
+    exit 1
+fi
+
+source ~/.zshrc.d/xx_functions/__xx_copy_kdbx_field
+__xx_copy_kdbx_field "${HOME}/.config/kdbx_database.txt" "${ENTRY}"

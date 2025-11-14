@@ -1,0 +1,125 @@
+__xx_copy_kdbx_field() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+    source ~/.zshrc.d/xx_functions/__xx_tempfile
+    
+    local KDBX_DESCRIPTION_FILE="${1}"
+    local ENTRY="${2}"
+    
+    if [ -z "${TMUX}" ]; then
+        __xx_notify "#[fg=#d20f39,bold]This option is only available inside tmux!#[default]" 1000
+        return 1
+    fi
+    
+    if [ ! -f "${KDBX_DESCRIPTION_FILE}" ]; then
+        __xx_notify "#[fg=#d20f39,bold]File '${KDBX_DESCRIPTION_FILE}' doesn't exist!#[default]" 1000
+        return 1
+    fi
+    
+    local KDBX_FILE=$(cat "${KDBX_DESCRIPTION_FILE}")
+    
+    # Get entry details with sensitive fields
+    local ENTRY_DATA=$(kdbx show "${ENTRY}" --database="${KDBX_FILE}" --use-keyring --show-sensitive 2>/dev/null)
+    
+    if [ -z "${ENTRY_DATA}" ]; then
+        __xx_notify "#[fg=#d20f39,bold]KeePass entry '${ENTRY}' not found or has no data#[default]" 1000
+        return 0
+    fi
+    
+    # Parse fields from the entry data (format: "Field: Value")
+    # Filter out empty lines and extract field names
+    local FIELDS=$(echo "${ENTRY_DATA}" | ${XX_GNU_AWK_COMMAND} '
+        /^[[:space:]]*[A-Za-z][^:]*:[[:space:]]/ {
+            # Extract field name (everything before first colon)
+            match($0, /^[[:space:]]*([^:]+):/, arr)
+            field = arr[1]
+            # Trim whitespace
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", field)
+            # Skip if field name contains http/https (likely not a field label)
+            if (field !~ /^https?$/) {
+                print field
+            }
+        }
+    ')
+    
+    if [ -z "${FIELDS}" ]; then
+        __xx_notify "#[fg=#d20f39,bold]KeePass entry '${ENTRY}' has no copyable fields#[default]" 1000
+        return 0
+    fi
+    
+    # Write fields to temp file for gum to read
+    local TEMP_FIELDS=$(__xx_tempfile "xx-kdbx-fields")
+    local TEMP_RESULT=$(__xx_tempfile "xx-kdbx-field")
+    echo "${FIELDS}" > "${TEMP_FIELDS}"
+    
+    # Calculate popup dimensions
+    local field_count=$(echo "${FIELDS}" | wc -l | tr -d ' ')
+    local max_field_length=$(echo "${FIELDS}" | awk '{print length}' | sort -rn | head -1)
+    local pane_width=$(tmux display-message -p '#{pane_width}')
+    local pane_height=$(tmux display-message -p '#{pane_height}')
+    
+    local popup_width=$(( max_field_length + 30 ))
+    if [ $popup_width -lt 40 ]; then
+        popup_width=40
+    elif [ $popup_width -gt $((pane_width - 4)) ]; then
+        popup_width=$((pane_width - 4))
+    fi
+    
+    local popup_height=$(( field_count + 8 ))
+    if [ $popup_height -lt 10 ]; then
+        popup_height=10
+    elif [ $popup_height -gt $((pane_height - 4)) ]; then
+        popup_height=$((pane_height - 4))
+    fi
+    
+    # Show gum choose in popup
+    tmux display-popup \
+        -h ${popup_height} \
+        -w ${popup_width} \
+        -S 'fg=#7391e8' \
+        -T '#[align=absolute-centre] Select Field to Copy #[align=right]' \
+        -E "cat '${TEMP_FIELDS}' | gum choose \
+                --header='Choose a field from ${ENTRY}:' \
+                --header.foreground='#7391e8' \
+                --header.bold \
+                --cursor.foreground='#7391e8' \
+                --item.foreground='#e0def4' \
+                --selected.foreground='#313244' \
+                --selected.background='#7391e8' > '${TEMP_RESULT}'"
+    
+    # Check if a field was selected and copy it
+    if [ -s "${TEMP_RESULT}" ]; then
+        local SELECTED_FIELD=$(cat "${TEMP_RESULT}")
+        rm -f "${TEMP_RESULT}"
+        rm -f "${TEMP_FIELDS}"
+        
+        # Extract the field value from the entry data using awk to handle special characters
+        local FIELD_VALUE=$(echo "${ENTRY_DATA}" | awk -F': ' -v field="${SELECTED_FIELD}" '
+            BEGIN { found=0; value="" }
+            {
+                # Trim leading/trailing whitespace from the line
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "")
+                # Check if this line starts with our field name followed by colon
+                if ($0 ~ "^" field "[[:space:]]*:") {
+                    # Extract everything after the first ": "
+                    sub("^[^:]+:[[:space:]]*", "")
+                    value = $0
+                    found = 1
+                    exit
+                }
+            }
+            END { if (found) print value }
+        ')
+        
+        if [ -n "${FIELD_VALUE}" ]; then
+            printf '%s' "${FIELD_VALUE}" | ${XX_CLIPBOARD_COMMAND}
+            __xx_notify "Copied '${SELECTED_FIELD}' from KeePass entry '${ENTRY}'" 1000
+        else
+            __xx_notify "#[fg=#d20f39,bold]Failed to retrieve field '${SELECTED_FIELD}'#[default]" 1000
+        fi
+    else
+        rm -f "${TEMP_RESULT}"
+        rm -f "${TEMP_FIELDS}"
+    fi
+}

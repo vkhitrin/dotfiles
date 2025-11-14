@@ -1,15 +1,15 @@
 __xx_get_obsidian_notes() {
     local XX_OBSIDIAN_VAULT_DIR=${1}
-    local NOTES=$(find ${XX_OBSIDIAN_VAULT_DIR} -type f -name "*.md")
+    local NOTES=$(find "${XX_OBSIDIAN_VAULT_DIR}" -type f -name "*.md")
     if [ -n "${NOTES}" ]; then
         {
-            echo "NOTE,PATH,VAULT"
+            echo "NOTE\tPATH\tVAULT"
             while IFS= read -r note; do
               note_name=$(basename "${note}" ".md")
               vault_name=$(basename ${XX_OBSIDIAN_VAULT_DIR})
-              echo "${note_name},${note},${vault_name}"
+              echo "${note_name}\t${note}\t${vault_name}"
             done <<< "${NOTES}"
-        } | column -t -s ',' | sort -r
+        } | column -t -s $'\t' | sort -r
     else
         echo "No notes found"
     fi

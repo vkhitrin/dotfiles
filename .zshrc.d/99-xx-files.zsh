@@ -1,17 +1,22 @@
 function gpx() {
     # xx {"tags": "git,shell", "description": "Navigate to local git projects", "subshell": "PARTIAL", "cache": false}
     local STARTING_PATH="${1:-${HOME}/Projects/}"
+    local REFRESH_CACHE="${2:-false}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="CTRL+O: Browse | CTRL+T: Open In New Tmux Window"
+    local TEXT_PROMPT="CTRL+O: Browse | CTRL+T: Open In New Tmux Window | CTRL+R: Refresh Cache | CTRL+P: Toggle Preview"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
     BIND_OPTIONS+="--bind=ctrl-o:execute-silent(cd {}; git open)"
+    BIND_OPTIONS+="--bind=ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_git_directories; __xx_get_git_directories '${STARTING_PATH}' true 2>/dev/null)"
+    BIND_OPTIONS+="--bind=ctrl-p:toggle-preview"
+    BIND_OPTIONS+="--preview-window=right:70%:hidden:wrap"
+    BIND_OPTIONS+="--preview=source ~/.zshrc.d/xx_functions/__xx_preview_git_repo; __xx_preview_git_repo {}"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=enter:become(echo {})"
         TEXT_PROMPT+=" | ENTER: Navigate To Directory"
     else
         BIND_OPTIONS+="--bind=start:unbind(enter)"
     fi
-    local SELECTED_DIR=$(__xx_get_git_directories "${STARTING_PATH}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
+    local SELECTED_DIR=$(__xx_get_git_directories "${STARTING_PATH}" "${REFRESH_CACHE}" 2>/dev/null | fzf --border-label " Git Projects Under '${STARTING_PATH}' " \
         --info=inline --color 'border:#fab387,label:#fab387,header:#fab387' \
         --prompt "> Filter " --header "${TEXT_PROMPT}" --scheme=path \
         ${BIND_OPTIONS[@]}

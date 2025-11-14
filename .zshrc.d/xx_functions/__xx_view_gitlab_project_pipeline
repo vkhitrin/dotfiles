@@ -1,18 +1,53 @@
 __xx_view_gitlab_project_pipeline() {
     local GITLAB_HOST="${1}"
     local GITLAB_PROJECT="${2}"
-    local GITLAB_CI_PIPELINE_ID=$(echo "${3}" | gsed -n 's/.*#\([0-9]\+\)$/\1/p')
+    local PIPELINE_STATE="${3}"
 
-    [[ ! -z ${GITLAB_CI_PIPELINE_ID} ]] || exit
+    # Strip ANSI codes from the state field
+    local CLEAN_STATE=$(printf '%s' "${PIPELINE_STATE}" | sed -E 's/\x1b\[[0-9;]*m//g')
+    
+    # Extract pipeline ID from the state field (format: "(status) • #ID")
+    local GITLAB_CI_PIPELINE_ID=$(printf '%s' "${CLEAN_STATE}" | sed -E 's/.*#([0-9]+).*/\1/')
+    
+    if [[ -z "${GITLAB_CI_PIPELINE_ID}" ]]; then
+        echo "Unable to extract pipeline ID from: ${CLEAN_STATE}"
+        return 1
+    fi
+
+    [[ ! -z ${GITLAB_CI_PIPELINE_ID} ]] || return 1
+
+    # URL encode the project path
+    local PROJECT_ENCODED=$(echo "${GITLAB_PROJECT}" | sed 's/\//%2F/g')
 
     for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
-        if [[ -n "${TMUX}" ]]; then
-            tmux display-popup -h 80% -w 80% \
-                -S 'fg=#fca326' -T "#[align=absolute-centre] GitLab - ${GITLAB_PROJECT} Pipeline #${GITLAB_CI_PIPELINE_ID} #[align=right]" \
-                -E "tmux new-session -s xx_popup '{GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo ${GITLAB_PROJECT} ci get -p ${GITLAB_CI_PIPELINE_ID} -d --with-variables; echo -e \"\n\e[90mView this pipeline on GitLab: http://${GITLAB_HOST}/${GITLAB_PROJECT}/-/pipelines/${GITLAB_CI_PIPELINE_ID}\e[0m\"} | less -r; tmux kill-session -t xx_popup' \; set-option status off" && break
-
-        else
-            zsh -i -c "GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab --repo '${GITLAB_PROJECT}' ci get -p '${GITLAB_CI_PIPELINE_ID}' -d --with-variables; echo -e '\nView this pipeline on GitLab: http://${GITLAB_HOST}/${GITLAB_PROJECT}/-/pipelines/${GITLAB_CI_PIPELINE_ID}' | less -r" && break
+        # Get pipeline details
+        local pipeline_data=$(GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab api "projects/${PROJECT_ENCODED}/pipelines/${GITLAB_CI_PIPELINE_ID}" 2>/dev/null)
+        if [[ -n "${pipeline_data}" ]] && [[ ! "${pipeline_data}" =~ "404" ]]; then
+            printf '\033[1;33mPipeline #%s:\033[0m\n' "${GITLAB_CI_PIPELINE_ID}"
+            echo "${pipeline_data}" | jq -r '"Status: \(.status)\nRef: \(.ref)\nSHA: \(.sha[:8])\nCreated: \(.created_at | sub("T"; " ") | sub("\\..*"; ""))\nUpdated: \(.updated_at | sub("T"; " ") | sub("\\..*"; ""))\nDuration: \(.duration)s\nURL: \(.web_url)"' 2>/dev/null
+            echo
+            
+            # Get pipeline jobs (using correct API endpoint - excludes retries by default)
+            printf '\033[1;33mJobs:\033[0m\n'
+            local jobs_output=$(GLAB_CONFIG_DIR=$(dirname ${CONFIG_FILE}) GITLAB_HOST=${GITLAB_HOST} glab api "projects/${PROJECT_ENCODED}/pipelines/${GITLAB_CI_PIPELINE_ID}/jobs?per_page=100" 2>/dev/null | \
+                jq -r 'sort_by(.stage, .name) | .[] | "\(.status) - \(.name) (stage: \(.stage))"' 2>/dev/null)
+            
+            if [[ -z "${jobs_output}" ]]; then
+                echo "No jobs found for this pipeline (may have YAML errors or no jobs created)"
+            else
+                echo "${jobs_output}" | awk '{
+                    if ($0 ~ /^success/) {
+                        print "\033[32m" $0 "\033[0m"
+                    } else if ($0 ~ /^failed/) {
+                        print "\033[31m" $0 "\033[0m"
+                    } else if ($0 ~ /^canceled/ || $0 ~ /^skipped/ || $0 ~ /^manual/) {
+                        print "\033[90m" $0 "\033[0m"
+                    } else {
+                        print $0
+                    }
+                }'
+            fi
+            break
         fi
     done
 }

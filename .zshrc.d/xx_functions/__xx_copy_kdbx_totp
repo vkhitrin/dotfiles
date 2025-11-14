@@ -1,14 +1,15 @@
 __xx_copy_kdbx_totp() {
+    source ~/.zshrc.d/xx_functions/__xx_notify
     local KDBX_DESCRIPTION_FILE="${1}"
     local ENTRY="${2}"
     if [ -f "${KDBX_DESCRIPTION_FILE}" ]; then
         local KDBX_FILE=$(cat "${KDBX_DESCRIPTION_FILE}")
         local KDBX_ENTRY_PASSWORD=$(kdbx totp "${ENTRY}" --database="${KDBX_FILE}" --use-keyring | cat)
         if [ -z "${KDBX_ENTRY_PASSWORD}" ]; then
-            tmux display-message -d '1000' "#[fg=#d20f39,bold]KeePass Entry '${ENTRY}' has no TOTP#[default]" > /dev/null 2>&1 || true
+            __xx_notify "#[fg=#d20f39,bold]KeePass Entry '${ENTRY}' has no TOTP#[default]" 1000
         else
             echo "${KDBX_ENTRY_PASSWORD}" | ${XX_CLIPBOARD_COMMAND}
-            tmux display-message -d '1000' "Copied TOTP from KeePass entry '${ENTRY}'" > /dev/null 2>&1 || true
+            __xx_notify "Copied TOTP from KeePass entry '${ENTRY}'" 1000
         fi
     else
         echo "File '${KDBX_DESCRIPTION_FILE}' doesn't exist!"
