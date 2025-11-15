@@ -22,7 +22,7 @@ __xx_cache_github_repositories_to_sqlite() {
         echo "Wipe table data"
         sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Repositories;"
     fi
-    # Fetch repositories "owned" by current user
+
     gh api /user/repos --paginate -q '.[] | select(.fork == false) | [.svn_url, .full_name, .id] | @csv' | while IFS= read -r PROJECT_DETAILS; do
         sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Repositories (svn_url, full_name, id) VALUES (${PROJECT_DETAILS});"
     done

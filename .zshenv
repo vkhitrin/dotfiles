@@ -9,7 +9,8 @@ export FZF_DEFAULT_OPTS=" \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#f4e0dc,pointer:#f5e0dc \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#f4e0dc,hl+:#f38ba8 \
---color=selected-bg:#45475a --highlight-line --no-mouse --tmux 75%"
+--color=selected-bg:#45475a --highlight-line --no-mouse --tmux 75% \
+--wrap-sign ''"
 
 # bat
 export BAT_THEME='Catppuccin Mocha'
@@ -24,6 +25,9 @@ export KUBECONFIG=$(find "$HOME/.kube" -maxdepth 1 -type f | xargs | sed -e 's/ 
 export KUBECTL_COMMAND="kubectl"
 export ANSIBLE_HOME="${HOME}/.local/share/ansible"
 export GLAMOUR_STYLE="${HOME}/.config/glamour/catppuccin-mocha.json"
+
+# GitLab
+export GLAB_GLAMOUR_STYLE="${HOME}/.config/glamour/catppuccin-mocha.json"
 
 # gcloud
 export CLOUDSDK_PYTHON_SITEPACKAGES=1
@@ -56,6 +60,7 @@ fi
 if [[ -f "/opt/homebrew/bin/socktainer" && $(uname) == "Darwin" ]];then
     export DOCKER_HOST=unix://${HOME}/.socktainer/container.sock
     export DOCKER_BUILDKIT=0
+    export TESTCONTAINERS_RYUK_DISABLED=true
 fi
 
 # OpenCode

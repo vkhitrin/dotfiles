@@ -14,8 +14,12 @@
     fast-puf = "!git adda; git amendit; git puf"
     rename-branch = branch --move
     rm-branch = branch -D
-    update-submodules-remote = "submodule update --recursive --remote"
+    submodule-update-remote = "submodule update --recursive --remote"
     root = rev-parse --show-toplevel
+    dno = diff --name-only
+    fzf = "! fzf --info=inline --color 'border:#fab387,label:#fab387,header:#fab387' \
+        --prompt '> Filter '"
+    test = "!git for-each-ref --format='%(refname:short)' refs/heads/ | git fzf --border-label ' Branches ' --bind='enter:become(git checkout {})'"
 [pull]
     rebase = true
 [init]

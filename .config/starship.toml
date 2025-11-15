@@ -13,6 +13,7 @@ truncation_symbol = ""
 
 [custom.mise_tools]
 format = "[󱁤 $output]($style)"
+shell = ["sh", "--noprofile", "--noprofile"]
 command = "mise current | xargs"
 # detect_files = [".mise.toml", "mise.toml"]
 when = "mise doctor --json | jq -e '.toolset | flatten | .[]'"
@@ -28,6 +29,7 @@ description = "display mise tools"
 
 [custom.apple_container]
 format = "[ container]($style) "
+shell = ["sh", "--noprofile", "--noprofile"]
 when = "uname | grep Darwin && container system status"
 style = "bold teal"
 symbol = " "
@@ -35,6 +37,7 @@ description = "display if Apple container is running"
 
 [custom.socktainer]
 format = "[  socktainer]($style) "
+shell = ["sh", "--noprofile", "--noprofile"]
 when = "uname | grep Darwin && pgrep socktainer"
 style = "bold teal"
 symbol = " "

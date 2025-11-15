@@ -18,7 +18,6 @@ fi
 if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
     source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
     FAST_HIGHLIGHT[chroma-man]=
-    # NOTE: After upgrading to 1.56, this theme doesn't work anymore
     fast-theme XDG:catppuccin-mocha > /dev/null 2>/dev/null
 fi
 
