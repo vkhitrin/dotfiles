@@ -14,8 +14,9 @@
     fast-puf = "!git adda; git amendit; git puf"
     rename-branch = branch --move
     rm-branch = branch -D
-    update-submodules-remote = "submodule update --recursive --remote"
+    submodule-update-remote = "submodule update --recursive --remote"
     root = rev-parse --show-toplevel
+    dno = diff --name-only
 [pull]
     rebase = true
 [init]
