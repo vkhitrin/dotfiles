@@ -1,3 +1,9 @@
 vim.loader.enable()
-require("settings") -- settings
-require("plugins")  -- configure plugins using lazy.nvim
+
+require("config.options")
+require("config.keymaps")
+require("config.autocmds")
+require("config.lazy")
+
+-- Load private settings
+pcall(require, "settings.private.mac")

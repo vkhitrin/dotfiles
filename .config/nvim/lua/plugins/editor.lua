@@ -1,29 +1,36 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-
-local plugins = {
+return {
 	{
-		"https://github.com/catppuccin/nvim",
-		priority = 1000,
-		config = function()
-			require("plugins.ui.catppuccin")
-		end,
-	},
-	{
-		"https://github.com/nvim-treesitter/nvim-treesitter",
-		lazy = false,
-		branch = "main",
-		build = ":TSUpdate",
-		config = function()
-			require("plugins.editor.treesitter")
-		end,
-	},
-	{
-		"https://github.com/folke/snacks.nvim",
+		"folke/snacks.nvim",
 		priority = 1000,
 		lazy = false,
-		config = function()
-			require("plugins.editor.snacks")
-		end,
+		opts = {
+			bigfile = { enabled = true },
+			dashboard = { enabled = false },
+			dim = { enabled = false },
+			explorer = { enabled = true },
+			indent = { enabled = true, animate = { enabled = false } },
+			input = { enabled = true },
+			lazygit = { enabled = true },
+			notifier = { enabled = false },
+			picker = {
+				enabled = true,
+				styles = {
+					backdrop = false,
+				},
+				sources = {
+					files = { hidden = true, ignored = true },
+					explorer = { hidden = true, ignored = true },
+				},
+			},
+			quickfile = { enabled = true },
+			scope = { enabled = true },
+			scroll = { enabled = false },
+			statuscolumn = { enabled = true },
+			words = { enabled = true },
+			win = {
+				backdrop = false,
+			},
+		},
 		keys = {
 			{
 				"<leader><space>",
@@ -88,7 +95,6 @@ local plugins = {
 				end,
 				desc = "Recent",
 			},
-			-- git
 			{
 				"<leader>gb",
 				function()
@@ -138,7 +144,6 @@ local plugins = {
 				end,
 				desc = "Git Log File",
 			},
-			-- Grep
 			{
 				"<leader>sb",
 				function()
@@ -161,7 +166,6 @@ local plugins = {
 				desc = "Visual selection or word",
 				mode = { "n", "x" },
 			},
-			-- search
 			{
 				'<leader>s"',
 				function()
@@ -182,13 +186,6 @@ local plugins = {
 					Snacks.picker.autocmds()
 				end,
 				desc = "Autocmds",
-			},
-			{
-				"<leader>sb",
-				function()
-					Snacks.picker.lines()
-				end,
-				desc = "Buffer Lines",
 			},
 			{
 				"<leader>sc",
@@ -309,7 +306,6 @@ local plugins = {
 				end,
 				desc = "Colorschemes",
 			},
-			-- LSP
 			{
 				"gd",
 				function()
@@ -360,7 +356,6 @@ local plugins = {
 				end,
 				desc = "LSP Workspace Symbols",
 			},
-			-- Other
 			{
 				"<leader>.",
 				function()
@@ -432,16 +427,14 @@ local plugins = {
 			vim.api.nvim_create_autocmd("User", {
 				pattern = "VeryLazy",
 				callback = function()
-					-- Setup some globals for debugging (lazy-loaded)
 					_G.dd = function(...)
 						Snacks.debug.inspect(...)
 					end
 					_G.bt = function()
 						Snacks.debug.backtrace()
 					end
-					vim.print = _G.dd -- Override print to use snacks for `:=` command
+					vim.print = _G.dd
 
-					-- Create some toggle mappings
 					Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
 					Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
 					Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
@@ -462,88 +455,8 @@ local plugins = {
 		end,
 	},
 	{
-		"https://github.com/lewis6991/gitsigns.nvim",
-		config = function()
-			require("plugins.ui.gitsigns")
-		end,
-	},
-	{
-		"https://github.com/mason-org/mason.nvim",
-		dependencies = {
-			"WhoIsSethDaniel/mason-tool-installer.nvim",
-			{ "williamboman/mason-lspconfig.nvim" },
-			"neovim/nvim-lspconfig",
-		},
-		build = ":MasonUpdate",
-		lazy = false,
-		config = function()
-			require("plugins.editor.mason")
-			require("plugins.lsp.mason-lsp")
-		end,
-		keys = {
-			{
-				"<leader>li",
-				":LspInfo<cr>",
-				desc = "LSP Info",
-			},
-			{
-				"<leader>ln",
-				":NullLsInfo<cr>",
-				desc = "null-ls Info",
-			},
-		},
-	},
-	{
-		"https://github.com/nvimtools/none-ls.nvim",
-		dependencies = {
-			"nvimtools/none-ls-extras.nvim",
-		},
-	},
-	{
-		"https://github.com/jay-babu/mason-null-ls.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		config = function()
-			require("plugins.lsp.mason-none-ls")
-		end,
-	},
-	{
-		"https://github.com/folke/trouble.nvim",
-		config = function()
-			require("plugins.lsp.trouble")
-		end,
-		keys = {
-			{
-				"<leader>xx",
-				"<cmd>Trouble diagnostics toggle<cr>",
-				desc = "Diagnostics (Trouble)",
-			},
-			{
-				"<leader>xX",
-				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-				desc = "Buffer Diagnostics (Trouble)",
-			},
-			{
-				"<leader>cs",
-				"<cmd>Trouble symbols toggle focus=false<cr>",
-				desc = "Symbols (Trouble)",
-			},
-			{
-				"<leader>xL",
-				"<cmd>Trouble loclist toggle<cr>",
-				desc = "Location List (Trouble)",
-			},
-			{
-				"<leader>xQ",
-				"<cmd>Trouble qflist toggle<cr>",
-				desc = "Quickfix List (Trouble)",
-			},
-		},
-	},
-	{
-		"https://github.com/folke/todo-comments.nvim",
-		config = function()
-			require("plugins.editor.todo-comments")
-		end,
+		"folke/todo-comments.nvim",
+		opts = {},
 		keys = {
 			{
 				"<leader>st",
@@ -555,192 +468,67 @@ local plugins = {
 		},
 	},
 	{
-		"https://github.com/folke/which-key.nvim",
+		"folke/which-key.nvim",
 		event = "VeryLazy",
 		init = function()
 			vim.o.timeout = true
 			vim.o.timeoutlen = 300
 		end,
-		config = function()
-			require("plugins.editor.which-key")
-		end,
-	},
-	{ "https://github.com/mfussenegger/nvim-ansible.git" },
-	{ "https://github.com/echasnovski/mini.surround", opts = {} },
-	{
-		"https://github.com/nvim-mini/mini.diff",
-		config = function()
-			require("plugins.ui.mini-diff")
-		end,
-	},
-	{ "https://github.com/b0o/schemastore.nvim" },
-	{
-		"https://github.com/Saghen/blink.cmp",
-		dependencies = {
-			"https://github.com/onsails/lspkind.nvim",
-			"https://github.com/Kaiser-Yang/blink-cmp-git",
-			"https://github.com/bydlw98/blink-cmp-env",
-		},
-		build = "cargo build --release",
-		config = function()
-			require("plugins.editor.blink")
-		end,
-	},
-	{ "https://github.com/romainl/vim-cool" },
-	{
-		"https://github.com/RRethy/vim-illuminate",
-		config = function()
-			require("plugins.editor.vim-illuminate")
+		opts = function()
+			local wk = require("which-key")
+			local mappings = {}
+			mappings = {
+				{ "<leader>l", group = "+LSP/Diagnostics" },
+				{ "<leader>lx", group = "+Trouble" },
+				{ "<leader>y", '"+y', desc = "Copy current selection to clipboard", mode = "x" },
+			}
+			wk.add(mappings)
+			return {
+				win = {
+					border = "none",
+				},
+			}
 		end,
 	},
 	{
-		"https://github.com/ray-x/lsp_signature.nvim",
-		event = "VeryLazy",
+		"MagicDuck/grug-far.nvim",
 		opts = {},
-		config = function()
-			require("plugins.lsp.lsp-signature")
-		end,
-	},
-	{
-		"https://github.com/koppchen/helm-ls.nvim",
-		ft = "helm",
-		opts = {
-			conceal_templates = {
-				enabled = false,
-			},
-		},
-	},
-	{
-		"https://github.com/cenk1cenk2/schema-companion.nvim",
-		dependencies = {
-			"https://github.com/neovim/nvim-lspconfig",
-			"https://github.com/nvim-lua/plenary.nvim",
-		},
-		config = function()
-			require("schema-companion").setup({})
-		end,
-	},
-	{
-		"https://github.com/nvim-lualine/lualine.nvim",
-		config = function()
-			require("plugins.ui.lualine")
-		end,
-	},
-	{
-		"https://github.com/mfussenegger/nvim-dap",
-		disabled = true,
-		config = function()
-			require("plugins.editor.dap")
-		end,
-	},
-	{ "https://github.com/vkhitrin/vim-tera" },
-	{ "https://github.com/pdurbin/vim-tsv" },
-	{
-		"https://github.com/MagicDuck/grug-far.nvim",
-		config = function()
-			require("plugins.editor.grug-far")
-		end,
 		keys = {
-			{
-				"<leader>F",
-				"<cmd>lua require('grug-far').toggle_instance({ instanceName='far', staticTitle='Find and Replace' })<CR>",
-				desc = "Spectre",
-			},
+			{ "<leader>F", "<cmd>lua require('grug-far').toggle_instance({ instanceName='far', staticTitle='Find and Replace' })<CR>", desc = "Spectre" },
 		},
 	},
-	{ "https://github.com/nvim-tree/nvim-web-devicons" },
 	{
-		"https://github.com/windwp/nvim-ts-autotag",
-		config = function()
-			require("plugins.editor.nvim-ts-autotag")
-		end,
+		"romainl/vim-cool",
 	},
 	{
-		"https://github.com/MeanderingProgrammer/render-markdown.nvim",
-		ft = { "opencode_output", "markdown", "markdown.floating_window" },
-		config = function()
-			require("plugins.ui.render-markdown")
-		end,
+		"echasnovski/mini.surround",
+		opts = {},
 	},
 	{
-		"https://github.com/fladson/vim-kitty",
-	},
-	{ "https://github.com/projectfluent/fluent.vim" },
-	{
-		"https://github.com/psliwka/vim-dirtytalk",
-		build = ":DirtytalkUpdate",
-		config = function()
-			vim.opt.spell = true
-			vim.opt.spelllang = { "en", "programming" }
-		end,
-	},
-	{
-		"https://github.com/mrcjkb/rustaceanvim",
-		version = "^6",
-		lazy = false,
-	},
-	{
-		"https://gitlab.com/HiPhish/jinja.vim",
-	},
-	{
-		"https://github.com/m-pilia/vim-pkgbuild",
-	},
-	{
-		"https://github.com/obsidian-nvim/obsidian.nvim",
+		"obsidian-nvim/obsidian.nvim",
 		version = "*",
 		lazy = true,
 		ft = "markdown",
-		config = function()
-			require("plugins.editor.obsidian")
-		end,
-	},
-	{
-		"https://github.com/sudo-tee/opencode.nvim",
-		config = function()
-			require("plugins.editor.opencode")
-		end,
-	},
-	-- https://github.com/nvim-java/nvim-java/issues/427
-	-- {
-	--     "https://github.com/nvim-java/nvim-java",
-	--     config = function()
-	--         require("plugins.editor.java")
-	--     end,
-	-- },
-	{ "https://github.com/Bekaboo/dropbar.nvim", opts = {} },
-	{ "https://github.com/chrisgrieser/nvim-justice", ft = "just", opts = {} },
-	{ "https://github.com/ngynkvn/gotmpl.nvim", opts = {} },
-	{
-		"https://github.com/cachebag/nvim-tcss",
-		config = true,
-	},
-}
-
-local opts = {
-	install = {
-		colorscheme = { "catppuccin" },
-	},
-	ui = {
-		backdrop = 100,
-		border = "rounded",
-		title = " Lazy Plugin Manager ",
-		icons = {
-			loaded = "󰸞",
-			not_loaded = "",
+		opts = {
+			workspaces = {
+				{
+					name = "Personal",
+					path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Personal",
+				},
+				{
+					name = "Work",
+					path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Work",
+				},
+			},
+			completion = {
+				nvim_cmp = false,
+				blink = true,
+			},
+			picker = {
+				name = "snacks.pick",
+			},
+			ui = { enable = false },
+			legacy_commands = false,
 		},
 	},
 }
-
-if not vim.loop.fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable",
-		lazypath,
-	})
-end
-vim.opt.rtp:prepend(lazypath)
-
-require("lazy").setup(plugins, opts)

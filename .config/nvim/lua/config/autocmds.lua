@@ -17,7 +17,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	desc = "LSP actions",
 	callback = function(event)
 		local opts = { buffer = event.buf }
-		-- vim.keymap.set("n", "K", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
 		vim.keymap.set("n", "gE", function()
 			vim.diagnostic.open_float({ focusable = true })
 		end, { desc = "Expand an Error into a float" })
@@ -39,33 +38,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
--- vectorcode
--- TODO: See how it can be integrated with opencode
--- vim.api.nvim_create_autocmd("LspAttach", {
---   callback = function()
---     local bufpath = vim.api.nvim_buf_get_name(0)
---     local root = vim.fs.dirname(bufpath)
---     local vc_dir = vim.fs.find(".vectorcode", { path = root, upward = true })[1]
---
---     if not vc_dir then
---       return
---     end
---
---     local bufnr = vim.api.nvim_get_current_buf()
---     local cacher = require("vectorcode.config").get_cacher_backend()
---     local utils = require("vectorcode.cacher").utils
---
---     utils.async_check("config", function()
---       cacher.register_buffer(bufnr, {
---         n_query = 10,
---       })
---     end, nil)
---   end,
---   desc = "Register buffer for VectorCode if `.vectorcode` exists",
--- })
-
--- Custom support for 'dotfiles' alias-like behavior
--- TODO: Update various plugin to look for the git dir
 vim.api.nvim_create_autocmd("VimEnter", {
 	callback = function()
 		local cwd = vim.fn.getcwd()
@@ -117,4 +89,49 @@ vim.api.nvim_create_autocmd("FileType", {
 			command = "silent! write",
 		})
 	end,
+})
+
+vim.api.nvim_create_user_command("LspCapabilities", function()
+    local curBuf = vim.api.nvim_get_current_buf()
+    local clients = vim.lsp.get_active_clients({ bufnr = curBuf })
+
+    for _, client in pairs(clients) do
+        if client.name ~= "null-ls" then
+            local capAsList = {}
+            for key, value in pairs(client.server_capabilities) do
+                if value and key:find("Provider") then
+                    local capability = key:gsub("Provider$", "")
+                    table.insert(capAsList, "- " .. capability)
+                end
+            end
+            table.sort(capAsList)
+            local msg = "LSP Server: " .. client.name .. "\n" .. table.concat(capAsList, "\n")
+            vim.notify(msg, "trace", {
+                on_open = function(win)
+                    local buf = vim.api.nvim_win_get_buf(win)
+                    vim.api.nvim_buf_set_option(buf, "filetype", "markdown")
+                end,
+                timeout = 14000,
+            })
+            vim.fn.setreg("+", "Capabilities = " .. vim.inspect(client.server_capabilities))
+        end
+    end
+end, {})
+
+-- Custom filetype detection
+vim.filetype.add({
+	extension = {
+		gotmpl = "gotmpl",
+	},
+	pattern = {
+		[vim.fn.expand("~") .. "/.kube/.*config"] = "yaml",
+		[".*%.gitlab%-ci%.ya?ml"] = "yaml.gitlab",
+		[".*/.zshrc.d/xx_functions/.*"] = "zsh",
+		[".*/templates/.*%.tpl"] = "helm",
+		[".*%.gotmpl"] = "helm",
+		[".*/templates/.*%.ya?ml"] = "helm",
+		["helmfile.*%.ya?ml"] = "helm",
+		["Brewfile"] = "ruby",
+		[".tmux_floating_note.md"] = "markdown.floating_window",
+	},
 })
