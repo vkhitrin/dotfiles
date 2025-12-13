@@ -1,0 +1,29 @@
+__xx_get_aws_parameter_store_entries() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_ssm.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "NAME^TYPE^DESCRIPTION"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT name, type, description FROM Parameters WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            name = $1
+                            type = $2
+                            desc = $3
+                            printf "%s^%s^%s\n", name, type, desc
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_parameter_store_to_sqlite' to cache parameters."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

@@ -1,0 +1,30 @@
+__xx_get_aws_route53_hosted_zones() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_route53.db"
+        local ACCOUNT="${AWS_VAULT}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "ZONE_ID^NAME^TYPE^RECORDS"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT hosted_zone_id, name, private_zone, record_count FROM HostedZones WHERE account = '${ACCOUNT}';" | \
+                        awk -F'|' '{
+                            hosted_zone_id = $1
+                            name = $2
+                            private_zone = $3
+                            record_count = $4
+                            zone_type = (private_zone == "true" ? "Private" : "Public")
+                            printf "%s^%s^%s^%s\n", hosted_zone_id, name, zone_type, record_count
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_route53_hosted_zones_to_sqlite' to cache Route53 hosted zones."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

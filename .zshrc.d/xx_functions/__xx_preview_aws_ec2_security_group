@@ -1,0 +1,61 @@
+__xx_preview_aws_ec2_security_group() {
+    local group_id="$1"
+
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        aws ec2 describe-security-groups --group-ids "${group_id}" --output json 2>/dev/null | \
+            jq -r '
+                .SecurityGroups[0] |
+                "Group ID: \(.GroupId)\n" +
+                "Group Name: \(.GroupName)\n" +
+                "Description: \(.Description)\n" +
+                "VPC ID: \(.VpcId)\n" +
+                "Owner: \(.OwnerId)\n" +
+                "\nInbound Rules:\n" +
+                (if (.IpPermissions | length) > 0 then
+                    ([.IpPermissions[] |
+                        "  [\(.IpProtocol)] Port: \(if .FromPort then "\(.FromPort)-\(.ToPort)" else "All" end)\n" +
+                        "    Sources:\n" +
+                        (if (.IpRanges | length) > 0 then
+                            ([.IpRanges[] | "      CIDR: \(.CidrIp)\(.Description // "")"] | join("\n"))
+                        else "" end) +
+                        (if (.Ipv6Ranges | length) > 0 then
+                            "\n" + ([.Ipv6Ranges[] | "      IPv6: \(.CidrIpv6)\(.Description // "")"] | join("\n"))
+                        else "" end) +
+                        (if (.UserIdGroupPairs | length) > 0 then
+                            "\n" + ([.UserIdGroupPairs[] | "      SG: \(.GroupId)\(.Description // "")"] | join("\n"))
+                        else "" end) +
+                        (if (.PrefixListIds | length) > 0 then
+                            "\n" + ([.PrefixListIds[] | "      Prefix List: \(.PrefixListId)\(.Description // "")"] | join("\n"))
+                        else "" end)
+                    ] | join("\n\n"))
+                else
+                    "  None"
+                end) +
+                "\n\nOutbound Rules:\n" +
+                (if (.IpPermissionsEgress | length) > 0 then
+                    ([.IpPermissionsEgress[] |
+                        "  [\(.IpProtocol)] Port: \(if .FromPort then "\(.FromPort)-\(.ToPort)" else "All" end)\n" +
+                        "    Destinations:\n" +
+                        (if (.IpRanges | length) > 0 then
+                            ([.IpRanges[] | "      CIDR: \(.CidrIp)\(.Description // "")"] | join("\n"))
+                        else "" end) +
+                        (if (.Ipv6Ranges | length) > 0 then
+                            "\n" + ([.Ipv6Ranges[] | "      IPv6: \(.CidrIpv6)\(.Description // "")"] | join("\n"))
+                        else "" end) +
+                        (if (.UserIdGroupPairs | length) > 0 then
+                            "\n" + ([.UserIdGroupPairs[] | "      SG: \(.GroupId)\(.Description // "")"] | join("\n"))
+                        else "" end) +
+                        (if (.PrefixListIds | length) > 0 then
+                            "\n" + ([.PrefixListIds[] | "      Prefix List: \(.PrefixListId)\(.Description // "")"] | join("\n"))
+                        else "" end)
+                    ] | join("\n\n"))
+                else
+                    "  None"
+                end) +
+                "\n\nTags:\n" +
+                ([.Tags[]? | "  \(.Key): \(.Value)"] | join("\n") // "  None")
+            '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

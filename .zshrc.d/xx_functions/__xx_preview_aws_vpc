@@ -1,0 +1,72 @@
+__xx_preview_aws_vpc() {
+    local vpc_id="$1"
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        aws ec2 describe-vpcs --vpc-ids "${vpc_id}" --output json 2>/dev/null | \
+            jq -r '
+                .Vpcs[0] |
+                "VPC ID: \(.VpcId)\n" +
+                "Name: \((.Tags[]? | select(.Key=="Name") | .Value) // "N/A")\n" +
+                "State: \(.State)\n" +
+                "CIDR Block: \(.CidrBlock)\n" +
+                "Additional CIDR Blocks: \([.CidrBlockAssociationSet[]? | select(.CidrBlock != .CidrBlock) | .CidrBlock] | join(", ") // "None")\n" +
+                "IPv6 CIDR Blocks: \([.Ipv6CidrBlockAssociationSet[]?.Ipv6CidrBlock] | join(", ") // "None")\n" +
+                "Is Default: \(.IsDefault)\n" +
+                "DHCP Options Set: \(.DhcpOptionsId)\n" +
+                "Instance Tenancy: \(.InstanceTenancy)\n" +
+                "\nDNS:\n" +
+                "  DNS Hostnames: \(.EnableDnsHostnames // false)\n" +
+                "  DNS Support: \(.EnableDnsSupport // false)\n" +
+                "\nOwner: \(.OwnerId)\n" +
+                "\nTags:\n" +
+                ([.Tags[]? | "  \(.Key): \(.Value)"] | join("\n") // "  None")
+            '
+
+        echo ""
+        echo "Subnets:"
+        echo "========"
+        aws ec2 describe-subnets --filters "Name=vpc-id,Values=${vpc_id}" --output json 2>/dev/null | \
+            jq -r '.Subnets[] | "  [\(.AvailabilityZone)] \(.SubnetId) - \(.CidrBlock) (\(.AvailableIpAddressCount) IPs available)"'
+
+        echo ""
+        echo "Route Tables:"
+        echo "============="
+        local route_tables=$(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=${vpc_id}" --output json 2>/dev/null)
+        if [[ -n "$route_tables" && "$route_tables" != "null" ]]; then
+            echo "$route_tables" | jq -r '.RouteTables[] | "  \(.RouteTableId) (\(if [.Associations[]? | select(.Main == true)] | length > 0 then "Main" else "Custom" end))"'
+        else
+            echo "  None"
+        fi
+
+        echo ""
+        echo "Security Groups:"
+        echo "================"
+        local security_groups=$(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=${vpc_id}" --output json 2>/dev/null)
+        if [[ -n "$security_groups" && "$security_groups" != "null" ]]; then
+            echo "$security_groups" | jq -r '.SecurityGroups[] | "  \(.GroupId) - \(.GroupName): \(.Description)"'
+        else
+            echo "  None"
+        fi
+
+        echo ""
+        echo "Internet Gateways:"
+        echo "=================="
+        local igws=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=${vpc_id}" --output json 2>/dev/null)
+        if [[ -n "$igws" && "$igws" != "null" ]]; then
+            echo "$igws" | jq -r '.InternetGateways[] | "  \(.InternetGatewayId) (State: \(.Attachments[0].State))"'
+        else
+            echo "  None"
+        fi
+
+        echo ""
+        echo "NAT Gateways:"
+        echo "============="
+        local nat_gws=$(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=${vpc_id}" --output json 2>/dev/null)
+        if [[ -n "$nat_gws" && "$nat_gws" != "null" ]]; then
+            echo "$nat_gws" | jq -r '.NatGateways[] | "  \(.NatGatewayId) - \(.State) in \(.SubnetId)"'
+        else
+            echo "  None"
+        fi
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

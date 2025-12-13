@@ -1,0 +1,31 @@
+__xx_get_aws_acm_certificates() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_acm.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "DOMAIN_NAME^STATUS^TYPE^IN_USE^ARN"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT domain_name, cert_status, cert_type, in_use, certificate_arn FROM Certificates WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            domain_name = $1
+                            cert_status = $2
+                            cert_type = $3
+                            in_use = $4
+                            certificate_arn = $5
+                            printf "%s^%s^%s^%s^%s\n", domain_name, cert_status, cert_type, in_use, certificate_arn
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_acm_certificates_to_sqlite' to cache ACM certificates."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

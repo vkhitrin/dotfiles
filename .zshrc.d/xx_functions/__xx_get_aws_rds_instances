@@ -1,0 +1,32 @@
+__xx_get_aws_rds_instances() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_rds.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "DB_IDENTIFIER^ENGINE^VERSION^CLASS^STATUS^ENDPOINT"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT db_identifier, engine, engine_version, instance_class, status, endpoint FROM Instances WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            db_identifier = $1
+                            engine = $2
+                            engine_version = $3
+                            instance_class = $4
+                            status = $5
+                            endpoint = $6
+                            printf "%s^%s^%s^%s^%s^%s\n", db_identifier, engine, engine_version, instance_class, status, endpoint
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_rds_instances_to_sqlite' to cache RDS instances."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

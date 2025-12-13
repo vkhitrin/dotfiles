@@ -1,0 +1,55 @@
+__xx_cache_aws_iam_roles_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS IAM Roles!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_iam.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Roles (account TEXT NOT NULL, role_name TEXT NOT NULL, role_path TEXT NOT NULL, role_id TEXT NOT NULL, role_arn TEXT NOT NULL, create_date TEXT NOT NULL, description TEXT, UNIQUE (account, role_name));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (account TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (account));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Roles WHERE account = '${ACCOUNT}';"
+    fi
+
+    __xx_notify "Fetching IAM roles for account: ${ACCOUNT}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Roles WHERE account = '${ACCOUNT}';"
+
+    aws iam list-roles --output json | \
+        jq -r '.Roles[] | [.RoleName, .Path, .RoleId, .Arn, .CreateDate, (.Description // "N/A")] | @tsv' | \
+        while IFS=$'\t' read -r role_name role_path role_id role_arn create_date description; do
+            role_name_escaped=$(echo "$role_name" | sed "s/'/''/g")
+            role_path_escaped=$(echo "$role_path" | sed "s/'/''/g")
+            role_id_escaped=$(echo "$role_id" | sed "s/'/''/g")
+            role_arn_escaped=$(echo "$role_arn" | sed "s/'/''/g")
+            create_date_escaped=$(echo "$create_date" | sed "s/'/''/g")
+            description_escaped=$(echo "$description" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Roles (account, role_name, role_path, role_id, role_arn, create_date, description) VALUES ('${ACCOUNT}', '${role_name_escaped}', '${role_path_escaped}', '${role_id_escaped}', '${role_arn_escaped}', '${create_date_escaped}', '${description_escaped}');"
+        done
+
+    __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+    SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (account, sync_timestamp) VALUES ('${ACCOUNT}', '${SYNC_TIMESTAMP}');"
+
+    __xx_notify "#[fg=bold]Finished fetching AWS IAM Roles!#[default]"
+}

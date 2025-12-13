@@ -14,14 +14,14 @@ __xx_get_argocd_contexts() {
                 is_current = 1
                 sub(/^\*[ \t]*/, "")
             }
-            
+
             # Extract context name and server
             context = $1
             server = $2
-            
+
             # Skip empty lines
             if (context == "") next
-            
+
             # Apply color if current context
             if (is_current) {
                 printf "\033[1;34m%s\033[0m,%s\n", context, server

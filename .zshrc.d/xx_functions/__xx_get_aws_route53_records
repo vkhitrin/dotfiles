@@ -1,0 +1,31 @@
+__xx_get_aws_route53_records() {
+    local hosted_zone_id="$1"
+    local zone_name="$2"
+
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local FETCH_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        (
+            echo "Fetched: ${FETCH_TIMESTAMP}"
+            echo "TYPE^NAME^TTL^VALUE"
+            aws route53 list-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --output json 2>/dev/null | \
+                jq -r '.ResourceRecordSets[] |
+                    if .AliasTarget then
+                        [.Type, .Name, "ALIAS", .AliasTarget.DNSName]
+                    elif .ResourceRecords then
+                        .ResourceRecords[] | [.Type, .Name, (.TTL // "N/A"), .Value] | @tsv
+                    else
+                        [.Type, .Name, (.TTL // "N/A"), "N/A"]
+                    end |
+                    if type == "array" then @tsv else . end' | \
+                awk -F'\t' '{
+                    record_type = $1
+                    name = $2
+                    ttl = $3
+                    value = $4
+                    printf "%s^%s^%s^%s\n", record_type, name, ttl, value
+                }'
+        ) | __xx_format_columns_ansi "^"
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

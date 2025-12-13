@@ -1,0 +1,56 @@
+__xx_cache_aws_ec2_instances_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS EC2 Instances!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_ec2.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+    local REGION="${AWS_REGION}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Instances (account TEXT NOT NULL, region TEXT NOT NULL, instance_id TEXT NOT NULL, name TEXT, instance_type TEXT NOT NULL, state TEXT NOT NULL, private_ip TEXT, public_ip TEXT, UNIQUE (account, region, instance_id));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (account TEXT NOT NULL, region TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (account, region));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Instances WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+    fi
+
+    __xx_notify "Fetching EC2 instances for account: ${ACCOUNT}, region: ${REGION}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Instances WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+
+    aws ec2 describe-instances --output json | \
+        jq -r '.Reservations[].Instances[] | [.InstanceId, (.Tags[]? | select(.Key=="Name") | .Value // "N/A"), .InstanceType, .State.Name, (.PrivateIpAddress // "N/A"), (.PublicIpAddress // "N/A")] | @tsv' | \
+        while IFS=$'\t' read -r instance_id name instance_type state private_ip public_ip; do
+            instance_id_escaped=$(echo "$instance_id" | sed "s/'/''/g")
+            name_escaped=$(echo "$name" | sed "s/'/''/g")
+            instance_type_escaped=$(echo "$instance_type" | sed "s/'/''/g")
+            state_escaped=$(echo "$state" | sed "s/'/''/g")
+            private_ip_escaped=$(echo "$private_ip" | sed "s/'/''/g")
+            public_ip_escaped=$(echo "$public_ip" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Instances (account, region, instance_id, name, instance_type, state, private_ip, public_ip) VALUES ('${ACCOUNT}', '${REGION}', '${instance_id_escaped}', '${name_escaped}', '${instance_type_escaped}', '${state_escaped}', '${private_ip_escaped}', '${public_ip_escaped}');"
+        done
+
+    __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+    SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (account, region, sync_timestamp) VALUES ('${ACCOUNT}', '${REGION}', '${SYNC_TIMESTAMP}');"
+
+    __xx_notify "#[fg=bold]Finished fetching AWS EC2 Instances!#[default]"
+}

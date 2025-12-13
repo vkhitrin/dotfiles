@@ -5,7 +5,7 @@ function argox() {
     local EXTRA_BIND_OPTIONS="ctrl-s:execute-silent(argocd app sync {1} --server {9})+reload(source ~/.zshrc.d/xx_functions/__xx_get_argocd_applications;__xx_get_argocd_applications {9}),ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_argocd_applications;__xx_get_argocd_applications {9}),ctrl-o:change-preview(argocd app manifests {1} --server {9} 2>/dev/null)+transform-preview-label(printf \" Manifests: %s \" {1})"
     local APPS_TEXT_PROMPT="CTRL+S: Sync App | CTRL+R: Refresh | CTRL+D: Diff | CTRL+L: Logs | CTRL+G: Details | CTRL+O: Manifests | CTRL+P: Toggle Preview"
     local INITIAL_PROMPT="ENTER: Browse Applications"
-    
+
     __xx_get_argocd_contexts | fzf --header-lines=1 \
         --ansi \
         --wrap \

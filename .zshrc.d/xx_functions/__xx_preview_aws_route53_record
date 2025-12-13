@@ -1,0 +1,42 @@
+__xx_preview_aws_route53_record() {
+    local hosted_zone_id="$1"
+    local record_type="$2"
+    local record_name="$3"
+
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        aws route53 list-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --output json 2>/dev/null | \
+            jq --arg type "$record_type" --arg name "$record_name" -r '
+                .ResourceRecordSets[] |
+                select(.Type == $type and .Name == $name) |
+                "Record Type: \(.Type)\n" +
+                "Name: \(.Name)\n" +
+                "TTL: \(.TTL // "N/A")\n" +
+                "\n" +
+                (if .AliasTarget then
+                    "Alias Target:\n" +
+                    "  DNS Name: \(.AliasTarget.DNSName)\n" +
+                    "  Hosted Zone ID: \(.AliasTarget.HostedZoneId)\n" +
+                    "  Evaluate Target Health: \(.AliasTarget.EvaluateTargetHealth)\n"
+                elif .ResourceRecords then
+                    "Resource Records:\n" +
+                    ([.ResourceRecords[] | "  - \(.Value)"] | join("\n")) + "\n"
+                else
+                    "No records\n"
+                end) +
+                "\n" +
+                (if .SetIdentifier then "Set Identifier: \(.SetIdentifier)\n" else "" end) +
+                (if .Weight then "Weight: \(.Weight)\n" else "" end) +
+                (if .Region then "Region: \(.Region)\n" else "" end) +
+                (if .Failover then "Failover: \(.Failover)\n" else "" end) +
+                (if .MultiValueAnswer then "Multi-Value Answer: \(.MultiValueAnswer)\n" else "" end) +
+                (if .GeoLocation then
+                    "GeoLocation:\n" +
+                    ([.GeoLocation | to_entries[] | "  \(.key): \(.value)"] | join("\n")) + "\n"
+                else "" end) +
+                (if .HealthCheckId then "Health Check ID: \(.HealthCheckId)\n" else "" end) +
+                (if .TrafficPolicyInstanceId then "Traffic Policy Instance ID: \(.TrafficPolicyInstanceId)\n" else "" end)
+            '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

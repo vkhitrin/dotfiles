@@ -1,0 +1,46 @@
+__xx_preview_aws_acm_certificate() {
+    local certificate_arn="$1"
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        aws acm describe-certificate --certificate-arn "${certificate_arn}" --output json 2>/dev/null | \
+            jq -r '
+                .Certificate |
+                "Domain Name: \(.DomainName)\n" +
+                "Status: \(.Status)\n" +
+                "Type: \(.Type)\n" +
+                "In Use: \(.InUseBy | length > 0)\n" +
+                "Key Algorithm: \(.KeyAlgorithm)\n" +
+                "Signature Algorithm: \(.SignatureAlgorithm)\n" +
+                "\nARN: \(.CertificateArn)\n" +
+                "\nSubject Alternative Names:\n" +
+                ([.SubjectAlternativeNames[] | "  - \(.)"] | join("\n")) +
+                "\n\nValidity:\n" +
+                "  Issued: \(.IssuedAt // "N/A")\n" +
+                "  Not Before: \(.NotBefore // "N/A")\n" +
+                "  Not After: \(.NotAfter // "N/A")\n" +
+                "  Created: \(.CreatedAt)\n" +
+                "  Imported: \(.ImportedAt // "N/A")\n" +
+                "\nIssuer:\n" +
+                "  Organization: \(.Issuer // "Amazon")\n" +
+                "\nDomain Validation:\n" +
+                ([.DomainValidationOptions[]? | "  Domain: \(.DomainName)\n    Validation Status: \(.ValidationStatus)\n    Validation Method: \(.ValidationMethod // "N/A")\n    Record Name: \(.ResourceRecord.Name // "N/A")\n    Record Type: \(.ResourceRecord.Type // "N/A")\n    Record Value: \(.ResourceRecord.Value // "N/A")"] | join("\n\n")) +
+                "\n\nRenewal:\n" +
+                "  Renewal Eligibility: \(.RenewalEligibility // "N/A")\n" +
+                "  Renewal Status: \(.RenewalSummary.RenewalStatus // "N/A")\n" +
+                "  Updated At: \(.RenewalSummary.UpdatedAt // "N/A")\n" +
+                "\nOptions:\n" +
+                "  Certificate Transparency Logging: \(.Options.CertificateTransparencyLoggingPreference // "N/A")\n" +
+                "\nIn Use By:\n" +
+                (if (.InUseBy | length > 0) then
+                    ([.InUseBy[] | "  - \(.)"] | join("\n"))
+                else
+                    "  (Not in use)"
+                end) +
+                "\n\nExtended Key Usages:\n" +
+                ([.ExtendedKeyUsages[]? | "  - \(.Name)"] | join("\n") // "  None") +
+                "\n\nKey Usages:\n" +
+                ([.KeyUsages[]? | "  - \(.Name)"] | join("\n") // "  None")
+            '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

@@ -1,0 +1,44 @@
+__xx_preview_aws_iam_policy() {
+    local policy_arn="$1"
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        echo "=== Policy Details ==="
+        aws iam get-policy --policy-arn "${policy_arn}" --output json 2>/dev/null | \
+            jq -r '
+                .Policy |
+                "Policy Name: \(.PolicyName)\n" +
+                "Policy ARN: \(.Arn)\n" +
+                "Policy ID: \(.PolicyId)\n" +
+                "Path: \(.Path)\n" +
+                "Create Date: \(.CreateDate)\n" +
+                "Update Date: \(.UpdateDate)\n" +
+                "Attachment Count: \(.AttachmentCount)\n" +
+                "Permissions Boundary Usage Count: \(.PermissionsBoundaryUsageCount)\n" +
+                "Default Version: \(.DefaultVersionId)\n" +
+                "Description: \(.Description // "N/A")"
+            '
+        
+        local version_id=$(aws iam get-policy --policy-arn "${policy_arn}" --output json 2>/dev/null | jq -r '.Policy.DefaultVersionId')
+        
+        if [[ -n "${version_id}" ]]; then
+            echo -e "\n=== Policy Document (${version_id}) ==="
+            aws iam get-policy-version --policy-arn "${policy_arn}" --version-id "${version_id}" --output json 2>/dev/null | \
+                jq -r '.PolicyVersion.Document | @json | fromjson | tostring' | \
+                jq -C '.' 2>/dev/null || echo "Unable to parse policy document"
+        fi
+        
+        echo -e "\n=== Attached To ==="
+        echo "Roles:"
+        aws iam list-entities-for-policy --policy-arn "${policy_arn}" --entity-filter Role --output json 2>/dev/null | \
+            jq -r '.PolicyRoles[]? | "  • \(.RoleName)"' || echo "  None"
+        
+        echo "Users:"
+        aws iam list-entities-for-policy --policy-arn "${policy_arn}" --entity-filter User --output json 2>/dev/null | \
+            jq -r '.PolicyUsers[]? | "  • \(.UserName)"' || echo "  None"
+        
+        echo "Groups:"
+        aws iam list-entities-for-policy --policy-arn "${policy_arn}" --entity-filter Group --output json 2>/dev/null | \
+            jq -r '.PolicyGroups[]? | "  • \(.GroupName)"' || echo "  None"
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

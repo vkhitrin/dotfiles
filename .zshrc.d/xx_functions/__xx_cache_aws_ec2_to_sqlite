@@ -1,0 +1,7 @@
+__xx_cache_aws_ec2_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_cache_aws_ec2_instances_to_sqlite
+    source ~/.zshrc.d/xx_functions/__xx_cache_aws_ec2_security_groups_to_sqlite
+
+    __xx_cache_aws_ec2_instances_to_sqlite > /dev/null 2>&1
+    __xx_cache_aws_ec2_security_groups_to_sqlite > /dev/null 2>&1
+}

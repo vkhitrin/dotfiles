@@ -1,20 +1,20 @@
 __xx_get_argocd_applications() {
     local XX_ARGOCD_SERVER=${1}
-    
+
     # Debug: show what server we received
     if [ -z "${XX_ARGOCD_SERVER}" ]; then
         echo "ERROR: No server provided to __xx_get_argocd_applications"
         return 1
     fi
-    
+
     local APPLICATIONS=$(argocd app list --server "${XX_ARGOCD_SERVER}" 2>/dev/null)
     local EXIT_CODE=$?
-    
+
     if [ ${EXIT_CODE} -ne 0 ]; then
         echo "ERROR: Failed to list applications for server '${XX_ARGOCD_SERVER}'"
         return 1
     fi
-    
+
     if [ -n "${APPLICATIONS}" ]; then
         # Convert to CSV format with colors and format using __xx_format_columns_ansi
         {
@@ -34,7 +34,7 @@ __xx_get_argocd_applications() {
                 health=$6
                 syncpolicy=$7
                 conditions=$8
-                
+
                 # Color code sync status
                 if (status == "Synced")
                     status="\033[1;32m" status "\033[0m"
@@ -42,7 +42,7 @@ __xx_get_argocd_applications() {
                     status="\033[1;33m" status "\033[0m"
                 else
                     status="\033[1;37m" status "\033[0m"
-                
+
                 # Color code health status
                 if (health == "Healthy")
                     health="\033[1;32m" health "\033[0m"
@@ -52,7 +52,7 @@ __xx_get_argocd_applications() {
                     health="\033[1;33m" health "\033[0m"
                 else
                     health="\033[1;37m" health "\033[0m"
-                
+
                 printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n", app, cluster, namespace, project, status, health, syncpolicy, conditions, srv
             }'
         } | __xx_format_columns_ansi ","

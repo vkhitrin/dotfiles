@@ -4,19 +4,19 @@ function __xx_preview_gitlab_project() {
     local PROJECT_PATH="${1}"
     local PROJECT_ID="${2}"
     local GITLAB_URL="${3}"
-    
+
     if [[ -z "${PROJECT_PATH}" || -z "${PROJECT_ID}" || -z "${GITLAB_URL}" ]]; then
         echo "Invalid project information"
         return 1
     fi
-    
+
     # Extract GitLab host from URL
     local GITLAB_HOST=$(echo "${GITLAB_URL}" | sed -E 's|^[a-z]+://([^/.:]+(\.[^/.:]+)*).*|\1|')
-    
+
     # Find the correct config file for this GitLab host
     local CONFIG_FOUND=false
     local CONFIG_DIR=""
-    
+
     for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
         local TEST_CONFIG_DIR=$(dirname ${CONFIG_FILE})
         # Test if this config works by trying to fetch project info
@@ -27,30 +27,30 @@ function __xx_preview_gitlab_project() {
             break
         fi
     done
-    
+
     if [[ "${CONFIG_FOUND}" == "false" ]]; then
         echo "Unable to find credentials for ${GITLAB_HOST}"
         return 1
     fi
-    
+
     # Project name
     printf '\033[1;33mProject:\033[0m\n'
     echo "${PROJECT_PATH}"
     echo
-    
+
     # Fetch project data once
     local project_data=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "projects/${PROJECT_ID}" 2>/dev/null)
-    
+
     # Description
     printf '\033[1;33mDescription:\033[0m\n'
     echo "${project_data}" | jq -r '.description // "No description"' 2>/dev/null
     echo
-    
+
     # Default Branch
     printf '\033[1;33mDefault Branch:\033[0m\n'
     echo "${project_data}" | jq -r '.default_branch // "N/A"' 2>/dev/null
     echo
-    
+
     # Last Activity
     printf '\033[1;33mLast Activity:\033[0m\n'
     local last_activity=$(echo "${project_data}" | jq -r '.last_activity_at // "N/A"' 2>/dev/null)
@@ -60,7 +60,7 @@ function __xx_preview_gitlab_project() {
         echo "N/A"
     fi
     echo
-    
+
     # Languages
     printf '\033[1;33mLanguages:\033[0m\n'
     local languages=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "projects/${PROJECT_ID}/languages" 2>/dev/null)
@@ -70,19 +70,19 @@ function __xx_preview_gitlab_project() {
         echo "No language data"
     fi
     echo
-    
+
     # Recent Commits
     printf '\033[1;33mRecent Commits:\033[0m\n'
     GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "projects/${PROJECT_ID}/repository/commits" --paginate=false 2>/dev/null | \
         jq -r '.[:5] | .[] | "\(.short_id) \(.title)"' 2>/dev/null || echo "Unable to fetch commits"
     echo
-    
+
     # Open Merge Requests
     printf '\033[1;33mOpen Merge Requests:\033[0m\n'
     local mr_count=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "projects/${PROJECT_ID}/merge_requests?state=opened" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
     echo "${mr_count:-0} open merge request(s)"
     echo
-    
+
     # CI/CD Status
     printf '\033[1;33mRecent Pipelines:\033[0m\n'
     GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "projects/${PROJECT_ID}/pipelines" --paginate=false 2>/dev/null | \

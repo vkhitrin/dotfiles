@@ -28,16 +28,16 @@ function brewsx() {
         --bind="ctrl-s:accept" \
         --bind="ctrl-r:accept" \
         --expect="ctrl-s,ctrl-r")
-    
+
     [[ -z "$service" ]] && return
-    
+
     local key=$(echo "$service" | head -1)
     local selected=$(echo "$service" | tail -1)
     local service_name=$(echo "$selected" | awk '{print $1}')
     local service_status=$(echo "$selected" | awk '{print $2}')
-    
+
     [[ -z "$service_name" ]] && return
-    
+
     case "$key" in
         ctrl-s)
             if [[ "$service_status" == "started" ]]; then

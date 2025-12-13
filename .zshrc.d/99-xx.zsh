@@ -11,7 +11,7 @@ xx() {
         --border-label \" xx \" \
         --color 'border:#f4e0dc,label:#f4e0dc,header:#f4e0dc:bold,header:#f4e0dc' \
         --header 'ENTER: Execute Command' --tmux 80%"
-    
+
     if [[ -z "${XX_CALLBACK_FROM_TMUX}" ]]; then
         eval "$cmd" | xargs zsh -i -c
     else

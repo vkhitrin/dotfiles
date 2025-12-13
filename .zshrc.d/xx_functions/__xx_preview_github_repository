@@ -4,40 +4,40 @@ function __xx_preview_github_repository() {
     local REPO_FULL_NAME="${1}"
     local REPO_ID="${2}"
     local REPO_URL="${3}"
-    
+
     if [[ -z "${REPO_FULL_NAME}" ]]; then
         echo "Invalid repository information"
         return 1
     fi
-    
+
     # Repository name
     printf '\033[1;33mRepository:\033[0m\n'
     echo "${REPO_FULL_NAME}"
     echo
-    
+
     # Fetch repository data from GitHub API
     local repo_data=$(gh api "repos/${REPO_FULL_NAME}" 2>/dev/null)
-    
+
     if [[ -z "${repo_data}" ]]; then
         echo "Unable to fetch repository details"
         return 1
     fi
-    
+
     # Description
     printf '\033[1;33mDescription:\033[0m\n'
     echo "${repo_data}" | jq -r '.description // "No description"' 2>/dev/null
     echo
-    
+
     # Default Branch
     printf '\033[1;33mDefault Branch:\033[0m\n'
     echo "${repo_data}" | jq -r '.default_branch // "N/A"' 2>/dev/null
     echo
-    
+
     # Visibility
     printf '\033[1;33mVisibility:\033[0m\n'
     echo "${repo_data}" | jq -r '.visibility // .private | if . == true then "private" elif . == false then "public" else . end' 2>/dev/null
     echo
-    
+
     # Last Updated
     printf '\033[1;33mLast Updated:\033[0m\n'
     local last_update=$(echo "${repo_data}" | jq -r '.updated_at // "N/A"' 2>/dev/null)
@@ -47,7 +47,7 @@ function __xx_preview_github_repository() {
         echo "N/A"
     fi
     echo
-    
+
     # Stars, Forks, Open Issues
     printf '\033[1;33mStats:\033[0m\n'
     local stars=$(echo "${repo_data}" | jq -r '.stargazers_count // 0' 2>/dev/null)
@@ -55,12 +55,12 @@ function __xx_preview_github_repository() {
     local issues=$(echo "${repo_data}" | jq -r '.open_issues_count // 0' 2>/dev/null)
     echo "⭐ Stars: ${stars} | 🍴 Forks: ${forks} | 📝 Open Issues: ${issues}"
     echo
-    
+
     # Language
     printf '\033[1;33mPrimary Language:\033[0m\n'
     echo "${repo_data}" | jq -r '.language // "Not specified"' 2>/dev/null
     echo
-    
+
     # Topics/Tags
     printf '\033[1;33mTopics:\033[0m\n'
     local topics=$(echo "${repo_data}" | jq -r '.topics // [] | join(", ")' 2>/dev/null)
@@ -70,13 +70,13 @@ function __xx_preview_github_repository() {
         echo "No topics"
     fi
     echo
-    
+
     # Recent Commits
     printf '\033[1;33mRecent Commits:\033[0m\n'
     gh api "repos/${REPO_FULL_NAME}/commits?per_page=5" 2>/dev/null | \
         jq -r '.[] | "\(.sha[0:7]) \(.commit.message | split("\n")[0])"' 2>/dev/null || echo "Unable to fetch commits"
     echo
-    
+
     # Open Pull Requests
     printf '\033[1;33mOpen Pull Requests:\033[0m\n'
     local pr_count=$(gh api "repos/${REPO_FULL_NAME}/pulls?state=open" 2>/dev/null | jq '. | length' 2>/dev/null)

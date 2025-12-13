@@ -1,0 +1,56 @@
+__xx_cache_aws_rds_instances_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS RDS Instances!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_rds.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+    local REGION="${AWS_REGION}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Instances (account TEXT NOT NULL, region TEXT NOT NULL, db_identifier TEXT NOT NULL, engine TEXT NOT NULL, engine_version TEXT NOT NULL, instance_class TEXT NOT NULL, status TEXT NOT NULL, endpoint TEXT, UNIQUE (account, region, db_identifier));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (account TEXT NOT NULL, region TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (account, region));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Instances WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+    fi
+
+    __xx_notify "Fetching RDS instances for account: ${ACCOUNT}, region: ${REGION}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Instances WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+
+    aws rds describe-db-instances --output json | \
+        jq -r '.DBInstances[] | [.DBInstanceIdentifier, .Engine, .EngineVersion, .DBInstanceClass, .DBInstanceStatus, (.Endpoint.Address // "N/A")] | @tsv' | \
+        while IFS=$'\t' read -r db_identifier engine engine_version instance_class db_status endpoint; do
+            db_identifier_escaped=$(echo "$db_identifier" | sed "s/'/''/g")
+            engine_escaped=$(echo "$engine" | sed "s/'/''/g")
+            engine_version_escaped=$(echo "$engine_version" | sed "s/'/''/g")
+            instance_class_escaped=$(echo "$instance_class" | sed "s/'/''/g")
+            db_status_escaped=$(echo "$db_status" | sed "s/'/''/g")
+            endpoint_escaped=$(echo "$endpoint" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Instances (account, region, db_identifier, engine, engine_version, instance_class, status, endpoint) VALUES ('${ACCOUNT}', '${REGION}', '${db_identifier_escaped}', '${engine_escaped}', '${engine_version_escaped}', '${instance_class_escaped}', '${db_status_escaped}', '${endpoint_escaped}');"
+        done
+
+    __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+    SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (account, region, sync_timestamp) VALUES ('${ACCOUNT}', '${REGION}', '${SYNC_TIMESTAMP}');"
+
+    __xx_notify "#[fg=bold]Finished fetching AWS RDS Instances!#[default]"
+}

@@ -1,0 +1,7 @@
+__xx_cache_aws_iam_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_cache_aws_iam_roles_to_sqlite
+    source ~/.zshrc.d/xx_functions/__xx_cache_aws_iam_policies_to_sqlite
+
+    __xx_cache_aws_iam_roles_to_sqlite > /dev/null 2>&1
+    __xx_cache_aws_iam_policies_to_sqlite > /dev/null 2>&1
+}

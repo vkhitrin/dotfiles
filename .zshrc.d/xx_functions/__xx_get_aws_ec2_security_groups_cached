@@ -1,0 +1,30 @@
+__xx_get_aws_ec2_security_groups_cached() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_ec2.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "GROUP_ID^GROUP_NAME^DESCRIPTION^VPC_ID"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT group_id, group_name, description, vpc_id FROM SecurityGroups WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            group_id = $1
+                            group_name = $2
+                            description = $3
+                            vpc_id = $4
+                            printf "%s^%s^%s^%s\n", group_id, group_name, description, vpc_id
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_ec2_security_groups_to_sqlite' to cache security groups."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

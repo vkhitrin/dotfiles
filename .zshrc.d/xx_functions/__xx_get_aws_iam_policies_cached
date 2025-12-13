@@ -1,0 +1,26 @@
+__xx_get_aws_iam_policies_cached() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_iam.db"
+        local ACCOUNT="${AWS_VAULT}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            (
+                echo "POLICY_NAME^SCOPE^ARN^ATTACHMENTS^CREATE_DATE"
+                sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT policy_name, scope, policy_arn, attachment_count, create_date FROM Policies WHERE account = '${ACCOUNT}';" | \
+                    awk -F'|' '{
+                        policy_name = $1
+                        scope = $2
+                        policy_arn = $3
+                        attachment_count = $4
+                        create_date = $5
+                        printf "%s^%s^%s^%s^%s\n", policy_name, scope, policy_arn, attachment_count, create_date
+                    }'
+            ) | __xx_format_columns_ansi "^"
+            return
+        fi
+
+        echo "No cache found."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

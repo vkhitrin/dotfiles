@@ -1,0 +1,46 @@
+__xx_preview_aws_route53_hosted_zone() {
+    local hosted_zone_id="$1"
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        # Get hosted zone details
+        aws route53 get-hosted-zone --id "${hosted_zone_id}" --output json 2>/dev/null | \
+            jq -r '
+                "Hosted Zone ID: \(.HostedZone.Id)\n" +
+                "Name: \(.HostedZone.Name)\n" +
+                "Type: \(if .HostedZone.Config.PrivateZone then "Private" else "Public" end)\n" +
+                "Record Count: \(.HostedZone.ResourceRecordSetCount)\n" +
+                "Comment: \(.HostedZone.Config.Comment // "N/A")\n" +
+                "\nName Servers:\n" +
+                ([.DelegationSet.NameServers[]? | "  - \(.)"] | join("\n") // "  N/A") +
+                "\n\nVPCs (Private Zones):\n" +
+                ([.VPCs[]? | "  - \(.VPCId) (\(.VPCRegion))"] | join("\n") // "  N/A")
+            '
+
+        echo ""
+        echo "DNS Records:"
+        echo "============"
+
+        # Get and display DNS records
+        aws route53 list-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --output json 2>/dev/null | \
+            jq -r '
+                .ResourceRecordSets[] |
+                "\n[\(.Type)] \(.Name)\n" +
+                "  TTL: \(.TTL // "N/A")\n" +
+                (if .AliasTarget then
+                    "  Alias Target: \(.AliasTarget.DNSName)\n" +
+                    "  Alias Zone ID: \(.AliasTarget.HostedZoneId)\n" +
+                    "  Evaluate Target Health: \(.AliasTarget.EvaluateTargetHealth)"
+                elif .ResourceRecords then
+                    ([.ResourceRecords[] | "  Value: \(.Value)"] | join("\n"))
+                else
+                    "  No records"
+                end) +
+                (if .SetIdentifier then "\n  Set Identifier: \(.SetIdentifier)" else "" end) +
+                (if .Weight then "\n  Weight: \(.Weight)" else "" end) +
+                (if .Region then "\n  Region: \(.Region)" else "" end) +
+                (if .Failover then "\n  Failover: \(.Failover)" else "" end) +
+                (if .GeoLocation then "\n  GeoLocation: \(.GeoLocation | to_entries | map("\(.key): \(.value)") | join(", "))" else "" end)
+            '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

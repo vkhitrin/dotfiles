@@ -1,0 +1,50 @@
+__xx_cache_aws_iam_policies_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS IAM Policies!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_iam.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Policies (account TEXT NOT NULL, policy_name TEXT NOT NULL, policy_id TEXT NOT NULL, policy_arn TEXT NOT NULL, scope TEXT NOT NULL, attachment_count INTEGER, create_date TEXT NOT NULL, description TEXT, UNIQUE (account, policy_arn));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Policies WHERE account = '${ACCOUNT}';"
+    fi
+
+    __xx_notify "Fetching IAM policies for account: ${ACCOUNT}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Policies WHERE account = '${ACCOUNT}';"
+
+    aws iam list-policies --scope All --output json | \
+        jq -r '.Policies[] | [.PolicyName, .PolicyId, .Arn, (if .Arn | startswith("arn:aws:iam::aws:") then "AWS" else "Customer" end), .AttachmentCount, .CreateDate, (.Description // "N/A")] | @tsv' | \
+        while IFS=$'\t' read -r policy_name policy_id policy_arn scope attachment_count create_date description; do
+            policy_name_escaped=$(echo "$policy_name" | sed "s/'/''/g")
+            policy_id_escaped=$(echo "$policy_id" | sed "s/'/''/g")
+            policy_arn_escaped=$(echo "$policy_arn" | sed "s/'/''/g")
+            scope_escaped=$(echo "$scope" | sed "s/'/''/g")
+            create_date_escaped=$(echo "$create_date" | sed "s/'/''/g")
+            description_escaped=$(echo "$description" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Policies (account, policy_name, policy_id, policy_arn, scope, attachment_count, create_date, description) VALUES ('${ACCOUNT}', '${policy_name_escaped}', '${policy_id_escaped}', '${policy_arn_escaped}', '${scope_escaped}', ${attachment_count}, '${create_date_escaped}', '${description_escaped}');"
+        done
+
+    __xx_notify "#[fg=bold]Finished fetching AWS IAM Policies!#[default]"
+}

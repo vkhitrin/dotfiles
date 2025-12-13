@@ -1,0 +1,25 @@
+__xx_get_aws_vpc_subnets() {
+    local vpc_id="$1"
+    local vpc_name="$2"
+
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local FETCH_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        (
+            echo "Fetched: ${FETCH_TIMESTAMP}"
+            echo "SUBNET_ID^NAME^AZ^CIDR_BLOCK^AVAILABLE_IPS^PUBLIC"
+            aws ec2 describe-subnets --filters "Name=vpc-id,Values=${vpc_id}" --output json 2>/dev/null | \
+                jq -r '.Subnets[] | [.SubnetId, (.Tags[]? | select(.Key=="Name") | .Value // "N/A"), .AvailabilityZone, .CidrBlock, .AvailableIpAddressCount, (.MapPublicIpOnLaunch | tostring)] | @tsv' | \
+                awk -F'\t' '{
+                    subnet_id = $1
+                    name = $2
+                    az = $3
+                    cidr_block = $4
+                    available_ips = $5
+                    is_public = ($6 == "true" ? "Yes" : "No")
+                    printf "%s^%s^%s^%s^%s^%s\n", subnet_id, name, az, cidr_block, available_ips, is_public
+                }'
+        ) | __xx_format_columns_ansi "^"
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

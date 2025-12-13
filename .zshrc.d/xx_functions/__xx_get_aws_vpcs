@@ -1,0 +1,31 @@
+__xx_get_aws_vpcs() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_vpc.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "VPC_ID^NAME^CIDR_BLOCK^DEFAULT^STATE"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT vpc_id, name, cidr_block, is_default, vpc_state FROM VPCs WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            vpc_id = $1
+                            name = $2
+                            cidr_block = $3
+                            is_default = $4
+                            vpc_state = $5
+                            printf "%s^%s^%s^%s^%s\n", vpc_id, name, cidr_block, is_default, vpc_state
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_vpcs_to_sqlite' to cache VPCs."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}
