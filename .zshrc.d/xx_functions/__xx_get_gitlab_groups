@@ -1,8 +1,11 @@
 __xx_get_gitlab_groups() {
     if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
+        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/gitlab.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='gitlab_entities';" 2>/dev/null || echo "Never")
+        echo "Last cached: ${CACHE_TIMESTAMP}"
         sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT group_name AS name,id,web_url FROM Groups" | \
             jq -r '(["GROUP","ID","URL"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
     else
         echo "gitlab.db doesn't exist"
+        echo "Run CTRL+R to cache GitLab groups"
     fi
 }

@@ -5,8 +5,9 @@ function glpx() {
     local MR_OPEN_MERGE_REQUEST_PROMPT="CTRL-O: Browse | CTRL-P: Toggle Preview"
     local CI_PIPELINE_OPEN_MERGE_PROMPT="CTRL-O: Browse | CTRL-P: Toggle Preview | CTRL-T: View Pipeline TUI"
 
-    __xx_get_gitlab_projects | fzf --ansi --header-lines=1 --info=inline \
+    __xx_get_gitlab_projects | fzf --ansi --header-lines=2 --info=inline \
         --bind="start:unbind(ctrl-v,ctrl-t,enter)" \
+        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_gitlab_entities_to_sqlite;__xx_cache_gitlab_entities_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_projects;__xx_get_gitlab_projects)" \
         --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="> Filter " \
         --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="> Filter " \
         --bind "ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_smart_gitlab_open;__xx_smart_gitlab_open 'browser' {})" \
@@ -31,15 +32,16 @@ function glpx() {
         --delimiter="[[:space:]][[:space:]]+" \
         --layout=reverse-list \
         --border-label ' GitLab Projects ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,header:#fca326' \
-        --header 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+A: Show 100 Open MR | CTRL+S: Show 100 Pipelines | CTRL+O: Browse | CTRL+P: Toggle Preview' \
+        --header 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+A: Show 100 Open MR | CTRL+S: Show 100 Pipelines | CTRL+O: Browse | CTRL+P: Toggle Preview | CTRL+R: Refresh Cache' \
         --tmux 80% \
         --bind="enter:become(source ~/.zshrc.d/xx_functions/__xx_smart_gitlab_open;__xx_smart_gitlab_open 'open' {})"
 }
 
 function glgx() {
     # xx {"tags": "gitlab", "description": "Display cached GitLab Groups", "subshell": false, "cache": true}
-    __xx_get_gitlab_groups | fzf --header-lines=1 --info=inline \
+    __xx_get_gitlab_groups | fzf --header-lines=2 --info=inline \
         --bind="start:unbind(enter)" \
+        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_gitlab_entities_to_sqlite;__xx_cache_gitlab_entities_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_groups;__xx_get_gitlab_groups)" \
         --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --prompt="> Filter " \
@@ -50,7 +52,7 @@ function glgx() {
         --delimiter="[[:space:]][[:space:]]+" \
         --layout=reverse-list \
         --border-label ' GitLab Groups ' --color 'border:#fca326,label:#fca326,header:#fca326:bold,header:#fca326' \
-        --header 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+O: Browse | CTRL+P: Toggle Preview' \
+        --header 'CTRL+U: Copy URL | CTRL+I: Copy ID | CTRL+O: Browse | CTRL+P: Toggle Preview | CTRL+R: Refresh Cache' \
         --tmux 80%
 }
 

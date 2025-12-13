@@ -1,0 +1,60 @@
+__xx_cache_gitlab_entities_to_sqlite() {
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        echo "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Starting to fetch GitLab entities!#[default]" > /dev/null 2>&1 || true
+    fi
+
+    echo "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/gitlab.db"
+
+    local GITLAB_BINARY_ARGS=${GITLAB_BINARY_ARGS:-"glab"}
+    if [ -n "${GLAB_CONFIG_DIR}" ]; then
+        GITLAB_BINARY_ARGS="GLAB_CONFIG_DIR=${GLAB_CONFIG_DIR} glab"
+    fi
+
+    local GITLAB_HOST=${GITLAB_HOST:-"gitlab.com"}
+    echo "Checking if authenticated with GitLab host - ${GITLAB_HOST}"
+    if ! eval "${GITLAB_BINARY_ARGS}" auth status --hostname="${GITLAB_HOST}"; then
+        echo "Failed to contact or not authenticated with ${GITLAB_HOST}"
+        return 1
+    fi
+
+    echo "Creating 'Projects' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Projects (web_url TEXT NOT NULL, project TEXT NOT NULL, id INTEGER NOT NULL, UNIQUE (web_url, project, id));"
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        echo "Wipe Projects table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Projects;"
+    fi
+
+    cd
+    eval "${GITLAB_BINARY_ARGS}" api 'projects?membership=true&per_page=100&simple=true' --paginate | \
+        jq -r '(.[]| [.web_url,.path_with_namespace,.id]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
+        sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Projects (web_url, project, id) VALUES (${PROJECT_DETAILS});"
+    done
+
+    echo "Creating 'Groups' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Groups (web_url TEXT NOT NULL, group_name TEXT NOT NULL, id INTEGER NOT NULL, UNIQUE (web_url, group_name, id));"
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        echo "Wipe Groups table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Groups;"
+    fi
+
+    cd
+    eval "${GITLAB_BINARY_ARGS}" api 'groups' | jq -r '(.[]| [.web_url,.name,.id]|@csv)' | sed "s/\"/'/g" | while IFS= read -r GROUP_DETAILS; do
+        sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Groups (web_url, group_name, id) VALUES (${GROUP_DETAILS});"
+    done
+
+    echo "Creating 'SyncLog' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (operation TEXT PRIMARY KEY, sync_timestamp TEXT NOT NULL);"
+    SYNC_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (operation, sync_timestamp) VALUES ('gitlab_entities', '$SYNC_TIMESTAMP');"
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Finished fetching GitLab entities!#[default]" > /dev/null 2>&1 || true
+    fi
+}
