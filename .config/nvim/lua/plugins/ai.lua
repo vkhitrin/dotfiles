@@ -17,6 +17,9 @@ return {
 						wrap = true,
 					},
 				},
+				output = {
+					always_scroll_to_bottom = true,
+				},
 			},
 		},
 	},

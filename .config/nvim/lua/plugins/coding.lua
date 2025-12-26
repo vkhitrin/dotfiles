@@ -8,6 +8,7 @@ return {
 			require("nvim-treesitter").install({
 				"awk",
 				"bash",
+                "bicep",
 				"c",
 				"cmake",
 				"comment",
@@ -219,7 +220,5 @@ return {
 	},
 	{
 		"mfussenegger/nvim-dap",
-		enabled = false,
-		opts = {},
 	},
 }

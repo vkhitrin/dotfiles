@@ -1,6 +1,6 @@
 [[ "$OSTYPE" == darwin* ]] || return
 
-export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${HOME}/.local/share/nvim/mason/bin:/Users/vkhitrin/.lmstudio/bin:${PATH}"
+export PATH="${HOME}/.cargo/bin:/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:${HOME}/.local/bin:${HOME}/go/bin:${HOME}/.local/share/nvim/mason/bin:${HOME}/.lmstudio/bin:${HOME}/.bun/bin:${PATH}"
 
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
 
@@ -69,6 +69,17 @@ alias _backup_my_macos="mackup backup -vf && mackup link uninstall --force; cp -
 if [[ -d "${HOME}/.config/glab-cli/work" ]];then
     alias glab-work="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work glab"
 fi
+
+# Custom SourceGraph configuration
+src-work() {
+    SRC_ENDPOINT=$(security find-generic-password -s "sourcegraph-work" 2>/dev/null | grep "acct" | cut -d"\"" -f4)
+    SRC_ACCESS_TOKEN=$(security find-generic-password -s "sourcegraph-work" -w 2>/dev/null)
+    if [[ -z "$SRC_ENDPOINT" || -z "$SRC_ACCESS_TOKEN" ]]; then
+        echo "Error: keychain item 'sourcegraph-work' not found" >&2
+        return 1
+    fi
+    SRC_ENDPOINT="$SRC_ENDPOINT" SRC_ACCESS_TOKEN="$SRC_ACCESS_TOKEN" src "$@"
+}
 
 # Snipkit widget bind only if config file exists
 if [[ -d "${HOME}/Library/Application Support/snipkit" ]]; then

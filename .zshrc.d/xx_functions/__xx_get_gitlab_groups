@@ -1,9 +1,18 @@
 __xx_get_gitlab_groups() {
-    if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
-        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/gitlab.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='gitlab_entities';" 2>/dev/null || echo "Never")
-        echo "Last cached: ${CACHE_TIMESTAMP}"
-        sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT group_name AS name,id,web_url FROM Groups" | \
-            jq -r '(["GROUP","ID","URL"] | @csv) , (.[] | [.name, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
+    local DB_PATH="${XX_CACHE_DIR}/gitlab.db"
+
+    if [[ -f "${DB_PATH}" ]]; then
+        # Get the most recent cache timestamp
+        local LATEST_TIMESTAMP=$(sqlite3 "${DB_PATH}" "SELECT MAX(sync_timestamp) FROM SyncLog WHERE operation='gitlab_groups';" 2>/dev/null)
+        if [ -n "${LATEST_TIMESTAMP}" ]; then
+            echo "Last cached: ${LATEST_TIMESTAMP}"
+        else
+            echo "Last cached: Never"
+        fi
+
+        # Query all groups from all hosts
+        sqlite3 --json "${DB_PATH}" "SELECT group_name AS name,id,web_url,hostname FROM Groups ORDER BY name" | \
+            jq -r '(["GROUP","ID","URL","HOST"] | @csv) , (.[] | [.name, .id, .web_url, .hostname] | @csv)' | sed 's/"//g' | column -t -s','
     else
         echo "gitlab.db doesn't exist"
         echo "Run CTRL+R to cache GitLab groups"

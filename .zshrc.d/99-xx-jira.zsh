@@ -11,20 +11,24 @@ function jipx() {
         --bind "start:unbind(enter)" \
         --bind "ctrl-o:become(jira open --project {1} >/dev/null)"
 }
-# TODO: Add pagination support
 function jiix() {
     # xx {"tags": "jira", "description": "Query Jira for issues", "subshell": false, "cache": false}
-     __xx_get_jira_issues | fzf --border-label " Jira Issues " \
+    export XX_JIRA_PAGE="${XX_JIRA_PAGE:-0}"
+    export XX_JIRA_LIMIT="${XX_JIRA_LIMIT:-50}"
+
+     __xx_get_jira_issues "" "${XX_JIRA_PAGE}" "${XX_JIRA_LIMIT}" | fzf --border-label " Jira Issues " \
         --tmux 90% \
         --preview-window=right:70%:hidden:wrap \
-        --header-lines=2 --layout=reverse-list \
+        --header-lines=1 --layout=reverse-list \
         --info=inline --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa,header:#89b4fa:bold' \
-        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_issues;__xx_get_jira_issues)" \
+        --bind="ctrl-r:reload(__xx_get_jira_issues '' \${XX_JIRA_PAGE} \${XX_JIRA_LIMIT})" \
+        --bind="ctrl-n:reload([[ \${XX_JIRA_LAST_COUNT:-0} -ge \${XX_JIRA_LIMIT} ]] && export XX_JIRA_PAGE=\$((XX_JIRA_PAGE + XX_JIRA_LIMIT)); __xx_get_jira_issues '' \${XX_JIRA_PAGE} \${XX_JIRA_LIMIT})" \
+        --bind="ctrl-b:reload([[ \${XX_JIRA_PAGE} -gt 0 ]] && export XX_JIRA_PAGE=\$((XX_JIRA_PAGE - XX_JIRA_LIMIT)); [[ \${XX_JIRA_PAGE} -lt 0 ]] && export XX_JIRA_PAGE=0; __xx_get_jira_issues '' \${XX_JIRA_PAGE} \${XX_JIRA_LIMIT})" \
         --bind="ctrl-u:execute-silent(jira open --no-browser {2} | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --bind="ctrl-i:execute-silent(echo {2} | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --bind="ctrl-t:become(source ~/.zshrc.d/xx_functions/__xx_jira_launch_tui; __xx_jira_launch_tui {2})" \
         --bind "ctrl-p:toggle-preview" --preview 'jira issue view --plain --comments 100 {2}' \
-        --prompt "> Filter " --header 'CTRL+R: Refresh | CTRL+U: Copy URL | CTRL+I: Copy KEY | CTRL+O: Browse | CTRL+T: JiraTUI | CTRL+P: Toggle Preview' \
+        --prompt "> Filter " --header 'CTRL+R: Refresh | CTRL+N: Next Page | CTRL+B: Previous Page | CTRL+U: Copy URL | CTRL+I: Copy KEY | CTRL+O: Browse | CTRL+T: JiraTUI | CTRL+P: Toggle Preview' \
         --bind "start:unbind(enter)" \
         --bind "ctrl-o:execute-silent(jira open {2})"
 }

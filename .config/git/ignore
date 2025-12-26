@@ -11,3 +11,5 @@
 .local/bin
 # local fzf scripts
 ~/.zshrc.d/fzf
+# opencode and plugins
+.opencode/swarm.db

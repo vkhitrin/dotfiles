@@ -139,7 +139,7 @@ return {
 			anti_conceal = {
 				enabled = false,
 			},
-			file_types = { "markdown", "opencode_output" },
+			file_types = { "markdown", "opencode_output", "markdown.floating_window" },
 			completions = {
 				blink = {
 					enabled = true,

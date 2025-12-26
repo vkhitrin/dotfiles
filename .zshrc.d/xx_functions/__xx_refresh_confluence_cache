@@ -1,0 +1,183 @@
+__xx_refresh_confluence_cache_spaces() {
+    local KEYCHAIN_SERVICE="CONFLUENCE_CLI"
+    local CONFLUENCE_BASE_URL="https://plainid.atlassian.net/wiki"
+    
+    if [[ -z "${XX_CACHE_DIR}" ]]; then
+        __xx_notify "Error: XX_CACHE_DIR not defined" 3000
+        return 1
+    fi
+    
+    __xx_notify "Refreshing Confluence spaces cache..." 2000
+    
+    # Retrieve credentials from keychain
+    local CONFLUENCE_EMAIL=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" 2>&1 | awk -F'"' '/acct/{print $4}')
+    local CONFLUENCE_API_TOKEN=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" -w 2>/dev/null)
+    
+    if [[ -z "${CONFLUENCE_EMAIL}" || -z "${CONFLUENCE_API_TOKEN}" ]]; then
+        __xx_notify "Error: Failed to retrieve credentials" 3000
+        return 1
+    fi
+    
+    local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/confluence.db"
+    
+    # Ensure directory exists
+    mkdir -p "${XX_CACHE_DIR}" 2>/dev/null
+    
+    # Create table
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Spaces (key TEXT NOT NULL, name TEXT NOT NULL, url TEXT NOT NULL, UNIQUE (key, name, url));" 2>/dev/null
+    
+    # Helper function to insert into Spaces table
+    insert_space() {
+        local key=$1
+        local name=$2
+        local url=$3
+        sqlite3 "${SQLITE_DATABASE_PATH}" <<EOF 2>/dev/null
+INSERT OR IGNORE INTO Spaces VALUES ('${key//\'/\'\'}', '${name//\'/\'\'}', '${url//\'/\'\'}');
+EOF
+    }
+    
+    # Fetch global spaces
+    if [[ -z "${SKIP_GLOBAL_SPACES:-}" ]]; then
+        __xx_notify "Fetching global spaces..." 2000
+        local GLOBAL_SPACES_JSON=$(curl -s -u "${CONFLUENCE_EMAIL}:${CONFLUENCE_API_TOKEN}" \
+            -X GET "${CONFLUENCE_BASE_URL}/rest/api/space?type=global" -H "Accept: application/json" 2>/dev/null)
+        
+        echo "${GLOBAL_SPACES_JSON}" | jq -r --arg base_url "${CONFLUENCE_BASE_URL}" '
+            .results[] |
+            [
+                .key,
+                .name,
+                ($base_url + "/spaces/" + .key)
+            ] | @tsv' 2>/dev/null | while IFS=$'\t' read -r key name url; do
+            insert_space "$key" "$name" "$url"
+        done
+    fi
+    
+    # Fetch personal space
+    if [[ -z "${SKIP_PERSONAL_SPACE:-}" ]]; then
+        __xx_notify "Fetching personal space..." 2000
+        
+        local USER_JSON=$(curl -s -u "${CONFLUENCE_EMAIL}:${CONFLUENCE_API_TOKEN}" \
+            -X GET "${CONFLUENCE_BASE_URL}/rest/api/user/current" -H "Accept: application/json" 2>/dev/null)
+        local ACCOUNT_ID=$(echo "${USER_JSON}" | jq -r '.accountId' 2>/dev/null | tr -d ':-')
+        
+        if [[ -z "${ACCOUNT_ID}" || "${ACCOUNT_ID}" == "null" ]]; then
+            __xx_notify "Error: Unable to retrieve account ID" 3000
+            return 1
+        fi
+        
+        local PERSONAL_SPACE_JSON=$(curl -s -u "${CONFLUENCE_EMAIL}:${CONFLUENCE_API_TOKEN}" \
+            -X GET "${CONFLUENCE_BASE_URL}/rest/api/space/~${ACCOUNT_ID}" -H "Accept: application/json" 2>/dev/null)
+        
+        echo "${PERSONAL_SPACE_JSON}" | jq -r --arg base_url "${CONFLUENCE_BASE_URL}" '
+            [
+                .key,
+                .name,
+                ($base_url + "/spaces/" + .key)
+            ] | @tsv' 2>/dev/null | while IFS=$'\t' read -r key name url; do
+            insert_space "$key" "$name" "$url"
+        done
+    fi
+    
+    # Success summary
+    if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+        local space_count=$(sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT COUNT(*) FROM Spaces;" 2>/dev/null)
+        __xx_notify "Spaces cache refreshed: ${space_count} spaces" 3000
+    else
+        __xx_notify "Spaces cache refresh failed" 3000
+        return 1
+    fi
+}
+
+__xx_refresh_confluence_cache_pages() {
+    local KEYCHAIN_SERVICE="CONFLUENCE_CLI"
+    local CONFLUENCE_BASE_URL="https://plainid.atlassian.net/wiki"
+    
+    if [[ -z "${XX_CACHE_DIR}" ]]; then
+        __xx_notify "Error: XX_CACHE_DIR not defined" 3000
+        return 1
+    fi
+    
+    __xx_notify "Refreshing Confluence pages cache..." 2000
+    
+    # Retrieve credentials from keychain
+    local CONFLUENCE_EMAIL=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" 2>&1 | awk -F'"' '/acct/{print $4}')
+    local CONFLUENCE_API_TOKEN=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" -w 2>/dev/null)
+    
+    if [[ -z "${CONFLUENCE_EMAIL}" || -z "${CONFLUENCE_API_TOKEN}" ]]; then
+        __xx_notify "Error: Failed to retrieve credentials" 3000
+        return 1
+    fi
+    
+    local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/confluence.db"
+    
+    # Ensure directory exists
+    mkdir -p "${XX_CACHE_DIR}" 2>/dev/null
+    
+    # Create table
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Pages (title TEXT NOT NULL, space TEXT NOT NULL, url TEXT NOT NULL, created_at TEXT, updated_at TEXT, UNIQUE (title, space, url));" 2>/dev/null
+    
+    # Helper function to insert into Pages table
+    insert_page() {
+        local title=$1
+        local space=$2
+        local url=$3
+        local created=$4
+        local updated=$5
+        sqlite3 "${SQLITE_DATABASE_PATH}" <<EOF 2>/dev/null
+INSERT OR IGNORE INTO Pages VALUES ('${title//\'/\'\'}', '${space//\'/\'\'}', '${url//\'/\'\'}', '${created}', '${updated}');
+EOF
+    }
+    
+    # Helper function to process a space
+    process_space() {
+        local space_key=$1
+        
+        local page_api_url="${CONFLUENCE_BASE_URL}/rest/api/content?spaceKey=${space_key}&type=page&limit=250&expand=history,history.lastUpdated"
+        local next_url="${page_api_url}"
+        
+        while [[ -n "${next_url}" && "${next_url}" != "null" ]]; do
+            local RESPONSE=$(curl -s -u "${CONFLUENCE_EMAIL}:${CONFLUENCE_API_TOKEN}" \
+                -X GET "${next_url}" -H "Accept: application/json" 2>/dev/null)
+            
+            echo "${RESPONSE}" | jq -r --arg base_url "${CONFLUENCE_BASE_URL}" --arg space_key "${space_key}" '
+                .results[] |
+                [
+                    .title,
+                    $space_key,
+                    ($base_url + "/spaces/" + $space_key + "/pages/" + .id),
+                    .history.createdDate,
+                    .history.lastUpdated.when
+                ] | @tsv' 2>/dev/null | while IFS=$'\t' read -r title space url created updated; do
+                insert_page "${title}" "${space}" "${url}" "${created}" "${updated}"
+            done
+            
+            next_url=$(echo "${RESPONSE}" | jq -r '.["_links"].next // empty' 2>/dev/null)
+            [[ -n "${next_url}" && "${next_url}" != "null" ]] && next_url="${CONFLUENCE_BASE_URL}${next_url}"
+        done
+    }
+    
+    # Get all space keys from the Spaces table
+    local space_keys=$(sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT key FROM Spaces;" 2>/dev/null)
+    
+    if [[ -z "${space_keys}" ]]; then
+        __xx_notify "Error: No spaces found. Run spaces cache first." 3000
+        return 1
+    fi
+    
+    # Process each space
+    echo "${space_keys}" | while read -r space_key; do
+        [[ -z "${space_key}" ]] && continue
+        __xx_notify "Fetching pages for space: ${space_key}" 2000
+        process_space "${space_key}"
+    done
+    
+    # Success summary
+    if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+        local page_count=$(sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT COUNT(*) FROM Pages;" 2>/dev/null)
+        __xx_notify "Pages cache refreshed: ${page_count} pages" 3000
+    else
+        __xx_notify "Pages cache refresh failed" 3000
+        return 1
+    fi
+}

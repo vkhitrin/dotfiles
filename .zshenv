@@ -47,6 +47,9 @@ export DISABLE_COMPFIX="true"
 export OP_BIOMETRIC_UNLOCK_ENABLED=false
 export OP_CACHE=true
 
+# Textual
+export TEXTUAL_SPEEDUPS=1
+
 # xx
 export XX_CACHE_DIR="${HOME}/.cache/xx"
 if [ -d "${HOME}/.zshrc.d/xx_functions" ]; then
@@ -65,3 +68,4 @@ fi
 
 # OpenCode
 OPENCODE_DISABLE_LSP_DOWNLOAD=true
+. "$HOME/.cargo/env"

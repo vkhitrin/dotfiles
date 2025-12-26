@@ -1,0 +1,120 @@
+__xx_cache_gitlab_projects_to_sqlite() {
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        echo "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Starting to fetch GitLab projects!#[default]" > /dev/null 2>&1 || true
+    fi
+
+    echo "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/gitlab.db"
+
+    echo "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Projects (web_url TEXT NOT NULL, project TEXT NOT NULL, id INTEGER NOT NULL, hostname TEXT NOT NULL, UNIQUE (web_url, project, id, hostname));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (operation TEXT NOT NULL, hostname TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (operation, hostname));"
+
+    # Find all glab config files and extract hosts
+    local CONFIG_FILES=()
+    if [ -n "${GLAB_CONFIG_DIR}" ]; then
+        CONFIG_FILES+=("${GLAB_CONFIG_DIR}/config.yml")
+    fi
+    # Find all config.yml files in the glab-cli config directory
+    while IFS= read -r config_file; do
+        CONFIG_FILES+=("${config_file}")
+    done < <(find "${HOME}/.config/glab-cli/" -name "config.yml" -type f 2>/dev/null)
+
+    if [ -f "${HOME}/Library/Application Support/glab-cli/config.yml" ]; then
+        CONFIG_FILES+=("${HOME}/Library/Application Support/glab-cli/config.yml")
+    fi
+
+    # Extract all unique hosts from config files and map them to their config
+    typeset -A HOST_CONFIG_MAP
+    local HOSTS=()
+    for CONFIG_FILE in "${CONFIG_FILES[@]}"; do
+        if [ -f "${CONFIG_FILE}" ]; then
+            echo "Reading hosts from: ${CONFIG_FILE}"
+            local FILE_HOSTS_LIST=$(grep -A 20 "^hosts:" "${CONFIG_FILE}" | grep -E "^    [^ ].*:" | sed 's/:.*//' | sed 's/^    //')
+            while IFS= read -r HOST; do
+                if [ -n "${HOST}" ] && [[ ! " ${HOSTS[@]} " =~ " ${HOST} " ]]; then
+                    HOSTS+=("${HOST}")
+                    HOST_CONFIG_MAP[${HOST}]="${CONFIG_FILE}"
+                fi
+            done <<< "${FILE_HOSTS_LIST}"
+        fi
+    done
+
+    if [ ${#HOSTS[@]} -eq 0 ]; then
+        echo "No GitLab hosts found in config files"
+        return 1
+    fi
+
+    echo "Found ${#HOSTS[@]} GitLab host(s): ${HOSTS[@]}"
+
+    # Iterate over all hosts
+    for GITLAB_HOST in "${HOSTS[@]}"; do
+        echo ""
+        echo "=== Processing ${GITLAB_HOST} ==="
+
+        # Determine which config to use based on where the host was found
+        local USE_GLAB_CONFIG_DIR=""
+        local CONFIG_FILE_FOR_HOST="${HOST_CONFIG_MAP[${GITLAB_HOST}]}"
+        echo "Using config: ${CONFIG_FILE_FOR_HOST}"
+
+        # Extract the directory from the config file path to determine GLAB_CONFIG_DIR
+        local CONFIG_DIR=$(dirname "${CONFIG_FILE_FOR_HOST}")
+
+        # Only set GLAB_CONFIG_DIR if it's not the default location
+        if [[ "${CONFIG_DIR}" != "${HOME}/.config/glab-cli" ]] && [[ "${CONFIG_DIR}" != "${HOME}/Library/Application Support/glab-cli" ]]; then
+            USE_GLAB_CONFIG_DIR="${CONFIG_DIR}"
+            echo "Setting GLAB_CONFIG_DIR to: ${USE_GLAB_CONFIG_DIR}"
+        fi
+
+        echo "Checking if authenticated with GitLab host - ${GITLAB_HOST}"
+        if [ -n "${USE_GLAB_CONFIG_DIR}" ]; then
+            if ! GLAB_CONFIG_DIR="${USE_GLAB_CONFIG_DIR}" glab auth status --hostname="${GITLAB_HOST}" 2>/dev/null; then
+                echo "Failed to contact or not authenticated with ${GITLAB_HOST}, skipping..."
+                continue
+            fi
+        else
+            if ! glab auth status --hostname="${GITLAB_HOST}" 2>/dev/null; then
+                echo "Failed to contact or not authenticated with ${GITLAB_HOST}, skipping..."
+                continue
+            fi
+        fi
+
+        if [ -n "${SQLITE_WIPE_DATA}" ]; then
+            echo "Wipe Projects table data for ${GITLAB_HOST}"
+            sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Projects WHERE hostname='${GITLAB_HOST}';"
+        fi
+
+        echo "Fetching projects from ${GITLAB_HOST}..."
+        (
+            cd
+            if [ -n "${USE_GLAB_CONFIG_DIR}" ]; then
+                GLAB_CONFIG_DIR="${USE_GLAB_CONFIG_DIR}" glab api 'projects?membership=true&per_page=100&simple=true' --paginate --hostname="${GITLAB_HOST}" 2>/dev/null | \
+                    jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.path_with_namespace,.id,$host]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Projects (web_url, project, id, hostname) VALUES (${PROJECT_DETAILS});"
+                done
+            else
+                glab api 'projects?membership=true&per_page=100&simple=true' --paginate --hostname="${GITLAB_HOST}" 2>/dev/null | \
+                    jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.path_with_namespace,.id,$host]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Projects (web_url, project, id, hostname) VALUES (${PROJECT_DETAILS});"
+                done
+            fi
+        )
+
+        SYNC_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (operation, hostname, sync_timestamp) VALUES ('gitlab_projects', '${GITLAB_HOST}', '$SYNC_TIMESTAMP');"
+        echo "Finished syncing projects for ${GITLAB_HOST}"
+    done
+
+    echo ""
+    echo "All GitLab projects synced successfully!"
+
+    if [ -n "${TMUX}" ]; then
+        tmux display-message -d '1000' "#[fg=bold]Finished fetching GitLab projects!#[default]" > /dev/null 2>&1 || true
+    fi
+}

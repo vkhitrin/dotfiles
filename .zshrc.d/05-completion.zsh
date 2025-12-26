@@ -25,3 +25,8 @@ zstyle ':completion:*:*:*:*:corrections' format '%F{yellow} %d (errors: %e) %
 zstyle ':completion:*:messages' format '%F{purple} -- %d --%f'
 zstyle ':completion:*:warnings' format '%F{red} No Matches Found %f'
 zstyle -e ':completion:*:default' list-colors 'reply=("${PREFIX:+=(#bi)($PREFIX:t)(?)*==48;2;69;71;90;01=48;2;69;71;90;01}:ma=48;2;69;71;90;01")'
+
+# if ast-grep is installed
+if which sg > /dev/null 2>&1;then
+    compdef sg=ast-grep
+fi

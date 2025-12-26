@@ -14,15 +14,15 @@ __xx_preview_aws_iam_role() {
                 "Max Session Duration: \(.MaxSessionDuration // "N/A") seconds\n" +
                 "\nAssumeRolePolicyDocument:\n\(.AssumeRolePolicyDocument | @json | fromjson | tostring)"
             '
-        
+
         echo -e "\n=== Attached Managed Policies ==="
         aws iam list-attached-role-policies --role-name "${role_name}" --output json 2>/dev/null | \
             jq -r '.AttachedPolicies[] | "  • \(.PolicyName) (\(.PolicyArn))"' || echo "  None"
-        
+
         echo -e "\n=== Inline Policies ==="
         aws iam list-role-policies --role-name "${role_name}" --output json 2>/dev/null | \
             jq -r '.PolicyNames[] | "  • \(.)"' || echo "  None"
-        
+
         echo -e "\n=== Tags ==="
         aws iam list-role-tags --role-name "${role_name}" --output json 2>/dev/null | \
             jq -r '.Tags[]? | "  \(.Key): \(.Value)"' || echo "  None"

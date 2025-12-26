@@ -1,7 +1,7 @@
 __xx_get_confluence_pages() {
     if [[ -f "${XX_CACHE_DIR}/confluence.db" ]]; then
-        sqlite3 --json "${XX_CACHE_DIR}/confluence.db" "SELECT title,space,url FROM Pages" | \
-            jq -r '(["TITLE","SPACE","URL"] | @csv) , (.[] | [.title, .space, .url] | @csv)' | sed 's/"//g' | column -t -s','
+        sqlite3 --json "${XX_CACHE_DIR}/confluence.db" "SELECT title,space,url,updated_at FROM Pages ORDER BY updated_at DESC" | \
+            jq -r '(["TITLE","SPACE","URL","UPDATED"] | @csv) , (.[] | [.title, .space, .url, .updated_at] | @csv)' | sed 's/"//g' | column -t -s','
     else
         echo "confluence.db doesn't exist"
     fi

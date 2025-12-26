@@ -1,10 +1,14 @@
 __xx_confluence_render_page() {
     local CONFLUENCE_PAGE_URL
+    local CONFLUENCE_PAGE_ID
+    local KEYCHAIN_SERVICE
     CONFLUENCE_PAGE_URL="${1}"
+    CONFLUENCE_PAGE_ID="${CONFLUENCE_PAGE_URL##*/}"
+    KEYCHAIN_SERVICE="CONFLUENCE_CLI"
     if [ -n "${1}" ]; then
-        export CONFLUENCE_USERNAME=$(security find-generic-password -s "CONFLUENCE_CLI" 2>&1 | awk -F'"' '/acct/{print $4}')
-        export CONFLUENCE_PASSWORD=$(security find-generic-password -s "CONFLUENCE_CLI" -w)
-        confluence-cli page get \
-        "${CONFLUENCE_PAGE_URL}" | pandoc -f html -t markdown
+        export CONFLUENCE_DOMAIN=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" 2>&1 | awk -F'"' '/svce/{print $4}')
+        export CONFLUENCE_EMAIL=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" 2>&1 | awk -F'"' '/acct/{print $4}')
+        export CONFLUENCE_API_TOKEN=$(security find-generic-password -l "${KEYCHAIN_SERVICE}" -w)
+        confluence-cli read "${CONFLUENCE_PAGE_ID}" --format markdown
     fi
 }

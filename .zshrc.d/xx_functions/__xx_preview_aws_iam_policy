@@ -16,25 +16,25 @@ __xx_preview_aws_iam_policy() {
                 "Default Version: \(.DefaultVersionId)\n" +
                 "Description: \(.Description // "N/A")"
             '
-        
+
         local version_id=$(aws iam get-policy --policy-arn "${policy_arn}" --output json 2>/dev/null | jq -r '.Policy.DefaultVersionId')
-        
+
         if [[ -n "${version_id}" ]]; then
             echo -e "\n=== Policy Document (${version_id}) ==="
             aws iam get-policy-version --policy-arn "${policy_arn}" --version-id "${version_id}" --output json 2>/dev/null | \
                 jq -r '.PolicyVersion.Document | @json | fromjson | tostring' | \
                 jq -C '.' 2>/dev/null || echo "Unable to parse policy document"
         fi
-        
+
         echo -e "\n=== Attached To ==="
         echo "Roles:"
         aws iam list-entities-for-policy --policy-arn "${policy_arn}" --entity-filter Role --output json 2>/dev/null | \
             jq -r '.PolicyRoles[]? | "  • \(.RoleName)"' || echo "  None"
-        
+
         echo "Users:"
         aws iam list-entities-for-policy --policy-arn "${policy_arn}" --entity-filter User --output json 2>/dev/null | \
             jq -r '.PolicyUsers[]? | "  • \(.UserName)"' || echo "  None"
-        
+
         echo "Groups:"
         aws iam list-entities-for-policy --policy-arn "${policy_arn}" --entity-filter Group --output json 2>/dev/null | \
             jq -r '.PolicyGroups[]? | "  • \(.GroupName)"' || echo "  None"

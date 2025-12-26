@@ -1,9 +1,18 @@
 __xx_get_gitlab_projects() {
-    if [[ -f "${XX_CACHE_DIR}/gitlab.db" ]]; then
-        local CACHE_TIMESTAMP=$(sqlite3 -column "${XX_CACHE_DIR}/gitlab.db" "SELECT sync_timestamp FROM SyncLog WHERE operation='gitlab_entities';" 2>/dev/null || echo "Never")
-        echo "Last cached: ${CACHE_TIMESTAMP}"
-        sqlite3 --json "${XX_CACHE_DIR}/gitlab.db" "SELECT project,id,web_url FROM Projects" | \
-            jq -r '(["PROJECT","ID","URL"] | @csv) , (.[] | [.project, .id, .web_url] | @csv)' | sed 's/"//g' | column -t -s','
+    local DB_PATH="${XX_CACHE_DIR}/gitlab.db"
+
+    if [[ -f "${DB_PATH}" ]]; then
+        # Get the most recent cache timestamp
+        local LATEST_TIMESTAMP=$(sqlite3 "${DB_PATH}" "SELECT MAX(sync_timestamp) FROM SyncLog WHERE operation='gitlab_projects';" 2>/dev/null)
+        if [ -n "${LATEST_TIMESTAMP}" ]; then
+            echo "Last cached: ${LATEST_TIMESTAMP}"
+        else
+            echo "Last cached: Never"
+        fi
+
+        # Query all projects from all hosts
+        sqlite3 --json "${DB_PATH}" "SELECT project,id,web_url,hostname FROM Projects ORDER BY project" | \
+            jq -r '(["PROJECT","ID","URL","HOST"] | @csv) , (.[] | [.project, .id, .web_url, .hostname] | @csv)' | sed 's/"//g' | column -t -s','
     else
         echo "gitlab.db doesn't exist"
         echo "Run CTRL+R to cache GitLab projects"

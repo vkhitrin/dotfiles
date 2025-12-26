@@ -1,5 +1,19 @@
 __xx_get_jira_issues() {
     local JQL="${1:-(assignee = currentUser()) AND (status !='done')}"
-    echo "Jira Query: ${JQL}"
-    jira issues list --jql="${JQL}" --order-by priority --plain --columns priority,key,status,summary 2>&1
+    local PAGE="${2:-0}"
+    local LIMIT="${3:-50}"
+
+    local OUTPUT=$(jira issues list --jql="${JQL}" --order-by priority --plain --columns priority,key,status,summary --paginate "${PAGE}:${LIMIT}" 2>&1)
+    local ISSUE_COUNT=$(echo "${OUTPUT}" | tail -n +3 | wc -l | tr -d ' ')
+
+    # Export count for pagination logic
+    export XX_JIRA_LAST_COUNT="${ISSUE_COUNT}"
+
+    local PAGE_INFO="Jira Query: ${JQL}"
+    if [[ ${PAGE} -gt 0 ]] || [[ ${ISSUE_COUNT} -ge ${LIMIT} ]]; then
+        PAGE_INFO="${PAGE_INFO} | Page: $((PAGE / LIMIT + 1)) (Showing ${ISSUE_COUNT}/${LIMIT})"
+    fi
+
+    echo "${PAGE_INFO}"
+    echo "${OUTPUT}" | tail -n +2
 }

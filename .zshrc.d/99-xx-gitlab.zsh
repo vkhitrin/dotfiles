@@ -7,7 +7,7 @@ function glpx() {
 
     __xx_get_gitlab_projects | fzf --ansi --header-lines=2 --info=inline \
         --bind="start:unbind(ctrl-v,ctrl-t,enter)" \
-        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_gitlab_entities_to_sqlite;__xx_cache_gitlab_entities_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_projects;__xx_get_gitlab_projects)" \
+        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_gitlab_projects_to_sqlite;__xx_cache_gitlab_projects_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_projects;__xx_get_gitlab_projects)" \
         --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="> Filter " \
         --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" --prompt="> Filter " \
         --bind "ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_smart_gitlab_open;__xx_smart_gitlab_open 'browser' {})" \
@@ -41,7 +41,7 @@ function glgx() {
     # xx {"tags": "gitlab", "description": "Display cached GitLab Groups", "subshell": false, "cache": true}
     __xx_get_gitlab_groups | fzf --header-lines=2 --info=inline \
         --bind="start:unbind(enter)" \
-        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_gitlab_entities_to_sqlite;__xx_cache_gitlab_entities_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_groups;__xx_get_gitlab_groups)" \
+        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_gitlab_groups_to_sqlite;__xx_cache_gitlab_groups_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_gitlab_groups;__xx_get_gitlab_groups)" \
         --bind="ctrl-u:execute-silent(echo {3} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --bind="ctrl-i:execute-silent(echo {2} | awk '{print \$NF}' | tr -d '\n' | ${XX_CLIPBOARD_COMMAND})" \
         --prompt="> Filter " \
