@@ -3,6 +3,8 @@ which aws-vault > /dev/null 2>&1 || return
 
 function awsx() {
     # xx {"tags": "aws", "description": "Activate AWS profile for shell", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-O: Open SSO URL | CTRL-L: Login | CTRL-D: Clear Session"
     BIND_OPTIONS+="--bind=ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_open_aws_sso_url; ${XX_OPEN_COMMAND} \$(__xx_open_aws_sso_url {1}))"
@@ -24,6 +26,8 @@ function awsx() {
 
 function awsrx() {
     # xx {"tags": "aws", "description": "Change AWS region for active AWS vault in shell", "subshell": true, "cache": false}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT=""
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
@@ -46,6 +50,8 @@ function awsrx() {
 
 function awsssmx() {
     # xx {"tags": "aws", "description": "Fetch AWS Parameter Store entry value", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-Y: Copy Value | CTRL-V: Copy Decrypted Value | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache"
     BIND_OPTIONS+="--bind=ctrl-y:execute-silent(aws ssm get-parameter --name {1} --query 'Parameter.Value' --output text | tr -d '\n' | pbcopy)+abort"
@@ -65,6 +71,8 @@ function awsssmx() {
 
 function awssecretsx() {
     # xx {"tags": "aws", "description": "Fetch AWS Secrets Manager secret value", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-Y: Copy Secret Value | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache"
     BIND_OPTIONS+="--bind=ctrl-y:execute-silent(aws secretsmanager get-secret-value --secret-id {1} --query 'SecretString' --output text | tr -d '\n' | pbcopy)+abort"
@@ -83,6 +91,8 @@ function awssecretsx() {
 
 function awsec2x() {
     # xx {"tags": "aws", "description": "View AWS EC2 instances and security groups", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local INSTANCES_PROMPT="CTRL-I: Copy Instance ID | CTRL-Y: Copy Private IP | CTRL-U: Copy Public IP | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache | CTRL-S: Security Groups"
     local SG_PROMPT="CTRL-G: Copy Group ID | CTRL-V: Copy VPC ID | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache | CTRL-B: Back to Instances"
 
@@ -117,6 +127,8 @@ function awsec2x() {
 
 function awsrdsx() {
     # xx {"tags": "aws", "description": "View AWS RDS instances", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-I: Copy DB Identifier | CTRL-E: Copy Endpoint | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache"
     BIND_OPTIONS+="--bind=ctrl-i:execute-silent(echo {1} | tr -d '\n' | pbcopy)+abort"
@@ -136,6 +148,8 @@ function awsrdsx() {
 
 function awselasticachex() {
     # xx {"tags": "aws", "description": "View AWS ElastiCache clusters", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-I: Copy Cluster ID | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache"
     BIND_OPTIONS+="--bind=ctrl-i:execute-silent(echo {1} | tr -d '\n' | pbcopy)+abort"
@@ -154,6 +168,8 @@ function awselasticachex() {
 
 function awsacmx() {
     # xx {"tags": "aws", "description": "View AWS ACM certificates", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local BIND_OPTIONS=()
     local TEXT_PROMPT="CTRL-A: Copy ARN | CTRL-D: Copy Domain Name | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache"
     BIND_OPTIONS+="--bind=ctrl-a:execute-silent(echo {5} | tr -d '\n' | pbcopy)+abort"
@@ -173,6 +189,8 @@ function awsacmx() {
 
 function awsroute53x() {
     # xx {"tags": "aws", "description": "View AWS Route53 hosted zones", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local RECORDS_PROMPT="CTRL-N: Copy Record Name | CTRL-V: Copy Record Value | CTRL-P: Toggle Preview"
 
     __xx_get_aws_route53_hosted_zones | fzf --exact --ansi --header-lines=2 --info=inline \
@@ -199,6 +217,8 @@ function awsroute53x() {
 
 function awsvpcx() {
     # xx {"tags": "aws", "description": "View AWS VPCs", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local SUBNETS_PROMPT="CTRL-S: Copy Subnet ID | CTRL-V: Copy CIDR Block"
 
     __xx_get_aws_vpcs | fzf --exact --ansi --header-lines=2 --info=inline \
@@ -223,6 +243,8 @@ function awsvpcx() {
 
 function awsiamx() {
     # xx {"tags": "aws", "description": "View AWS IAM roles and policies", "subshell": true, "cache": true}
+    source ~/.zshrc.d/xx_functions/__xx_tmux_callback_unavailable
+    __xx_tmux_callback_unavailable && return
     local ROLES_PROMPT="CTRL-N: Copy Role Name | CTRL-A: Copy Role ARN | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache | CTRL-O: View Policies"
     local POLICIES_PROMPT="CTRL-N: Copy Policy Name | CTRL-A: Copy Policy ARN | CTRL-P: Toggle Preview | CTRL-R: Refresh Cache | CTRL-B: Back to Roles"
 

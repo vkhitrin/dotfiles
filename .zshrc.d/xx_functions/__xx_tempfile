@@ -1,4 +1,4 @@
 __xx_tempfile() {
-    local prefix="${1:-xx}"
-    mktemp -t "${prefix}.XXXXXXXXXX"
+    local PREFIX="${1:-xx}"
+    mktemp -t "${PREFIX}.XXXXXXXXXX"
 }

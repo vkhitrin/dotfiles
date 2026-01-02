@@ -23,14 +23,13 @@ $1 == "ID" { next; }
     for (i = NF; i >= 1; i--) {
         if ($i == "true" || $i == "false") {
             status = $i;
-            status_pos = i;
-            break;
-        }
-    }
-
-    title = "";
-    for (i = 2; i < status_pos; i++) {
-        title = title $i " ";
+            if ($i == "true") {
+                released = "[32mreleased[0m";
+            } else {
+                released = "[31mnot released[0m";
+            }
+        } else {
+            title = title $i " ";
     }
 
     desc = "";
@@ -42,5 +41,5 @@ $1 == "ID" { next; }
     gsub(/[ \t]+$/, "", desc);
 
     printf "%-7s %-45s %-8s %s\n", id, title, status, desc;
-}' | (read -r header; echo "$header"; sort -rn -k1)
+}' | (read -r HEADER; echo "${HEADER}"; sort -rn -k1)
 }

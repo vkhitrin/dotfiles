@@ -54,29 +54,29 @@ __xx_copy_kdbx_field() {
     echo "${FIELDS}" > "${TEMP_FIELDS}"
 
     # Calculate popup dimensions
-    local field_count=$(echo "${FIELDS}" | wc -l | tr -d ' ')
-    local max_field_length=$(echo "${FIELDS}" | awk '{print length}' | sort -rn | head -1)
-    local pane_width=$(tmux display-message -p '#{pane_width}')
-    local pane_height=$(tmux display-message -p '#{pane_height}')
+    local FIELD_COUNT=$(echo "${FIELDS}" | wc -l | tr -d ' ')
+    local MAX_FIELD_LENGTH=$(echo "${FIELDS}" | awk '{print length}' | sort -rn | head -1)
+    local PANE_WIDTH=$(tmux display-message -p '#{pane_width}')
+    local PANE_HEIGHT=$(tmux display-message -p '#{pane_height}')
 
-    local popup_width=$(( max_field_length + 30 ))
-    if [ $popup_width -lt 40 ]; then
-        popup_width=40
-    elif [ $popup_width -gt $((pane_width - 4)) ]; then
-        popup_width=$((pane_width - 4))
+    local POPUP_WIDTH=$(( MAX_FIELD_LENGTH + 30 ))
+    if [ ${POPUP_WIDTH} -lt 40 ]; then
+        POPUP_WIDTH=40
+    elif [ ${POPUP_WIDTH} -gt $((PANE_WIDTH - 4)) ]; then
+        POPUP_WIDTH=$((PANE_WIDTH - 4))
     fi
 
-    local popup_height=$(( field_count + 8 ))
-    if [ $popup_height -lt 10 ]; then
-        popup_height=10
-    elif [ $popup_height -gt $((pane_height - 4)) ]; then
-        popup_height=$((pane_height - 4))
+    local POPUP_HEIGHT=$(( FIELD_COUNT + 8 ))
+    if [ ${POPUP_HEIGHT} -lt 10 ]; then
+        POPUP_HEIGHT=10
+    elif [ ${POPUP_HEIGHT} -gt $((PANE_HEIGHT - 4)) ]; then
+        POPUP_HEIGHT=$((PANE_HEIGHT - 4))
     fi
 
     # Show gum choose in popup
     tmux display-popup \
-        -h ${popup_height} \
-        -w ${popup_width} \
+        -h ${POPUP_HEIGHT} \
+        -w ${POPUP_WIDTH} \
         -S 'fg=#7391e8' \
         -T '#[align=absolute-centre] Select Field to Copy #[align=right]' \
         -E "cat '${TEMP_FIELDS}' | gum choose \

@@ -1,8 +1,8 @@
 __xx_preview_aws_iam_role() {
-    local role_name="$1"
+    local ROLE_NAME="$1"
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
         echo "=== Role Details ==="
-        aws iam get-role --role-name "${role_name}" --output json 2>/dev/null | \
+        aws iam get-role --role-name "${ROLE_NAME}" --output json 2>/dev/null | \
             jq -r '
                 .Role |
                 "Role Name: \(.RoleName)\n" +
@@ -16,15 +16,15 @@ __xx_preview_aws_iam_role() {
             '
 
         echo -e "\n=== Attached Managed Policies ==="
-        aws iam list-attached-role-policies --role-name "${role_name}" --output json 2>/dev/null | \
+        aws iam list-attached-role-policies --role-name "${ROLE_NAME}" --output json 2>/dev/null | \
             jq -r '.AttachedPolicies[] | "  • \(.PolicyName) (\(.PolicyArn))"' || echo "  None"
 
         echo -e "\n=== Inline Policies ==="
-        aws iam list-role-policies --role-name "${role_name}" --output json 2>/dev/null | \
+        aws iam list-role-policies --role-name "${ROLE_NAME}" --output json 2>/dev/null | \
             jq -r '.PolicyNames[] | "  • \(.)"' || echo "  None"
 
         echo -e "\n=== Tags ==="
-        aws iam list-role-tags --role-name "${role_name}" --output json 2>/dev/null | \
+        aws iam list-role-tags --role-name "${ROLE_NAME}" --output json 2>/dev/null | \
             jq -r '.Tags[]? | "  \(.Key): \(.Value)"' || echo "  None"
     else
         echo "AWS vault is not enabled."

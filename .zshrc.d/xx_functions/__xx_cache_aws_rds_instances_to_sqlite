@@ -38,14 +38,14 @@ __xx_cache_aws_rds_instances_to_sqlite() {
 
     aws rds describe-db-instances --output json | \
         jq -r '.DBInstances[] | [.DBInstanceIdentifier, .Engine, .EngineVersion, .DBInstanceClass, .DBInstanceStatus, (.Endpoint.Address // "N/A")] | @tsv' | \
-        while IFS=$'\t' read -r db_identifier engine engine_version instance_class db_status endpoint; do
-            db_identifier_escaped=$(echo "$db_identifier" | sed "s/'/''/g")
-            engine_escaped=$(echo "$engine" | sed "s/'/''/g")
-            engine_version_escaped=$(echo "$engine_version" | sed "s/'/''/g")
-            instance_class_escaped=$(echo "$instance_class" | sed "s/'/''/g")
-            db_status_escaped=$(echo "$db_status" | sed "s/'/''/g")
-            endpoint_escaped=$(echo "$endpoint" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Instances (account, region, db_identifier, engine, engine_version, instance_class, status, endpoint) VALUES ('${ACCOUNT}', '${REGION}', '${db_identifier_escaped}', '${engine_escaped}', '${engine_version_escaped}', '${instance_class_escaped}', '${db_status_escaped}', '${endpoint_escaped}');"
+        while IFS=$'\t' read -r DB_IDENTIFIER ENGINE ENGINE_VERSION INSTANCE_CLASS DB_STATUS ENDPOINT; do
+            DB_IDENTIFIER_ESCAPED=$(echo "${DB_IDENTIFIER}" | sed "s/'/''/g")
+            ENGINE_ESCAPED=$(echo "${ENGINE}" | sed "s/'/''/g")
+            ENGINE_VERSION_ESCAPED=$(echo "${ENGINE_VERSION}" | sed "s/'/''/g")
+            INSTANCE_CLASS_ESCAPED=$(echo "${INSTANCE_CLASS}" | sed "s/'/''/g")
+            DB_STATUS_ESCAPED=$(echo "${DB_STATUS}" | sed "s/'/''/g")
+            ENDPOINT_ESCAPED=$(echo "${ENDPOINT}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Instances (account, region, db_identifier, engine, engine_version, instance_class, status, endpoint) VALUES ('${ACCOUNT}', '${REGION}', '${DB_IDENTIFIER_ESCAPED}', '${ENGINE_ESCAPED}', '${ENGINE_VERSION_ESCAPED}', '${INSTANCE_CLASS_ESCAPED}', '${DB_STATUS_ESCAPED}', '${ENDPOINT_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

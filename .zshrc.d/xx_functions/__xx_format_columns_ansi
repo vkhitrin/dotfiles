@@ -1,8 +1,8 @@
 __xx_format_columns_ansi() {
-    local separator="${1:-,}"  # Default to comma if no argument
+    local SEPARATOR="${1:-,}"  # Default to comma if no argument
 
     # Use awk to format columns with proper alignment and ANSI color support
-    ${XX_GNU_AWK_COMMAND} -v sep="${separator}" '
+    ${XX_GNU_AWK_COMMAND} -v sep="${SEPARATOR}" '
     BEGIN {
         FS = sep;
         OFS = "  ";

@@ -19,36 +19,36 @@ __xx_get_functions() {
         else
             # Quick check: if cache is less than 5 seconds old, assume it's valid
             # This avoids expensive validation on rapid successive calls
-            local cache_age=999999
+            local CACHE_AGE=999999
             if [[ $(uname) == "Darwin" ]]; then
-                local cache_mtime=$(stat -f "%m" "${SQLITE_DATABASE_PATH}" 2>/dev/null)
-                local current_time=$(date +%s)
-                cache_age=$((current_time - cache_mtime))
+                local CACHE_MTIME=$(stat -f "%m" "${SQLITE_DATABASE_PATH}" 2>/dev/null)
+                local CURRENT_TIME=$(date +%s)
+                CACHE_AGE=$((CURRENT_TIME - CACHE_MTIME))
             elif [[ $(uname) == "Linux" ]]; then
-                cache_age=$(stat -c "%Y" "${SQLITE_DATABASE_PATH}" 2>/dev/null)
-                local current_time=$(date +%s)
-                cache_age=$((current_time - cache_age))
+                CACHE_AGE=$(stat -c "%Y" "${SQLITE_DATABASE_PATH}" 2>/dev/null)
+                local CURRENT_TIME=$(date +%s)
+                CACHE_AGE=$((CURRENT_TIME - CACHE_AGE))
             fi
 
-            if [[ ${cache_age} -lt 5 ]]; then
+            if [[ ${CACHE_AGE} -lt 5 ]]; then
                 # Cache is very recent, skip validation
                 CACHE_VALID=1
             else
                 # Perform full validation by checking file mtimes
                 # Get all cached mtimes in a single query
-                local cached_data=$(sqlite3 "${SQLITE_DATABASE_PATH}" \
+                local CACHED_DATA=$(sqlite3 "${SQLITE_DATABASE_PATH}" \
                     "SELECT filepath, mtime FROM file_mtimes;" 2>/dev/null)
 
                 # Check each file's mtime
-                while IFS='|' read -r filepath mtime; do
-                    if [[ -f "$filepath" ]]; then
+                while IFS='|' read -r FILEPATH MTIME; do
+                    if [[ -f "${FILEPATH}" ]]; then
                         if [[ $(uname) == "Darwin" ]]; then
-                            current_mtime=$(stat -f "%m" "$filepath" 2>/dev/null)
+                            CURRENT_MTIME=$(stat -f "%m" "${FILEPATH}" 2>/dev/null)
                         elif [[ $(uname) == "Linux" ]]; then
-                            current_mtime=$(stat -c "%Y" "$filepath" 2>/dev/null)
+                            CURRENT_MTIME=$(stat -c "%Y" "${FILEPATH}" 2>/dev/null)
                         fi
 
-                        if [[ "${current_mtime}" != "${mtime}" ]]; then
+                        if [[ "${CURRENT_MTIME}" != "${MTIME}" ]]; then
                             CACHE_VALID=0
                             break
                         fi
@@ -57,7 +57,7 @@ __xx_get_functions() {
                         CACHE_VALID=0
                         break
                     fi
-                done <<< "${cached_data}"
+                done <<< "${CACHED_DATA}"
             fi
         fi
 
@@ -87,8 +87,8 @@ __xx_get_functions() {
 
             # Get active files
             XX_ACTIVE_FILES=$(
-                for fn in ${(ok)functions[(I)*x]}; do
-                    type "$fn" | grep '99-xx' | grep 'shell function from' | ${XX_GNU_SED_COMMAND} 's/.*is a shell function from //g'
+                for FN in ${(ok)functions[(I)*x]}; do
+                    type "${FN}" | grep '99-xx' | grep 'shell function from' | ${XX_GNU_SED_COMMAND} 's/.*is a shell function from //g'
                 done | sort | uniq | ${XX_GNU_SED_COMMAND} ':a;N;$!ba;s/\n/ /g'
             )
 
@@ -191,18 +191,18 @@ __xx_get_functions() {
 
             # Store file modification times
             local CACHE_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-            for file in ${(z)XX_ACTIVE_FILES}; do
-                if [[ -f "$file" ]]; then
+            for FILE in ${(z)XX_ACTIVE_FILES}; do
+                if [[ -f "${FILE}" ]]; then
                     if [[ $(uname) == "Darwin" ]]; then
-                        mtime=$(stat -f "%m" "$file" 2>/dev/null)
+                        MTIME=$(stat -f "%m" "${FILE}" 2>/dev/null)
                     elif [[ $(uname) == "Linux" ]]; then
-                        mtime=$(stat -c "%Y" "$file" 2>/dev/null)
+                        MTIME=$(stat -c "%Y" "${FILE}" 2>/dev/null)
                     fi
 
                     # Escape single quotes in filepath
-                    escaped_file="${file//\'/\'\'}"
+                    ESCAPED_FILE="${FILE//\'/\'\'}"
                     sqlite3 "${SQLITE_DATABASE_PATH}" \
-                        "INSERT INTO file_mtimes (filepath, mtime, updated_at) VALUES ('${escaped_file}', ${mtime}, '${CACHE_TIMESTAMP}');" >&2
+                        "INSERT INTO file_mtimes (filepath, mtime, updated_at) VALUES ('${ESCAPED_FILE}', ${MTIME}, '${CACHE_TIMESTAMP}');" >&2
                 fi
             done
         fi
@@ -238,8 +238,8 @@ __xx_get_functions() {
 
     # Fall back to non-cached version if caching is disabled
     XX_ACTIVE_FILES=$(
-        for fn in ${(ok)functions[(I)*x]}; do
-            type "$fn" | grep '99-xx' | grep 'shell function from' | ${XX_GNU_SED_COMMAND} 's/.*is a shell function from //g'
+        for FN in ${(ok)functions[(I)*x]}; do
+            type "${FN}" | grep '99-xx' | grep 'shell function from' | ${XX_GNU_SED_COMMAND} 's/.*is a shell function from //g'
         done | sort | uniq | ${XX_GNU_SED_COMMAND} ':a;N;$!ba;s/\n/ /g'
     )
 

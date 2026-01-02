@@ -39,27 +39,27 @@ __xx_cache_aws_elasticache_clusters_to_sqlite() {
     # Fetch Redis replication groups (clusters)
     aws elasticache describe-replication-groups --output json 2>/dev/null | \
         jq -r '.ReplicationGroups[] | [.ReplicationGroupId, "redis", (.CacheNodeType // "N/A"), .Status, ([.MemberClusters] | length)] | @tsv' | \
-        while IFS=$'\t' read -r cluster_id engine node_type cluster_status num_nodes; do
-            cluster_id_escaped=$(echo "$cluster_id" | sed "s/'/''/g")
-            engine_escaped=$(echo "$engine" | sed "s/'/''/g")
-            node_type_escaped=$(echo "$node_type" | sed "s/'/''/g")
-            cluster_status_escaped=$(echo "$cluster_status" | sed "s/'/''/g")
+        while IFS=$'\t' read -r CLUSTER_ID ENGINE NODE_TYPE CLUSTER_STATUS NUM_NODES; do
+            CLUSTER_ID_ESCAPED=$(echo "${CLUSTER_ID}" | sed "s/'/''/g")
+            ENGINE_ESCAPED=$(echo "${ENGINE}" | sed "s/'/''/g")
+            NODE_TYPE_ESCAPED=$(echo "${NODE_TYPE}" | sed "s/'/''/g")
+            CLUSTER_STATUS_ESCAPED=$(echo "${CLUSTER_STATUS}" | sed "s/'/''/g")
             # Get engine version from one of the member clusters
-            engine_version=$(aws elasticache describe-replication-groups --replication-group-id "$cluster_id" --output json 2>/dev/null | jq -r '.ReplicationGroups[0].MemberClusters[0]' | xargs -I {} aws elasticache describe-cache-clusters --cache-cluster-id {} --output json 2>/dev/null | jq -r '.CacheClusters[0].EngineVersion // "N/A"')
-            engine_version_escaped=$(echo "$engine_version" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Clusters (account, region, cluster_id, engine, engine_version, node_type, cluster_status, num_nodes) VALUES ('${ACCOUNT}', '${REGION}', '${cluster_id_escaped}', '${engine_escaped}', '${engine_version_escaped}', '${node_type_escaped}', '${cluster_status_escaped}', ${num_nodes});"
+            ENGINE_VERSION=$(aws elasticache describe-replication-groups --replication-group-id "${CLUSTER_ID}" --output json 2>/dev/null | jq -r '.ReplicationGroups[0].MemberClusters[0]' | xargs -I {} aws elasticache describe-cache-clusters --cache-cluster-id {} --output json 2>/dev/null | jq -r '.CacheClusters[0].EngineVersion // "N/A"')
+            ENGINE_VERSION_ESCAPED=$(echo "${ENGINE_VERSION}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Clusters (account, region, cluster_id, engine, engine_version, node_type, cluster_status, num_nodes) VALUES ('${ACCOUNT}', '${REGION}', '${CLUSTER_ID_ESCAPED}', '${ENGINE_ESCAPED}', '${ENGINE_VERSION_ESCAPED}', '${NODE_TYPE_ESCAPED}', '${CLUSTER_STATUS_ESCAPED}', ${NUM_NODES});"
         done
 
     # Fetch standalone Memcached clusters (not in replication groups)
     aws elasticache describe-cache-clusters --output json 2>/dev/null | \
         jq -r '.CacheClusters[] | select(.ReplicationGroupId == null) | [.CacheClusterId, .Engine, .EngineVersion, .CacheNodeType, .CacheClusterStatus, .NumCacheNodes] | @tsv' | \
-        while IFS=$'\t' read -r cluster_id engine engine_version node_type cluster_status num_nodes; do
-            cluster_id_escaped=$(echo "$cluster_id" | sed "s/'/''/g")
-            engine_escaped=$(echo "$engine" | sed "s/'/''/g")
-            engine_version_escaped=$(echo "$engine_version" | sed "s/'/''/g")
-            node_type_escaped=$(echo "$node_type" | sed "s/'/''/g")
-            cluster_status_escaped=$(echo "$cluster_status" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Clusters (account, region, cluster_id, engine, engine_version, node_type, cluster_status, num_nodes) VALUES ('${ACCOUNT}', '${REGION}', '${cluster_id_escaped}', '${engine_escaped}', '${engine_version_escaped}', '${node_type_escaped}', '${cluster_status_escaped}', ${num_nodes});"
+        while IFS=$'\t' read -r CLUSTER_ID ENGINE ENGINE_VERSION NODE_TYPE CLUSTER_STATUS NUM_NODES; do
+            CLUSTER_ID_ESCAPED=$(echo "${CLUSTER_ID}" | sed "s/'/''/g")
+            ENGINE_ESCAPED=$(echo "${ENGINE}" | sed "s/'/''/g")
+            ENGINE_VERSION_ESCAPED=$(echo "${ENGINE_VERSION}" | sed "s/'/''/g")
+            NODE_TYPE_ESCAPED=$(echo "${NODE_TYPE}" | sed "s/'/''/g")
+            CLUSTER_STATUS_ESCAPED=$(echo "${CLUSTER_STATUS}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Clusters (account, region, cluster_id, engine, engine_version, node_type, cluster_status, num_nodes) VALUES ('${ACCOUNT}', '${REGION}', '${CLUSTER_ID_ESCAPED}', '${ENGINE_ESCAPED}', '${ENGINE_VERSION_ESCAPED}', '${NODE_TYPE_ESCAPED}', '${CLUSTER_STATUS_ESCAPED}', ${NUM_NODES});"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

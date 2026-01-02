@@ -38,11 +38,11 @@ __xx_cache_aws_parameter_store_to_sqlite() {
 
     aws ssm describe-parameters --output json | \
         jq -r '.Parameters[] | [.Name, .Type, (.Description // "N/A")] | @tsv' | \
-        while IFS=$'\t' read -r name type description; do
+        while IFS=$'\t' read -r NAME TYPE DESCRIPTION; do
             # Escape single quotes for SQL
-            name_escaped=$(echo "$name" | sed "s/'/''/g")
-            description_escaped=$(echo "$description" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Parameters (account, region, name, type, description) VALUES ('${ACCOUNT}', '${REGION}', '${name_escaped}', '${type}', '${description_escaped}');"
+            NAME_ESCAPED=$(echo "${NAME}" | sed "s/'/''/g")
+            DESCRIPTION_ESCAPED=$(echo "${DESCRIPTION}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Parameters (account, region, name, type, description) VALUES ('${ACCOUNT}', '${REGION}', '${NAME_ESCAPED}', '${TYPE}', '${DESCRIPTION_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

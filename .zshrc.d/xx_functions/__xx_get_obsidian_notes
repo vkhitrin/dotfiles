@@ -4,10 +4,10 @@ __xx_get_obsidian_notes() {
     if [ -n "${NOTES}" ]; then
         {
             echo "NOTE\tPATH\tVAULT"
-            while IFS= read -r note; do
-              note_name=$(basename "${note}" ".md")
-              vault_name=$(basename ${XX_OBSIDIAN_VAULT_DIR})
-              echo "${note_name}\t${note}\t${vault_name}"
+            while IFS= read -r NOTE; do
+              NOTE_NAME=$(basename "${NOTE}" ".md")
+              VAULT_NAME=$(basename ${XX_OBSIDIAN_VAULT_DIR})
+              echo "${NOTE_NAME}\t${NOTE}\t${VAULT_NAME}"
             done <<< "${NOTES}"
         } | column -t -s $'\t' | sort -r
     else

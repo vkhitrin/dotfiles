@@ -36,14 +36,14 @@ __xx_cache_aws_iam_policies_to_sqlite() {
 
     aws iam list-policies --scope All --output json | \
         jq -r '.Policies[] | [.PolicyName, .PolicyId, .Arn, (if .Arn | startswith("arn:aws:iam::aws:") then "AWS" else "Customer" end), .AttachmentCount, .CreateDate, (.Description // "N/A")] | @tsv' | \
-        while IFS=$'\t' read -r policy_name policy_id policy_arn scope attachment_count create_date description; do
-            policy_name_escaped=$(echo "$policy_name" | sed "s/'/''/g")
-            policy_id_escaped=$(echo "$policy_id" | sed "s/'/''/g")
-            policy_arn_escaped=$(echo "$policy_arn" | sed "s/'/''/g")
-            scope_escaped=$(echo "$scope" | sed "s/'/''/g")
-            create_date_escaped=$(echo "$create_date" | sed "s/'/''/g")
-            description_escaped=$(echo "$description" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Policies (account, policy_name, policy_id, policy_arn, scope, attachment_count, create_date, description) VALUES ('${ACCOUNT}', '${policy_name_escaped}', '${policy_id_escaped}', '${policy_arn_escaped}', '${scope_escaped}', ${attachment_count}, '${create_date_escaped}', '${description_escaped}');"
+        while IFS=$'\t' read -r POLICY_NAME POLICY_ID POLICY_ARN SCOPE ATTACHMENT_COUNT CREATE_DATE DESCRIPTION; do
+            POLICY_NAME_ESCAPED=$(echo "${POLICY_NAME}" | sed "s/'/''/g")
+            POLICY_ID_ESCAPED=$(echo "${POLICY_ID}" | sed "s/'/''/g")
+            POLICY_ARN_ESCAPED=$(echo "${POLICY_ARN}" | sed "s/'/''/g")
+            SCOPE_ESCAPED=$(echo "${SCOPE}" | sed "s/'/''/g")
+            CREATE_DATE_ESCAPED=$(echo "${CREATE_DATE}" | sed "s/'/''/g")
+            DESCRIPTION_ESCAPED=$(echo "${DESCRIPTION}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Policies (account, policy_name, policy_id, policy_arn, scope, attachment_count, create_date, description) VALUES ('${ACCOUNT}', '${POLICY_NAME_ESCAPED}', '${POLICY_ID_ESCAPED}', '${POLICY_ARN_ESCAPED}', '${SCOPE_ESCAPED}', ${ATTACHMENT_COUNT}, '${CREATE_DATE_ESCAPED}', '${DESCRIPTION_ESCAPED}');"
         done
 
     __xx_notify "#[fg=bold]Finished fetching AWS IAM Policies!#[default]"

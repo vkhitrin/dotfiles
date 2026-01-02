@@ -38,13 +38,13 @@ __xx_cache_aws_vpcs_to_sqlite() {
 
     aws ec2 describe-vpcs --output json 2>/dev/null | \
         jq -r '.Vpcs[] | [.VpcId, (.Tags[]? | select(.Key=="Name") | .Value // "N/A"), .CidrBlock, (.IsDefault | tostring), .State] | @tsv' | \
-        while IFS=$'\t' read -r vpc_id name cidr_block is_default vpc_state; do
-            vpc_id_escaped=$(echo "$vpc_id" | sed "s/'/''/g")
-            name_escaped=$(echo "$name" | sed "s/'/''/g")
-            cidr_block_escaped=$(echo "$cidr_block" | sed "s/'/''/g")
-            is_default_escaped=$(echo "$is_default" | sed "s/'/''/g")
-            vpc_state_escaped=$(echo "$vpc_state" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO VPCs (account, region, vpc_id, name, cidr_block, is_default, vpc_state) VALUES ('${ACCOUNT}', '${REGION}', '${vpc_id_escaped}', '${name_escaped}', '${cidr_block_escaped}', '${is_default_escaped}', '${vpc_state_escaped}');"
+        while IFS=$'\t' read -r VPC_ID NAME CIDR_BLOCK IS_DEFAULT VPC_STATE; do
+            VPC_ID_ESCAPED=$(echo "${VPC_ID}" | sed "s/'/''/g")
+            NAME_ESCAPED=$(echo "${NAME}" | sed "s/'/''/g")
+            CIDR_BLOCK_ESCAPED=$(echo "${CIDR_BLOCK}" | sed "s/'/''/g")
+            IS_DEFAULT_ESCAPED=$(echo "${IS_DEFAULT}" | sed "s/'/''/g")
+            VPC_STATE_ESCAPED=$(echo "${VPC_STATE}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO VPCs (account, region, vpc_id, name, cidr_block, is_default, vpc_state) VALUES ('${ACCOUNT}', '${REGION}', '${VPC_ID_ESCAPED}', '${NAME_ESCAPED}', '${CIDR_BLOCK_ESCAPED}', '${IS_DEFAULT_ESCAPED}', '${VPC_STATE_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

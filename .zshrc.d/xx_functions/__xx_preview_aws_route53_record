@@ -1,13 +1,13 @@
 __xx_preview_aws_route53_record() {
-    local hosted_zone_id="$1"
-    local record_type="$2"
-    local record_name="$3"
+    local HOSTED_ZONE_ID="$1"
+    local RECORD_TYPE="$2"
+    local RECORD_NAME="$3"
 
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
-        aws route53 list-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --output json 2>/dev/null | \
-            jq --arg type "$record_type" --arg name "$record_name" -r '
+        aws route53 list-resource-record-sets --hosted-zone-id "${HOSTED_ZONE_ID}" --output json 2>/dev/null | \
+            jq --arg type "${RECORD_TYPE}" --arg name "${RECORD_NAME}" -r '
                 .ResourceRecordSets[] |
-                select(.Type == $type and .Name == $name) |
+                select(.Type == ${TYPE} and .Name == ${NAME}) |
                 "Record Type: \(.Type)\n" +
                 "Name: \(.Name)\n" +
                 "TTL: \(.TTL // "N/A")\n" +

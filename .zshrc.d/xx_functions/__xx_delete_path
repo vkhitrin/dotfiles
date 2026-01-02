@@ -10,54 +10,54 @@ __xx_delete_path() {
             if [[ "$PATH_OF_INTEREST_EXPANDED" == "$PROTECTED_PATHS"* ]]; then
                 tmux display-message -d '1000' "#[fg=#d20f39,bold]Path '${PATH_OF_INTEREST}' is protected!#[default]" > /dev/null 2>&1 || true
             else
-                path_length=${#PATH_OF_INTEREST}
-                pane_width=$(tmux display-message -p '#{pane_width}')
-                pane_height=$(tmux display-message -p '#{pane_height}')
+                PATH_LENGTH=${#PATH_OF_INTEREST}
+                PANE_WIDTH=$(tmux display-message -p '#{pane_width}')
+                PANE_HEIGHT=$(tmux display-message -p '#{pane_height}')
 
-                popup_width=$(( path_length + 20 ))
-                if [ $popup_width -lt 40 ]; then
-                    popup_width=40
-                elif [ $popup_width -gt $((pane_width - 4)) ]; then
-                    popup_width=$((pane_width - 4))
+                POPUP_WIDTH=$(( PATH_LENGTH + 20 ))
+                if [ ${POPUP_WIDTH} -lt 40 ]; then
+                    POPUP_WIDTH=40
+                elif [ ${POPUP_WIDTH} -gt $((PANE_WIDTH - 4)) ]; then
+                    POPUP_WIDTH=$((PANE_WIDTH - 4))
                 fi
 
-                popup_height=$(( (path_length / 50) + 8 ))
+                POPUP_HEIGHT=$(( (PATH_LENGTH / 50) + 8 ))
 
-                if [ $popup_height -lt 8 ]; then
-                    popup_height=8
-                elif [ $popup_height -gt 20 ]; then
-                    popup_height=20
+                if [ ${POPUP_HEIGHT} -lt 8 ]; then
+                    POPUP_HEIGHT=8
+                elif [ ${POPUP_HEIGHT} -gt 20 ]; then
+                    POPUP_HEIGHT=20
                 fi
-                pad_tb=$(( popup_height / 10 ))
-                if [ $pad_tb -lt 2 ]; then
-                    pad_tb=2
-                elif [ $pad_tb -gt 10 ]; then
-                    pad_tb=10
+                PAD_TB=$(( POPUP_HEIGHT / 10 ))
+                if [ ${PAD_TB} -lt 2 ]; then
+                    PAD_TB=2
+                elif [ ${PAD_TB} -gt 10 ]; then
+                    PAD_TB=10
                 fi
 
-                base_lr=$(( popup_width / 12 ))
+                BASE_LR=$(( POPUP_WIDTH / 12 ))
 
-                if [ $path_length -gt 50 ]; then
-                    pad_lr=$(( base_lr / 2 ))
+                if [ ${PATH_LENGTH} -gt 50 ]; then
+                    PAD_LR=$(( BASE_LR / 2 ))
                 else
-                    pad_lr=$base_lr
+                    PAD_LR=${BASE_LR}
                 fi
 
-                if [ $pad_lr -lt 2 ]; then
-                    pad_lr=2
-                elif [ $pad_lr -gt 10 ]; then
-                    pad_lr=10
+                if [ ${PAD_LR} -lt 2 ]; then
+                    PAD_LR=2
+                elif [ ${PAD_LR} -gt 10 ]; then
+                    PAD_LR=10
                 fi
 
-                padding="${pad_tb} ${pad_lr} ${pad_tb} ${pad_lr}"
+                PADDING="${PAD_TB} ${PAD_LR} ${PAD_TB} ${PAD_LR}"
 
                 tmux display-popup \
-                    -h ${popup_height} \
-                    -w ${popup_width} \
+                    -h ${POPUP_HEIGHT} \
+                    -w ${POPUP_WIDTH} \
                     -S 'fg=#f5e0dc' \
                     -T '#[align=absolute-centre] Confirm Deletion #[align=right]' \
                     -E "gum confirm '${PATH_OF_INTEREST}' \
-                        --padding='${padding}' \
+                        --padding='${PADDING}' \
                         --affirmative='Delete' \
                         --negative='Keep' \
                         --no-show-help \

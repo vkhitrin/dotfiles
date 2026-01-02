@@ -22,8 +22,8 @@ __xx_cache_gitlab_projects_to_sqlite() {
         CONFIG_FILES+=("${GLAB_CONFIG_DIR}/config.yml")
     fi
     # Find all config.yml files in the glab-cli config directory
-    while IFS= read -r config_file; do
-        CONFIG_FILES+=("${config_file}")
+    while IFS= read -r CONFIG_FILE; do
+        CONFIG_FILES+=("${CONFIG_FILE}")
     done < <(find "${HOME}/.config/glab-cli/" -name "config.yml" -type f 2>/dev/null)
 
     if [ -f "${HOME}/Library/Application Support/glab-cli/config.yml" ]; then
@@ -95,12 +95,12 @@ __xx_cache_gitlab_projects_to_sqlite() {
             cd
             if [ -n "${USE_GLAB_CONFIG_DIR}" ]; then
                 GLAB_CONFIG_DIR="${USE_GLAB_CONFIG_DIR}" glab api 'projects?membership=true&per_page=100&simple=true' --paginate --hostname="${GITLAB_HOST}" 2>/dev/null | \
-                    jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.path_with_namespace,.id,$host]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
+                    jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.path_with_namespace,.id,${HOST}]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
                     sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Projects (web_url, project, id, hostname) VALUES (${PROJECT_DETAILS});"
                 done
             else
                 glab api 'projects?membership=true&per_page=100&simple=true' --paginate --hostname="${GITLAB_HOST}" 2>/dev/null | \
-                    jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.path_with_namespace,.id,$host]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
+                    jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.path_with_namespace,.id,${HOST}]|@csv)' | while IFS= read -r PROJECT_DETAILS; do
                     sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Projects (web_url, project, id, hostname) VALUES (${PROJECT_DETAILS});"
                 done
             fi

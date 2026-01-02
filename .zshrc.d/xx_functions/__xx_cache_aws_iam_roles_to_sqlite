@@ -37,14 +37,14 @@ __xx_cache_aws_iam_roles_to_sqlite() {
 
     aws iam list-roles --output json | \
         jq -r '.Roles[] | [.RoleName, .Path, .RoleId, .Arn, .CreateDate, (.Description // "N/A")] | @tsv' | \
-        while IFS=$'\t' read -r role_name role_path role_id role_arn create_date description; do
-            role_name_escaped=$(echo "$role_name" | sed "s/'/''/g")
-            role_path_escaped=$(echo "$role_path" | sed "s/'/''/g")
-            role_id_escaped=$(echo "$role_id" | sed "s/'/''/g")
-            role_arn_escaped=$(echo "$role_arn" | sed "s/'/''/g")
-            create_date_escaped=$(echo "$create_date" | sed "s/'/''/g")
-            description_escaped=$(echo "$description" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Roles (account, role_name, role_path, role_id, role_arn, create_date, description) VALUES ('${ACCOUNT}', '${role_name_escaped}', '${role_path_escaped}', '${role_id_escaped}', '${role_arn_escaped}', '${create_date_escaped}', '${description_escaped}');"
+        while IFS=$'\t' read -r ROLE_NAME ROLE_PATH ROLE_ID ROLE_ARN CREATE_DATE DESCRIPTION; do
+            ROLE_NAME_ESCAPED=$(echo "${ROLE_NAME}" | sed "s/'/''/g")
+            ROLE_PATH_ESCAPED=$(echo "${ROLE_PATH}" | sed "s/'/''/g")
+            ROLE_ID_ESCAPED=$(echo "${ROLE_ID}" | sed "s/'/''/g")
+            ROLE_ARN_ESCAPED=$(echo "${ROLE_ARN}" | sed "s/'/''/g")
+            CREATE_DATE_ESCAPED=$(echo "${CREATE_DATE}" | sed "s/'/''/g")
+            DESCRIPTION_ESCAPED=$(echo "${DESCRIPTION}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Roles (account, role_name, role_path, role_id, role_arn, create_date, description) VALUES ('${ACCOUNT}', '${ROLE_NAME_ESCAPED}', '${ROLE_PATH_ESCAPED}', '${ROLE_ID_ESCAPED}', '${ROLE_ARN_ESCAPED}', '${CREATE_DATE_ESCAPED}', '${DESCRIPTION_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

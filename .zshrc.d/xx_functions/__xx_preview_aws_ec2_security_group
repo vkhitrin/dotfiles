@@ -1,8 +1,8 @@
 __xx_preview_aws_ec2_security_group() {
-    local group_id="$1"
+    local GROUP_ID="$1"
 
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
-        aws ec2 describe-security-groups --group-ids "${group_id}" --output json 2>/dev/null | \
+        aws ec2 describe-security-groups --group-ids "${GROUP_ID}" --output json 2>/dev/null | \
             jq -r '
                 .SecurityGroups[0] |
                 "Group ID: \(.GroupId)\n" +
