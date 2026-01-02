@@ -67,9 +67,9 @@ __xx_get_git_directories() {
     sqlite3 "${DB_FILE}" "DELETE FROM git_directories WHERE starting_path = '${STARTING_PATH}';"
 
     # Store each directory as a separate row
-    echo "${GIT_DIRS}" | while IFS= read -r dir; do
+    echo "${GIT_DIRS}" | while IFS= read -r DIR; do
         sqlite3 "${DB_FILE}" "INSERT INTO git_directories (starting_path, directory, last_updated)
-                              VALUES ('${STARTING_PATH}', '${dir}', ${TIMESTAMP});"
+                              VALUES ('${STARTING_PATH}', '${DIR}', ${TIMESTAMP});"
     done
 
     __xx_notify "Cached ${COUNT} git directories"

@@ -1,0 +1,9 @@
+__xx_argocd_launch_tui() {
+    local ARGONAUT_COMMAND="argonaut"
+
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 90% -w 90% -S 'fg=#b77a5e' -T '#[align=absolute-centre] argonaut #[align=right]' -E "${ARGONAUT_COMMAND}"
+    else
+        zsh -i -c "${ARGONAUT_COMMAND}"
+    fi
+}

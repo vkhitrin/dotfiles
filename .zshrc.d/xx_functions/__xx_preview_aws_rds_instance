@@ -1,7 +1,7 @@
 __xx_preview_aws_rds_instance() {
-    local db_identifier="$1"
+    local DB_IDENTIFIER="$1"
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
-        aws rds describe-db-instances --db-instance-identifier "${db_identifier}" --output json 2>/dev/null | \
+        aws rds describe-db-instances --db-instance-identifier "${DB_IDENTIFIER}" --output json 2>/dev/null | \
             jq -r '
                 .DBInstances[0] |
                 "DB Instance Identifier: \(.DBInstanceIdentifier)\n" +

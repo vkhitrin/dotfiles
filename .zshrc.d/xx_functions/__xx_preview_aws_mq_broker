@@ -1,0 +1,39 @@
+__xx_preview_aws_mq_broker() {
+    local BROKER_ID="$1"
+
+    if [[ -z "${BROKER_ID}" || "${BROKER_ID}" == "BROKER_ID" ]]; then
+        echo "Select a broker to see details"
+        return
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        echo "AWS vault is not enabled."
+        return
+    fi
+
+    aws mq describe-broker --broker-id "${BROKER_ID}" --output json 2>/dev/null | \
+        jq -r '
+            "Broker ID: \(.BrokerId)\n" +
+            "Broker Name: \(.BrokerName)\n" +
+            "Broker State: \(.BrokerState)\n" +
+            "Engine Type: \(.EngineType)\n" +
+            "Engine Version: \(.EngineVersion)\n" +
+            "Deployment Mode: \(.DeploymentMode)\n" +
+            "Instance Type: \(.HostInstanceType)\n" +
+            "Storage Type: \(.StorageType // "N/A")\n" +
+            "Created: \(.Created)\n" +
+            "Auto Minor Version Upgrade: \(.AutoMinorVersionUpgrade)\n" +
+            "Authentication Strategy: \(.AuthenticationStrategy // "N/A")\n" +
+            (if .MaintenanceWindowStartTime then "Maintenance Window: \(.MaintenanceWindowStartTime.DayOfWeek) \(.MaintenanceWindowStartTime.TimeOfDay) \(.MaintenanceWindowStartTime.TimeZone)\n" else "" end) +
+            "\nNetwork Configuration:\n" +
+            "  Publicly Accessible: \(.PubliclyAccessible)\n" +
+            (if .SubnetIds and (.SubnetIds | length > 0) then "  Subnets: \(.SubnetIds | join(", "))\n" else "" end) +
+            (if .SecurityGroups and (.SecurityGroups | length > 0) then "  Security Groups: \(.SecurityGroups | join(", "))\n" else "" end) +
+            (if .BrokerInstances and (.BrokerInstances | length > 0) then "\nBroker Instances:\n" + (.BrokerInstances[] | "  - Console URL: \(.ConsoleURL)\n    Endpoints: \(.Endpoints | join(", "))\n") else "" end) +
+            (if .EncryptionOptions.UseAwsOwnedKey then "\nEncryption: AWS Owned Key\n" elif .EncryptionOptions.KmsKeyId then "\nEncryption: Customer Managed Key\n  KMS Key: \(.EncryptionOptions.KmsKeyId)\n" else "" end) +
+            (if .Logs then "\nLogging:\n  General: \(.Logs.General)\n" + (if .Logs.GeneralLogGroup then "  General Log Group: \(.Logs.GeneralLogGroup)\n" else "" end) + (if .Logs.Audit != null then "  Audit: \(.Logs.Audit)\n" else "" end) else "" end) +
+            (if .Users and (.Users | length > 0) then "\nUsers:\n" + (.Users[] | "  - \(.Username) (Console: \(.ConsoleAccess // false))\n") else "\nUsers: None configured\n" end) +
+            (if .Configurations.Current then "\nConfiguration:\n  ID: \(.Configurations.Current.Id)\n  Revision: \(.Configurations.Current.Revision)\n" else "" end) +
+            (if .Tags and (.Tags | length > 0) then "\nTags:\n" + (.Tags | to_entries[] | "  \(.key): \(.value)\n") else "" end)
+        '
+}

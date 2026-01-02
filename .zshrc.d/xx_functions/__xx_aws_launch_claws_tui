@@ -1,0 +1,24 @@
+__xx_aws_launch_claws_tui() {
+    local CLAWS_COMMAND
+    local AWS_SERVICE=${1}
+    local AWS_RESOURCE_ID=${2}
+    local CLAWS_COMMAND="claws"
+
+    if [[ -n "${AWS_SERVICE}" ]]; then
+        CLAWS_COMMAND="${CLAWS_COMMAND} -s ${AWS_SERVICE}"
+    fi
+
+    if [[ -n "${AWS_RESOURCE_ID}" ]]; then
+        CLAWS_COMMAND="${CLAWS_COMMAND} -i ${AWS_RESOURCE_ID}"
+    fi
+
+    if [[ -n "${TMUX}" ]]; then
+        local AWS_ENV_VARS=()
+        while IFS='=' read -r VAR VALUE; do
+            AWS_ENV_VARS+=(-e "${VAR}=${VALUE}")
+        done < <(env | grep '^AWS_')
+        tmux display-popup -h 90% -w 90% -S 'fg=#f9e2af' -T '#[align=absolute-centre] claws #[align=right]' "${AWS_ENV_VARS[@]}" -E "${CLAWS_COMMAND}"
+    else
+        zsh -i -c "${CLAWS_COMMAND}"
+    fi
+}

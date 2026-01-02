@@ -8,6 +8,7 @@ __xx_get_gitlab_project_pipelines() {
         if [ -n "${OUTPUT}" ]; then
         CONTENT=true;
         {
+            echo "Fetched $(${XX_GNU_DATE_COMMAND=} -u +'%Y-%m-%dT%H:%M:%SZ')"
             echo "State\tIID\tRef\tCreated\tHost\tRepository"
             echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" -v r="${GITLAB_PROJECT}" '{print $0 "\t" h "\t" r}'
         } | __xx_format_columns_ansi $'\t' | awk '
@@ -16,7 +17,7 @@ __xx_get_gitlab_project_pipelines() {
                         print "\033[31m" $0 "\033[0m"
                     } else if ($0 ~ /\(success\)/) {
                         print "\033[32m" $0 "\033[0m"
-                    } else if ($0 ~ /\(manual\)/ || $0 ~ /\(canceled\)/) {
+                    } else if ($0 ~ /\(manual\)/ || $0 ~ /\(canceled\)/ || $0 ~ /\(skipped\)/) {
                         print "\033[90m" $0 "\033[0m"
                     } else {
                         print $0

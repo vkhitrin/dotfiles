@@ -1,0 +1,144 @@
+__xx_cache_jira_notifications_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch Jira Notifications!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/jira.db"
+
+    # Get token and Jira instance
+    local COOKIE_VALUE
+    local COOKIE_EXPIRATION_EPOCH
+    local KEYCHAIN_SERVICE="JIRA_UI_TENANT_SESSION_TOKEN"
+    local JIRA_CONFIG="${HOME}/.config/.jira/.config.yml"
+    local JIRA_INSTANCE
+
+    # Read Jira instance from config file
+    if [ -f "${JIRA_CONFIG}" ]; then
+        JIRA_INSTANCE=$(grep '^server:' "${JIRA_CONFIG}" | awk '{print $2}')
+        if [ -z "${JIRA_INSTANCE}" ]; then
+            __xx_notify "Failed to read Jira instance from ${JIRA_CONFIG}."
+            return 1
+        fi
+    else
+        __xx_notify "Jira config file not found at ${JIRA_CONFIG}."
+        return 1
+    fi
+
+    __xx_notify "Fetching token from keychain"
+    local JSON_VALUE="$(security find-generic-password -l ${KEYCHAIN_SERVICE} -w 2>/dev/null)"
+    if [ -z "${JSON_VALUE}" ]; then
+        __xx_notify "Failed to fetch ${KEYCHAIN_SERVICE}."
+        return 1
+    fi
+
+    COOKIE_VALUE=$(echo "${JSON_VALUE}" | jq -r '.value')
+    COOKIE_EXPIRATION_EPOCH=$(echo "${JSON_VALUE}" | jq -r '.expiresAt')
+
+    # Check if token has expired
+    NOW_EPOCH=$(date +%s)
+    if (( NOW_EPOCH >= COOKIE_EXPIRATION_EPOCH )); then
+        __xx_notify "Token expired. Please refresh ${KEYCHAIN_SERVICE} in keychain."
+        return 1
+    fi
+
+    TIME_REMAINING=$(( (COOKIE_EXPIRATION_EPOCH - NOW_EPOCH) / 60 ))
+    __xx_notify "Token valid (expires in ${TIME_REMAINING}m)"
+
+    __xx_notify "Creating 'Notifications' table if not exists in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Notifications (id TEXT PRIMARY KEY, group_id TEXT, timestamp TEXT, read_state TEXT, category TEXT, json TEXT);"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Notifications;"
+    fi
+
+    # Function to fetch and store notifications for a given category
+    __fetch_notifications_by_category() {
+        local CATEGORY="$1"
+        local CATEGORY_LABEL="$2"
+
+        __xx_notify "Fetching ${CATEGORY_LABEL} notifications from Jira API"
+
+        # Build URL - watched notifications (category=none) don't support expand=content.body
+        local API_URL="${JIRA_INSTANCE}/gateway/api/notification-log/api/3/notification-groups?category=${CATEGORY}&limit=25"
+        if [ "${CATEGORY}" = "direct" ]; then
+            API_URL="${API_URL}&expand=content.body"
+        fi
+
+        local JIRA_RESPONSE=$(curl -s --compressed "${API_URL}" \
+            -X 'GET' \
+            -H 'accept: */*' \
+            -H "cookie: tenant.session.token=${COOKIE_VALUE}" \
+            -H "referer: ${JIRA_INSTANCE}/jira/notifications" \
+            -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36' \
+            -H 'x-app-name: jira-frontend')
+
+        # Check if fetch was successful
+        if echo "${JIRA_RESPONSE}" | jq -e '.groups' > /dev/null 2>&1; then
+            __xx_notify "Parsing and storing ${CATEGORY_LABEL} notifications"
+            # Parse notification groups and extract individual notifications
+            # For category=none, the API returns notifications with category: null, so we override it to 'watched'
+            local CATEGORY_OVERRIDE=""
+            if [ "${CATEGORY}" = "none" ]; then
+                CATEGORY_OVERRIDE="watched"
+            fi
+
+            echo "${JIRA_RESPONSE}" | jq -c '.groups[] | .notifications[] as $notif | .id as $group_id | $notif + {group_id: $group_id}' | while read -r ROW; do
+                ID=$(echo "${ROW}" | jq -r '.id')
+                GROUP_ID=$(echo "${ROW}" | jq -r '.group_id')
+                TIMESTAMP=$(echo "${ROW}" | jq -r '.timestamp')
+                READ_STATE=$(echo "${ROW}" | jq -r '.readState')
+                CATEGORY=$(echo "${ROW}" | jq -r '.category')
+
+                # Override null category with 'watched' for category=none requests
+                if [ "${CATEGORY}" = "null" ] && [ -n "${CATEGORY_OVERRIDE}" ]; then
+                    CATEGORY="${CATEGORY_OVERRIDE}"
+                fi
+
+                # Escape single quotes for SQL
+                ESCAPED_ROW=$(echo "${ROW}" | sed "s/'/''/g")
+
+                sqlite3 "${SQLITE_DATABASE_PATH}" \
+                    "INSERT OR REPLACE INTO Notifications (id, group_id, timestamp, read_state, category, json) VALUES ('${ID}', '${GROUP_ID}', '${TIMESTAMP}', '${READ_STATE}', '${CATEGORY}', '${ESCAPED_ROW}');"
+            done
+            __xx_notify "Finished storing ${CATEGORY_LABEL} notifications"
+            return 0
+        else
+            __xx_notify "Failed to fetch ${CATEGORY_LABEL} notifications from API"
+            return 1
+        fi
+    }
+
+    # Fetch direct notifications (category=direct)
+    __fetch_notifications_by_category "direct" "direct"
+    local DIRECT_STATUS=$?
+
+    # Fetch watched notifications (category=none)
+    __fetch_notifications_by_category "none" "watched"
+    local WATCHED_STATUS=$?
+
+    # Check if at least one fetch was successful
+    if [ $DIRECT_STATUS -eq 0 ] || [ $WATCHED_STATUS -eq 0 ]; then
+        __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (operation TEXT PRIMARY KEY, sync_timestamp TEXT NOT NULL);"
+
+        # Insert or replace sync timestamp into SyncLog table
+        SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+        sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (operation, sync_timestamp) VALUES ('notifications', '$SYNC_TIMESTAMP');"
+
+        __xx_notify "#[fg=bold]Finished fetching Jira Notifications!#[default]"
+    else
+        __xx_notify "Failed to fetch any notifications from API"
+        return 1
+    fi
+}

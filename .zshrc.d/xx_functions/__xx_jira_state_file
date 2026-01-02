@@ -1,0 +1,25 @@
+__xx_jira_state_file() {
+    local ACTION="${1:-get}"
+    local KEY="${2:-linked_parent}"
+    local VALUE="${3:-}"
+    local STATE_DIR="${XX_JIRA_STATE_DIR:-}"
+    local STATE_FILE="${STATE_DIR}/${KEY}"
+
+    case "${ACTION}" in
+        init)
+            if [[ -z "${XX_JIRA_STATE_DIR}" ]]; then
+                export XX_JIRA_STATE_DIR=$(mktemp -d -t "jiix.XXXXXXXXXX")
+            fi
+            ;;
+        set)
+            [[ -n "${STATE_DIR}" ]] && echo "${VALUE}" > "${STATE_FILE}"
+            ;;
+        get)
+            [[ -n "${STATE_DIR}" ]] && cat "${STATE_FILE}" 2>/dev/null || echo ""
+            ;;
+        cleanup)
+            [[ -n "${XX_JIRA_STATE_DIR}" ]] && rm -rf "${XX_JIRA_STATE_DIR}"
+            unset XX_JIRA_STATE_DIR
+            ;;
+    esac
+}

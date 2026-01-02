@@ -19,21 +19,26 @@ $1 == "ID" { next; }
 
 {
     id = $1;
+    title = "";
+    desc = "";
+    released = "";
+    status_pos = 0;
 
-    for (i = NF; i >= 1; i--) {
+    # Find the position of the true/false field
+    for (i = 1; i <= NF; i++) {
         if ($i == "true" || $i == "false") {
-            status = $i;
+            released = ($i == "true") ? "released" : "not released";
             status_pos = i;
             break;
         }
     }
 
-    title = "";
+    # Extract title (fields between ID and status)
     for (i = 2; i < status_pos; i++) {
         title = title $i " ";
     }
 
-    desc = "";
+    # Extract description (fields after status)
     for (i = status_pos + 1; i <= NF; i++) {
         desc = desc $i " ";
     }
@@ -41,6 +46,6 @@ $1 == "ID" { next; }
     gsub(/[ \t]+$/, "", title);
     gsub(/[ \t]+$/, "", desc);
 
-    printf "%-7s %-45s %-8s %s\n", id, title, status, desc;
-}' | (read -r header; echo "$header"; sort -rn -k1)
+    printf "%-7s %-45s %-12s %s\n", id, title, released, desc;
+}' | (read -r HEADER; echo "${HEADER}"; sort -rn -k1)
 }

@@ -1,0 +1,56 @@
+__xx_cache_aws_lambda_functions_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS Lambda Functions!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_lambda.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+    local REGION="${AWS_REGION}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Functions (account TEXT NOT NULL, region TEXT NOT NULL, function_name TEXT NOT NULL, runtime TEXT, memory_size INTEGER, timeout INTEGER, last_modified TEXT, function_arn TEXT, UNIQUE (account, region, function_name));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (account TEXT NOT NULL, region TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (account, region));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Functions WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+    fi
+
+    __xx_notify "Fetching Lambda functions for account: ${ACCOUNT}, region: ${REGION}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Functions WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+
+    aws lambda list-functions --output json | \
+        jq -r '.Functions[] | [.FunctionName, .Runtime, .MemorySize, .Timeout, .LastModified, .FunctionArn] | @tsv' | \
+        while IFS=$'\t' read -r FUNCTION_NAME RUNTIME MEMORY_SIZE TIMEOUT LAST_MODIFIED FUNCTION_ARN; do
+            FUNCTION_NAME_ESCAPED=$(echo "${FUNCTION_NAME}" | sed "s/'/''/g")
+            RUNTIME_ESCAPED=$(echo "${RUNTIME}" | sed "s/'/''/g")
+            MEMORY_SIZE_ESCAPED=$(echo "${MEMORY_SIZE}" | sed "s/'/''/g")
+            TIMEOUT_ESCAPED=$(echo "${TIMEOUT}" | sed "s/'/''/g")
+            LAST_MODIFIED_ESCAPED=$(echo "${LAST_MODIFIED}" | sed "s/'/''/g")
+            FUNCTION_ARN_ESCAPED=$(echo "${FUNCTION_ARN}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Functions (account, region, function_name, runtime, memory_size, timeout, last_modified, function_arn) VALUES ('${ACCOUNT}', '${REGION}', '${FUNCTION_NAME_ESCAPED}', '${RUNTIME_ESCAPED}', '${MEMORY_SIZE_ESCAPED}', '${TIMEOUT_ESCAPED}', '${LAST_MODIFIED_ESCAPED}', '${FUNCTION_ARN_ESCAPED}');"
+        done
+
+    __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+    SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (account, region, sync_timestamp) VALUES ('${ACCOUNT}', '${REGION}', '${SYNC_TIMESTAMP}');"
+
+    __xx_notify "#[fg=bold]Finished fetching AWS Lambda Functions!#[default]"
+}

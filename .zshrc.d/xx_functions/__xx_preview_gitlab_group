@@ -20,8 +20,8 @@ function __xx_preview_gitlab_group() {
     for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
         local TEST_CONFIG_DIR=$(dirname ${CONFIG_FILE})
         # Test if this config works by trying to fetch group info
-        local test_result=$(GLAB_CONFIG_DIR="${TEST_CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}" 2>/dev/null)
-        if [[ -n "${test_result}" ]]; then
+        local TEST_RESULT=$(GLAB_CONFIG_DIR="${TEST_CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}" 2>/dev/null)
+        if [[ -n "${TEST_RESULT}" ]]; then
             CONFIG_FOUND=true
             CONFIG_DIR="${TEST_CONFIG_DIR}"
             break
@@ -39,37 +39,37 @@ function __xx_preview_gitlab_group() {
     echo
 
     # Fetch group data once
-    local group_data=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}" 2>/dev/null)
+    local GROUP_DATA=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}" 2>/dev/null)
 
     # Description
     printf '\033[1;33mDescription:\033[0m\n'
-    echo "${group_data}" | jq -r '.description // "No description"' 2>/dev/null
+    echo "${GROUP_DATA}" | jq -r '.description // "No description"' 2>/dev/null
     echo
 
     # Full Path
     printf '\033[1;33mFull Path:\033[0m\n'
-    echo "${group_data}" | jq -r '.full_path // "N/A"' 2>/dev/null
+    echo "${GROUP_DATA}" | jq -r '.full_path // "N/A"' 2>/dev/null
     echo
 
     # Visibility
     printf '\033[1;33mVisibility:\033[0m\n'
-    echo "${group_data}" | jq -r '.visibility // "N/A"' 2>/dev/null
+    echo "${GROUP_DATA}" | jq -r '.visibility // "N/A"' 2>/dev/null
     echo
 
     # Projects Count
     printf '\033[1;33mProjects:\033[0m\n'
-    local projects_count=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}/projects" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
+    local PROJECTS_COUNT=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}/projects" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
     echo "${projects_count:-0} project(s)"
     echo
 
     # Subgroups Count
     printf '\033[1;33mSubgroups:\033[0m\n'
-    local subgroups_count=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}/subgroups" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
+    local SUBGROUPS_COUNT=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}/subgroups" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
     echo "${subgroups_count:-0} subgroup(s)"
     echo
 
     # Members Count
     printf '\033[1;33mMembers:\033[0m\n'
-    local members_count=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}/members" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
+    local MEMBERS_COUNT=$(GLAB_CONFIG_DIR="${CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab api "groups/${GROUP_ID}/members" --paginate=false 2>/dev/null | jq '. | length' 2>/dev/null)
     echo "${members_count:-0} member(s)"
 }

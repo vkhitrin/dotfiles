@@ -1,0 +1,51 @@
+__xx_preview_aws_lambda_function() {
+    local FUNCTION_NAME="$1"
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        aws lambda get-function --function-name "${FUNCTION_NAME}" --output json 2>/dev/null | \
+            jq -r '
+                .Configuration as $config |
+                .Tags as $tags |
+                "Function Name: \($config.FunctionName)\n" +
+                "ARN: \($config.FunctionArn)\n" +
+                "Runtime: \($config.Runtime)\n" +
+                "Handler: \($config.Handler)\n" +
+                "Memory: \($config.MemorySize) MB\n" +
+                "Timeout: \($config.Timeout) seconds\n" +
+                "Last Modified: \($config.LastModified)\n" +
+                "Code Size: \($config.CodeSize) bytes\n" +
+                "Description: \($config.Description // "N/A")\n" +
+                "Role: \($config.Role)\n" +
+                "State: \($config.State // "N/A")\n" +
+                "Last Update Status: \($config.LastUpdateStatus // "N/A")\n" +
+                "Package Type: \($config.PackageType // "Zip")\n" +
+                "\nEnvironment Variables:\n" +
+                (if $config.Environment.Variables then
+                    ($config.Environment.Variables | to_entries[] | "  \(.key): \(.value)")
+                else
+                    "  None"
+                end) +
+                "\n\nLayers:\n" +
+                (if $config.Layers then
+                    ($config.Layers[] | "  \(.Arn)")
+                else
+                    "  None"
+                end) +
+                "\n\nVPC Config:\n" +
+                (if $config.VpcConfig.VpcId then
+                    "  VPC ID: \($config.VpcConfig.VpcId)\n" +
+                    "  Subnets: \($config.VpcConfig.SubnetIds | join(", "))\n" +
+                    "  Security Groups: \($config.VpcConfig.SecurityGroupIds | join(", "))"
+                else
+                    "  No VPC"
+                end) +
+                "\n\nTags:\n" +
+                (if $tags then
+                    ($tags | to_entries[] | "  \(.key): \(.value)")
+                else
+                    "  None"
+                end)
+            '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

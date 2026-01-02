@@ -1,0 +1,41 @@
+__xx_preview_aws_sqs_queue() {
+    local QUEUE_URL="$1"
+
+    if [[ -z "${QUEUE_URL}" || "${QUEUE_URL}" == "QUEUE_URL" ]]; then
+        echo "Select a queue to see details"
+        return
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        echo "AWS vault is not enabled."
+        return
+    fi
+
+    local QUEUE_NAME=$(basename "${QUEUE_URL}")
+
+    echo "Queue Name: ${QUEUE_NAME}"
+    echo "Queue URL: ${QUEUE_URL}"
+    echo ""
+
+    aws sqs get-queue-attributes --queue-url "${QUEUE_URL}" --attribute-names All --output json 2>/dev/null | \
+            jq -r '
+                .Attributes |
+                "Type: \(if .FifoQueue == "true" then "FIFO" else "Standard" end)\n" +
+                "Messages Available: \(.ApproximateNumberOfMessages // "0")\n" +
+                "Messages Delayed: \(.ApproximateNumberOfMessagesDelayed // "0")\n" +
+                "Messages In Flight: \(.ApproximateNumberOfMessagesNotVisible // "0")\n" +
+                "Created: \(.CreatedTimestamp | tonumber | strftime("%Y-%m-%d %H:%M:%S UTC"))\n" +
+                "Last Modified: \(.LastModifiedTimestamp | tonumber | strftime("%Y-%m-%d %H:%M:%S UTC"))\n" +
+                "Visibility Timeout: \(.VisibilityTimeout)s\n" +
+                "Message Retention: \(.MessageRetentionPeriod)s (\((.MessageRetentionPeriod | tonumber / 86400) | floor) days)\n" +
+                "Max Message Size: \(.MaximumMessageSize) bytes\n" +
+                "Delivery Delay: \(.DelaySeconds)s\n" +
+                "Receive Wait Time: \(.ReceiveMessageWaitTimeSeconds)s\n" +
+                (if .FifoQueue == "true" then "Content-Based Deduplication: \(.ContentBasedDeduplication)\n" else "" end) +
+                (if .RedrivePolicy then "\nDead Letter Queue:\n  Target ARN: \(.RedrivePolicy | fromjson | .deadLetterTargetArn)\n  Max Receives: \(.RedrivePolicy | fromjson | .maxReceiveCount)\n" else "" end) +
+                (if .KmsMasterKeyId then "\nEncryption:\n  KMS Key: \(.KmsMasterKeyId)\n  Data Key Reuse: \(.KmsDataKeyReusePeriodSeconds)s\n" else "" end)
+            '
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

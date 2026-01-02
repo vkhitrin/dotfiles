@@ -27,7 +27,7 @@ function __xx_preview_git_repo() {
 
     # Local Branches
     printf '\033[1;33mLocal Branches:\033[0m\n'
-    local branches=($(git branch --format='%(refname:short)' 2>/dev/null))
+    local BRANCHES=($(git branch --format='%(refname:short)' 2>/dev/null))
     if [[ ${#branches[@]} -eq 1 ]]; then
         echo "${branches[1]}"
     elif [[ ${#branches[@]} -gt 1 ]]; then
@@ -37,7 +37,7 @@ function __xx_preview_git_repo() {
 
     # Recent Tags
     printf '\033[1;33mRecent Tags:\033[0m\n'
-    local tags=($(git tag --sort=-creatordate 2>/dev/null | head -n 10))
+    local TAGS=($(git tag --sort=-creatordate 2>/dev/null | head -n 10))
     if [[ ${#tags[@]} -eq 0 ]]; then
         echo "No tags"
     elif [[ ${#tags[@]} -eq 1 ]]; then

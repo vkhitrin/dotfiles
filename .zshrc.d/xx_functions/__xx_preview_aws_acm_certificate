@@ -1,7 +1,7 @@
 __xx_preview_aws_acm_certificate() {
-    local certificate_arn="$1"
+    local CERTIFICATE_ARN="$1"
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
-        aws acm describe-certificate --certificate-arn "${certificate_arn}" --output json 2>/dev/null | \
+        aws acm describe-certificate --certificate-arn "${CERTIFICATE_ARN}" --output json 2>/dev/null | \
             jq -r '
                 .Certificate |
                 "Domain Name: \(.DomainName)\n" +

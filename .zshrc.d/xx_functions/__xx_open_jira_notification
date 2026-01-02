@@ -1,0 +1,44 @@
+__xx_open_jira_notification() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    local NOTIFICATION_ID=$1
+
+    # Strip ANSI color codes from the ID if present
+    NOTIFICATION_ID=$(printf '%s' "${NOTIFICATION_ID}" | sed $'s/\033\\[[0-9;]*m//g' | tr -d '[:space:]')
+
+    if [[ -z "${NOTIFICATION_ID}" ]]; then
+        echo "Error: Notification ID is required"
+        return 1
+    fi
+
+    if [[ ! -f "${XX_CACHE_DIR}/jira.db" ]]; then
+        echo "Error: jira.db cache doesn't exist"
+        return 1
+    fi
+
+    # Fetch the notification JSON from the cache
+    local NOTIFICATION_JSON=$(sqlite3 --json "${XX_CACHE_DIR}/jira.db" \
+        "SELECT json FROM Notifications WHERE id='${NOTIFICATION_ID}';" 2>/dev/null | jq -r '.[0].json')
+
+    if [[ -z "${NOTIFICATION_JSON}" || "${NOTIFICATION_JSON}" == "null" ]]; then
+        echo "Error: Notification ID ${NOTIFICATION_ID} not found in cache"
+        return 1
+    fi
+
+    # Try to get URL from entity.link.url first (for Work Navigator and most notifications)
+    local NOTIFICATION_URL=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.entity.link.url // empty')
+
+    # If not found, try path[0].link.url as fallback
+    if [[ -z "${NOTIFICATION_URL}" ]]; then
+        NOTIFICATION_URL=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.path[0].link.url // empty')
+    fi
+
+    if [[ -z "${NOTIFICATION_URL}" ]]; then
+        echo "Error: Could not extract URL from notification"
+        return 1
+    fi
+
+    echo "Opening notification ${NOTIFICATION_ID}: ${NOTIFICATION_URL}"
+    eval "${XX_OPEN_COMMAND} '${NOTIFICATION_URL}'"
+}

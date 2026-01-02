@@ -38,14 +38,14 @@ __xx_cache_aws_ec2_instances_to_sqlite() {
 
     aws ec2 describe-instances --output json | \
         jq -r '.Reservations[].Instances[] | [.InstanceId, (.Tags[]? | select(.Key=="Name") | .Value // "N/A"), .InstanceType, .State.Name, (.PrivateIpAddress // "N/A"), (.PublicIpAddress // "N/A")] | @tsv' | \
-        while IFS=$'\t' read -r instance_id name instance_type state private_ip public_ip; do
-            instance_id_escaped=$(echo "$instance_id" | sed "s/'/''/g")
-            name_escaped=$(echo "$name" | sed "s/'/''/g")
-            instance_type_escaped=$(echo "$instance_type" | sed "s/'/''/g")
-            state_escaped=$(echo "$state" | sed "s/'/''/g")
-            private_ip_escaped=$(echo "$private_ip" | sed "s/'/''/g")
-            public_ip_escaped=$(echo "$public_ip" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Instances (account, region, instance_id, name, instance_type, state, private_ip, public_ip) VALUES ('${ACCOUNT}', '${REGION}', '${instance_id_escaped}', '${name_escaped}', '${instance_type_escaped}', '${state_escaped}', '${private_ip_escaped}', '${public_ip_escaped}');"
+        while IFS=$'\t' read -r INSTANCE_ID NAME INSTANCE_TYPE STATE PRIVATE_IP PUBLIC_IP; do
+            INSTANCE_ID_ESCAPED=$(echo "${INSTANCE_ID}" | sed "s/'/''/g")
+            NAME_ESCAPED=$(echo "${NAME}" | sed "s/'/''/g")
+            INSTANCE_TYPE_ESCAPED=$(echo "${INSTANCE_TYPE}" | sed "s/'/''/g")
+            STATE_ESCAPED=$(echo "${STATE}" | sed "s/'/''/g")
+            PRIVATE_IP_ESCAPED=$(echo "${PRIVATE_IP}" | sed "s/'/''/g")
+            PUBLIC_IP_ESCAPED=$(echo "${PUBLIC_IP}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Instances (account, region, instance_id, name, instance_type, state, private_ip, public_ip) VALUES ('${ACCOUNT}', '${REGION}', '${INSTANCE_ID_ESCAPED}', '${NAME_ESCAPED}', '${INSTANCE_TYPE_ESCAPED}', '${STATE_ESCAPED}', '${PRIVATE_IP_ESCAPED}', '${PUBLIC_IP_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

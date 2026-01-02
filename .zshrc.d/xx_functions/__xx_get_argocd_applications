@@ -26,34 +26,34 @@ __xx_get_argocd_applications() {
             }
             NR>1 {
                 # Extract fields
-                app=$1
-                cluster=$2
-                namespace=$3
-                project=$4
-                status=$5
-                health=$6
-                syncpolicy=$7
-                conditions=$8
+                APP=$1
+                CLUSTER=$2
+                NAMESPACE=$3
+                PROJECT=$4
+                STATUS=$5
+                HEALTH=$6
+                SYNCPOLICY=$7
+                CONDITIONS=$8
 
                 # Color code sync status
-                if (status == "Synced")
-                    status="\033[1;32m" status "\033[0m"
-                else if (status == "OutOfSync")
-                    status="\033[1;33m" status "\033[0m"
+                if (STATUS == "Synced")
+                    STATUS="\033[1;32m" STATUS "\033[0m"
+                else if (STATUS == "OutOfSync")
+                    STATUS="\033[1;33m" STATUS "\033[0m"
                 else
-                    status="\033[1;37m" status "\033[0m"
+                    STATUS="\033[1;37m" STATUS "\033[0m"
 
                 # Color code health status
-                if (health == "Healthy")
-                    health="\033[1;32m" health "\033[0m"
-                else if (health == "Degraded")
-                    health="\033[1;31m" health "\033[0m"
-                else if (health == "Progressing")
-                    health="\033[1;33m" health "\033[0m"
+                if (HEALTH == "Healthy")
+                    HEALTH="\033[1;32m" HEALTH "\033[0m"
+                else if (HEALTH == "Degraded")
+                    HEALTH="\033[1;31m" HEALTH "\033[0m"
+                else if (HEALTH == "Progressing")
+                    HEALTH="\033[1;33m" HEALTH "\033[0m"
                 else
-                    health="\033[1;37m" health "\033[0m"
+                    HEALTH="\033[1;37m" HEALTH "\033[0m"
 
-                printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n", app, cluster, namespace, project, status, health, syncpolicy, conditions, srv
+                printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n", APP, CLUSTER, NAMESPACE, PROJECT, STATUS, HEALTH, SYNCPOLICY, CONDITIONS, srv
             }'
         } | __xx_format_columns_ansi ","
     else

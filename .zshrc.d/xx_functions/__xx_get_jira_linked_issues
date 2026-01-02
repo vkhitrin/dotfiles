@@ -1,0 +1,35 @@
+__xx_get_jira_linked_issues() {
+    local PARENT_KEY="$1"
+    local PAGE="${2:-0}"
+    local LIMIT="${3:-100}"
+    local CURRENT_USER=$(jira me 2>/dev/null | awk -F'@' '{print $1}' | sed 's/\./ /g' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+
+    # Get issue count first
+    local ISSUE_COUNT=$(jira issue list --jql="issue in linkedIssues(${PARENT_KEY})" --order-by status --paginate "${PAGE}:${LIMIT}" --raw 2>/dev/null | jq -r 'length' 2>/dev/null || echo "0")
+    export XX_JIRA_LINKED_LAST_COUNT="${ISSUE_COUNT}"
+
+    local PAGE_INFO="Linked issues for ${PARENT_KEY}"
+    if [[ ${PAGE} -gt 0 ]]; then
+        PAGE_INFO="${PAGE_INFO} | Page: $((PAGE / LIMIT + 1)) (Showing ${ISSUE_COUNT}/${LIMIT})"
+    fi
+
+    echo "${PAGE_INFO}"
+    {
+        echo "PRIORITY\tTYPE\tKEY\tSTATUS\tASSIGNEE\tSUMMARY"
+        jira issue list --jql="issue in linkedIssues(${PARENT_KEY})" --order-by status --paginate "${PAGE}:${LIMIT}" --raw 2>/dev/null | \
+        jq -r --arg user "${CURRENT_USER}" '.[] |
+            [
+                .fields.priority.name,
+                .fields.issueType.name,
+                .key,
+                .fields.status.name,
+                (.fields.assignee.displayName // "-"),
+                .fields.summary
+            ] as [$prio, $type, $key, $status, $assignee, $summary] |
+            if ($assignee == "-" or ($assignee | contains($user) | not)) then
+                "\u001b[90m\($prio)\t\($type)\t\($key)\t\($status)\t\($assignee)\t\($summary)\u001b[0m"
+            else
+                "\($prio)\t\($type)\t\($key)\t\($status)\t\($assignee)\t\($summary)"
+            end' 2>/dev/null | ${XX_GNU_SED_COMMAND} 's/[\x00-\x08\x0B\x0C\x0E-\x1A\x1C-\x1F]/ /g'
+    } | __xx_format_columns_ansi $'\t'
+}

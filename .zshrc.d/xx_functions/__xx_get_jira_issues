@@ -1,19 +1,26 @@
 __xx_get_jira_issues() {
-    local JQL="${1:-(assignee = currentUser()) AND (status !='done')}"
+    local KEYCHAIN_JQL="$(security find-generic-password -l JIRA_WORK_JQL -w 2>/dev/null)"
+    local DEFAULT_JQL="(assignee = currentUser()) AND (status !='done')"
+    local JQL="${1:-${KEYCHAIN_JQL:-${DEFAULT_JQL}}}"
     local PAGE="${2:-0}"
-    local LIMIT="${3:-50}"
-
-    local OUTPUT=$(jira issues list --jql="${JQL}" --order-by priority --plain --columns priority,key,status,summary --paginate "${PAGE}:${LIMIT}" 2>&1)
+    local LIMIT="${3:-100}"
+    local CURRENT_USER=$(jira me 2>/dev/null | awk -F'@' '{print $1}' | sed 's/\./ /g' | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+    local OUTPUT=$(jira issues list --jql="${JQL}" --order-by priority --plain --columns priority,type,key,status,assignee,summary --paginate "${PAGE}:${LIMIT}" 2>&1)
     local ISSUE_COUNT=$(echo "${OUTPUT}" | tail -n +3 | wc -l | tr -d ' ')
-
-    # Export count for pagination logic
     export XX_JIRA_LAST_COUNT="${ISSUE_COUNT}"
-
     local PAGE_INFO="Jira Query: ${JQL}"
-    if [[ ${PAGE} -gt 0 ]] || [[ ${ISSUE_COUNT} -ge ${LIMIT} ]]; then
+    if [[ ${PAGE} -gt 0 ]]; then
         PAGE_INFO="${PAGE_INFO} | Page: $((PAGE / LIMIT + 1)) (Showing ${ISSUE_COUNT}/${LIMIT})"
     fi
-
     echo "${PAGE_INFO}"
-    echo "${OUTPUT}" | tail -n +2
+    {
+        echo "PRIORITY\tTYPE\tKEY\tSTATUS\tSUMMARY"
+        echo "${OUTPUT}" | tail -n +2 | while IFS=$'\t' read -r PRIO ITYPE KEY ISTATUS ASSIGNEE ISUMMARY; do
+            if [[ -z "${ASSIGNEE}" || "${ASSIGNEE}" != *"${CURRENT_USER}"* ]]; then
+                echo "\033[90m${PRIO}\t${ITYPE}\t${KEY}\t${ISTATUS}\t${ISUMMARY}\033[0m"
+            else
+                echo "${PRIO}\t${ITYPE}\t${KEY}\t${ISTATUS}\t${ISUMMARY}"
+            fi
+        done
+    } | __xx_format_columns_ansi $'\t'
 }

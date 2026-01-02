@@ -1,0 +1,8 @@
+__xx_tmux_callback_unavailable() {
+    if [[ -n ${XX_CALLBACK_FROM_TMUX} ]]; then
+        source ~/.zshrc.d/xx_functions/__xx_notify
+        __xx_notify "This action is not available when running in a tmux callback"
+        return 0
+    fi
+    return 1
+}

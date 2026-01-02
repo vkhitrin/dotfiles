@@ -1,0 +1,86 @@
+__xx_acknowledge_jira_notification() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+    __xx_setup_commands
+    local NOTIFICATION_ID=$1
+
+    # Strip ANSI color codes from the ID if present
+    NOTIFICATION_ID=$(printf '%s' "${NOTIFICATION_ID}" | sed $'s/\033\\[[0-9;]*m//g' | tr -d '[:space:]')
+
+    if [[ -z "${NOTIFICATION_ID}" ]]; then
+        echo "Error: Notification ID is required"
+        return 1
+    fi
+
+    # Get token and Jira instance
+    local COOKIE_VALUE
+    local COOKIE_EXPIRATION_EPOCH
+    local KEYCHAIN_SERVICE="JIRA_UI_TENANT_SESSION_TOKEN"
+    local JIRA_CONFIG="${HOME}/.config/.jira/.config.yml"
+    local JIRA_INSTANCE
+
+    # Read Jira instance from config file
+    if [ -f "${JIRA_CONFIG}" ]; then
+        JIRA_INSTANCE=$(grep '^server:' "${JIRA_CONFIG}" | awk '{print $2}')
+        if [ -z "${JIRA_INSTANCE}" ]; then
+            echo "Error: Failed to read Jira instance from ${JIRA_CONFIG}."
+            return 1
+        fi
+    else
+        echo "Error: Jira config file not found at ${JIRA_CONFIG}."
+        return 1
+    fi
+
+    # Fetch token from keychain
+    local JSON_VALUE="$(security find-generic-password -l ${KEYCHAIN_SERVICE} -w 2>/dev/null)"
+    if [ -z "${JSON_VALUE}" ]; then
+        echo "Error: Failed to fetch ${KEYCHAIN_SERVICE}."
+        return 1
+    fi
+
+    COOKIE_VALUE=$(echo "${JSON_VALUE}" | jq -r '.value')
+    COOKIE_EXPIRATION_EPOCH=$(echo "${JSON_VALUE}" | jq -r '.expiresAt')
+
+    # Check if token has expired
+    NOW_EPOCH=$(date +%s)
+    if (( NOW_EPOCH >= COOKIE_EXPIRATION_EPOCH )); then
+        echo "Error: Token expired. Please refresh ${KEYCHAIN_SERVICE} in keychain."
+        return 1
+    fi
+
+    # Mark notification as READ using the API
+    local API_URL="${JIRA_INSTANCE}/gateway/api/notification-log/api/3/notifications/mark/bulk"
+    local RESPONSE=$(curl -s -w "\n%{http_code}" "${API_URL}" \
+        -X 'POST' \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: */*' \
+        -H "cookie: tenant.session.token=${COOKIE_VALUE}" \
+        -H "referer: ${JIRA_INSTANCE}/jira/notifications" \
+        -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15' \
+        -H 'x-app-name: platform-pkg' \
+        -H 'x-app-platform: web' \
+        -H 'x-app-version: 0.0.0-use.local' \
+        --data-raw "{\"toState\":\"READ\",\"ids\":[\"${NOTIFICATION_ID}\"]}")
+
+    # Extract HTTP status code
+    local HTTP_CODE=$(echo "${RESPONSE}" | tail -n 1)
+    local RESPONSE_BODY=$(echo "${RESPONSE}" | sed '$d')
+
+    if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+        echo "Notification ${NOTIFICATION_ID} marked as READ"
+
+        # Update local cache if it exists
+        if [[ -f "${XX_CACHE_DIR}/jira.db" ]]; then
+            sqlite3 "${XX_CACHE_DIR}/jira.db" \
+                "UPDATE Notifications SET read_state='read' WHERE id='${NOTIFICATION_ID}';" 2>/dev/null
+        fi
+
+        return 0
+    else
+        echo "Error: Failed to acknowledge notification (HTTP ${HTTP_CODE})"
+        if [[ -n "${RESPONSE_BODY}" ]]; then
+            echo "Response: ${RESPONSE_BODY}"
+        fi
+        return 1
+    fi
+}

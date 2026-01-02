@@ -1,0 +1,32 @@
+__xx_get_aws_sqs_queues() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_sqs.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "QUEUE_NAME^TYPE^MESSAGES^DELAYED^IN_FLIGHT^QUEUE_URL"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT queue_name, queue_type, approximate_messages, approximate_messages_delayed, approximate_messages_not_visible, queue_url FROM Queues WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            queue_name = $1
+                            queue_type = $2
+                            messages = $3
+                            delayed = $4
+                            in_flight = $5
+                            queue_url = $6
+                            printf "%s^%s^%s^%s^%s^%s\n", queue_name, queue_type, messages, delayed, in_flight, queue_url
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_sqs_queues_to_sqlite' to cache SQS queues."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

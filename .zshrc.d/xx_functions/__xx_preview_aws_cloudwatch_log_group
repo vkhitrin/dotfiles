@@ -1,0 +1,28 @@
+__xx_preview_aws_cloudwatch_log_group() {
+    local LOG_GROUP_NAME="$1"
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        aws logs describe-log-groups --log-group-name-prefix "${LOG_GROUP_NAME}" --output json 2>/dev/null | \
+            jq -r --arg lg "${LOG_GROUP_NAME}" '
+                .logGroups[] | select(.logGroupName == $lg) |
+                "Log Group Name: \(.logGroupName)\n" +
+                "ARN: \(.arn)\n" +
+                "Creation Time: \(.creationTime | tostring | .[0:10] | tonumber | strftime("%Y-%m-%d %H:%M:%S UTC"))\n" +
+                "Retention: \(if .retentionInDays then "\(.retentionInDays) days" else "Never expires" end)\n" +
+                "Stored Bytes: \((.storedBytes // 0) | . / 1048576 | floor) MB\n" +
+                "Metric Filter Count: \(.metricFilterCount // 0)\n" +
+                "KMS Key ID: \(.kmsKeyId // "None")\n" +
+                "\nRecent Log Streams:"
+            '
+
+        # Show recent log streams
+        aws logs describe-log-streams \
+            --log-group-name "${LOG_GROUP_NAME}" \
+            --order-by LastEventTime \
+            --descending \
+            --max-items 5 \
+            --output json 2>/dev/null | \
+            jq -r '.logStreams[] | "  \(.logStreamName)\n    Last event: \(if .lastEventTime then (.lastEventTime | tostring | .[0:10] | tonumber | strftime("%Y-%m-%d %H:%M:%S UTC")) else "Never" end)"'
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

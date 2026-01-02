@@ -1,0 +1,107 @@
+#!/usr/bin/env zsh
+
+function __xx_preview_jira_notification() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    __xx_setup_commands
+    local NOTIFICATION_ID=$1
+
+    # Strip ANSI color codes from the ID if present
+    NOTIFICATION_ID=$(printf '%s' "${NOTIFICATION_ID}" | sed $'s/\033\\[[0-9;]*m//g' | tr -d '[:space:]')
+
+    if [[ -z "${NOTIFICATION_ID}" ]]; then
+        echo "Invalid notification information"
+        return 1
+    fi
+
+    if [[ ! -f "${XX_CACHE_DIR}/jira.db" ]]; then
+        echo "jira.db cache doesn't exist"
+        return 1
+    fi
+
+    # Fetch the notification JSON from the cache
+    local NOTIFICATION_JSON=$(sqlite3 --json "${XX_CACHE_DIR}/jira.db" \
+        "SELECT json FROM Notifications WHERE id='${NOTIFICATION_ID}';" 2>/dev/null | jq -r '.[0].json')
+
+    if [[ -z "${NOTIFICATION_JSON}" || "${NOTIFICATION_JSON}" == "null" ]]; then
+        echo "Notification ID ${NOTIFICATION_ID} not found in cache"
+        return 1
+    fi
+
+    # Extract notification details
+    local ISSUE_KEY=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.path[0].title // "N/A"')
+    local TITLE=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.entity.title // "N/A"')
+    local STATUS=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.entity.status.value // "N/A"')
+    local MESSAGE=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.message // "N/A"')
+    local READ_STATE=$(echo "${NOTIFICATION_JSON}" | jq -r '.readState // "N/A"')
+    local TIMESTAMP=$(echo "${NOTIFICATION_JSON}" | jq -r '.timestamp // "N/A"')
+    local ACTOR=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.actors[0].displayName // "N/A"')
+    local TYPE=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.type // "N/A"')
+
+    # Check if this is a Work Navigator notification
+    local IS_WORK_NAVIGATOR=false
+    if [[ "${ISSUE_KEY}" == "Work Navigator" ]]; then
+        IS_WORK_NAVIGATOR=true
+        local JQL_URL=$(echo "${NOTIFICATION_JSON}" | jq -r '.content.entity.link.url // ""')
+    fi
+
+    # Display notification details
+    printf '\033[1;34mIssue:\033[0m\n'
+    echo "${ISSUE_KEY}"
+    echo
+
+    printf '\033[1;34mTitle:\033[0m\n'
+    echo "${TITLE}"
+    echo
+
+    printf '\033[1;34mMessage:\033[0m\n'
+    echo "${MESSAGE}"
+    echo
+
+    printf '\033[1;34mStatus:\033[0m\n'
+    echo "${STATUS}"
+    echo
+
+    printf '\033[1;34mRead State:\033[0m\n'
+    echo "${READ_STATE}"
+    echo
+
+    printf '\033[1;34mActor:\033[0m\n'
+    echo "${ACTOR}"
+    echo
+
+    printf '\033[1;34mType:\033[0m\n'
+    echo "${TYPE}"
+    echo
+
+    printf '\033[1;34mTimestamp:\033[0m\n'
+    if [[ "${TIMESTAMP}" != "null" && "${TIMESTAMP}" != "N/A" ]]; then
+        # Check if timestamp is ISO 8601 format or epoch
+        if [[ "${TIMESTAMP}" =~ ^[0-9]+$ ]]; then
+            # Epoch timestamp - convert to readable format
+            ${XX_GNU_DATE_COMMAND} -d "@$((${TIMESTAMP}/1000))" '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo "${TIMESTAMP}"
+        else
+            # ISO 8601 format - parse directly
+            ${XX_GNU_DATE_COMMAND} -d "${TIMESTAMP}" '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo "${TIMESTAMP}"
+        fi
+    else
+        echo "N/A"
+    fi
+    echo
+
+    # Fetch additional details based on notification type
+    if [[ "${IS_WORK_NAVIGATOR}" == "true" ]] && command -v jira >/dev/null 2>&1; then
+        # Extract JQL from URL
+        local JQL=$(echo "${JQL_URL}" | sed 's/.*jql=//' | sed 's/%20/ /g' | sed 's/%3C/</g' | sed 's/%3D/=/g' | sed 's/%3E/>/g' | sed 's/%21/!/g')
+
+        printf '\033[1;34mWork Items:\033[0m\n'
+        if [[ -n "${JQL}" ]]; then
+            # Fetch issues using the JQL query
+            jira issue list --plain --columns KEY,STATUS,SUMMARY,PRIORITY,DUE --no-headers --jql "${JQL}" 2>/dev/null || echo "Unable to fetch work items"
+        else
+            echo "No JQL query found"
+        fi
+    elif command -v jira >/dev/null 2>&1 && [[ "${ISSUE_KEY}" != "N/A" ]] && [[ "${ISSUE_KEY}" != "Work Navigator" ]]; then
+        printf '\033[1;34mIssue Details:\033[0m\n'
+        jira issue view --plain "${ISSUE_KEY}" 2>/dev/null | head -20 || echo "Unable to fetch issue details"
+    fi
+}

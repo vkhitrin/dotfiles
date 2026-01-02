@@ -1,0 +1,27 @@
+__xx_get_aws_cloudwatch_log_streams() {
+    local LOG_GROUP_NAME="$1"
+    local LOG_GROUP_DISPLAY_NAME="$2"
+
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        echo "Log Group: ${LOG_GROUP_DISPLAY_NAME}"
+        (
+            echo "LOG_STREAM_NAME^LAST_EVENT_TIME^STORED_MB"
+            aws logs describe-log-streams \
+                --log-group-name "${LOG_GROUP_NAME}" \
+                --order-by LastEventTime \
+                --descending \
+                --max-items 100 \
+                --output json 2>/dev/null | \
+                jq -r '.logStreams[] | [.logStreamName, (.lastEventTime // 0), (.storedBytes // 0)] | @tsv' | \
+                awk -F'\t' '{
+                    stream_name = $1
+                    last_event_time = $2
+                    stored_bytes = $3
+                    stored_mb = sprintf("%.2f", stored_bytes / 1048576)
+                    printf "%s^%s^%s\n", stream_name, last_event_time, stored_mb
+                }'
+        ) | __xx_format_columns_ansi "^"
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

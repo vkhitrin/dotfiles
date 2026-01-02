@@ -29,14 +29,14 @@ __xx_cache_github_repositories_to_sqlite() {
 
     # Fetch upstream repositories I contributed to in the last 6 months
     # (repositories I don't own but have contributed to via PRs)
-    six_months_ago=$(date -d '6 months ago' +%Y-%m-%d)
+    SIX_MONTHS_AGO=$(date -d '6 months ago' +%Y-%m-%d)
 
     # Get current user's login
     CURRENT_USER=$(gh api /user -q '.login')
 
     gh api \
       -X GET \
-      -F q="author:@me type:pr created:>=$six_months_ago" \
+      -F q="author:@me type:pr created:>=${SIX_MONTHS_AGO}" \
       -F per_page=100 \
       /search/issues \
       --paginate \

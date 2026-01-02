@@ -1,0 +1,62 @@
+__xx_cache_aws_cloudwatch_log_groups_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS CloudWatch Log Groups!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_cloudwatch_logs.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+    local REGION="${AWS_REGION}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS LogGroups (account TEXT NOT NULL, region TEXT NOT NULL, log_group_name TEXT NOT NULL, creation_time INTEGER, retention_days INTEGER, stored_bytes INTEGER, UNIQUE (account, region, log_group_name));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (account TEXT NOT NULL, region TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (account, region));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM LogGroups WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+    fi
+
+    __xx_notify "Fetching CloudWatch log groups for account: ${ACCOUNT}, region: ${REGION}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM LogGroups WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+
+    local NEXT_TOKEN=""
+    while true; do
+        if [[ -z "${NEXT_TOKEN}" ]]; then
+            RESPONSE=$(aws logs describe-log-groups --output json 2>/dev/null)
+        else
+            RESPONSE=$(aws logs describe-log-groups --next-token "${NEXT_TOKEN}" --output json 2>/dev/null)
+        fi
+
+        echo "${RESPONSE}" | jq -r '.logGroups[] | [.logGroupName, .creationTime, (.retentionInDays // 0), (.storedBytes // 0)] | @tsv' | \
+            while IFS=$'\t' read -r LOG_GROUP_NAME CREATION_TIME RETENTION_DAYS STORED_BYTES; do
+                LOG_GROUP_NAME_ESCAPED=$(echo "${LOG_GROUP_NAME}" | sed "s/'/''/g")
+                sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO LogGroups (account, region, log_group_name, creation_time, retention_days, stored_bytes) VALUES ('${ACCOUNT}', '${REGION}', '${LOG_GROUP_NAME_ESCAPED}', ${CREATION_TIME}, ${RETENTION_DAYS}, ${STORED_BYTES});"
+            done
+
+        NEXT_TOKEN=$(echo "${RESPONSE}" | jq -r '.nextToken // empty')
+        [[ -z "${NEXT_TOKEN}" ]] && break
+    done
+
+    __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+    SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (account, region, sync_timestamp) VALUES ('${ACCOUNT}', '${REGION}', '${SYNC_TIMESTAMP}');"
+
+    __xx_notify "#[fg=bold]Finished fetching AWS CloudWatch Log Groups!#[default]"
+}

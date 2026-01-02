@@ -1,0 +1,21 @@
+__xx_preview_aws_cloudwatch_log_stream() {
+    local LOG_GROUP_NAME="$1"
+    local LOG_STREAM_NAME="$2"
+
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        echo "Log Stream: ${LOG_STREAM_NAME}"
+        echo "Log Group: ${LOG_GROUP_NAME}"
+        echo ""
+        echo "Recent log events (last 20):"
+        echo "----------------------------------------"
+
+        aws logs get-log-events \
+            --log-group-name "${LOG_GROUP_NAME}" \
+            --log-stream-name "${LOG_STREAM_NAME}" \
+            --limit 20 \
+            --output json 2>/dev/null | \
+            jq -r '.events[] | "\(.timestamp | tostring | .[0:10] | tonumber | strftime("%Y-%m-%d %H:%M:%S")) | \(.message)"'
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

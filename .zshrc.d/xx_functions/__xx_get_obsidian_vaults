@@ -4,9 +4,9 @@ __xx_get_obsidian_vaults() {
     if [ -n "${VAULTS}" ]; then
         {
             echo "VAULT\tPATH"
-            while IFS= read -r vault; do
-                vault_name=$(basename "${vault}")
-                echo "${vault_name}\t${vault}"
+            while IFS= read -r VAULT; do
+                VAULT_NAME=$(basename "${VAULT}")
+                echo "${VAULT_NAME}\t${VAULT}"
             done <<< "${VAULTS}"
         } | column -t -s $'\t'
     else

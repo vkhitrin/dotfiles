@@ -1,8 +1,8 @@
 __xx_preview_aws_route53_hosted_zone() {
-    local hosted_zone_id="$1"
+    local HOSTED_ZONE_ID="$1"
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
         # Get hosted zone details
-        aws route53 get-hosted-zone --id "${hosted_zone_id}" --output json 2>/dev/null | \
+        aws route53 get-hosted-zone --id "${HOSTED_ZONE_ID}" --output json 2>/dev/null | \
             jq -r '
                 "Hosted Zone ID: \(.HostedZone.Id)\n" +
                 "Name: \(.HostedZone.Name)\n" +
@@ -20,7 +20,7 @@ __xx_preview_aws_route53_hosted_zone() {
         echo "============"
 
         # Get and display DNS records
-        aws route53 list-resource-record-sets --hosted-zone-id "${hosted_zone_id}" --output json 2>/dev/null | \
+        aws route53 list-resource-record-sets --hosted-zone-id "${HOSTED_ZONE_ID}" --output json 2>/dev/null | \
             jq -r '
                 .ResourceRecordSets[] |
                 "\n[\(.Type)] \(.Name)\n" +

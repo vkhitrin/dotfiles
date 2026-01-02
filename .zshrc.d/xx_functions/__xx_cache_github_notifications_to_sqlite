@@ -28,10 +28,10 @@ __xx_cache_github_notifications_to_sqlite() {
     fi
     # Fetch notifications
     gh api --paginate  --method GET '/notifications?per_page=50&all=true' |
-    jq -c '.[]' | while read -r row; do
-      id=$(echo "$row" | jq -r '.id')
+    jq -c '.[]' | while read -r ROW; do
+      ID=$(echo "${ROW}" | jq -r '.id')
       sqlite3 "${SQLITE_DATABASE_PATH}" \
-        "INSERT OR REPLACE INTO Notifications (id, json) VALUES ('$id', '$row');"
+        "INSERT OR REPLACE INTO Notifications (id, json) VALUES ('${ID}', '${ROW}');"
     done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

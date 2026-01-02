@@ -14,8 +14,8 @@ __xx_get_github_open_issues() {
             [ -z "${OPEN_ISSUE}" ] && continue
             AUTHOR="${GITHUB_USER}"
             TITLE="${OPEN_ISSUE%%$'\t'*}"
-            local rest="${OPEN_ISSUE#*$'\t'}"
-            URL="${rest#*$'\t'}"
+            local REST="${OPEN_ISSUE#*$'\t'}"
+            URL="${REST#*$'\t'}"
             TMP="${URL#*//}"
             HOST="${TMP%%/*}"
             PATH_PART="${TMP#*/}"

@@ -37,13 +37,13 @@ __xx_cache_aws_route53_hosted_zones_to_sqlite() {
 
     aws route53 list-hosted-zones --output json 2>/dev/null | \
         jq -r '.HostedZones[] | [.Id, .Name, (.Config.PrivateZone | tostring), .ResourceRecordSetCount] | @tsv' | \
-        while IFS=$'\t' read -r hosted_zone_id name private_zone record_count; do
+        while IFS=$'\t' read -r HOSTED_ZONE_ID NAME PRIVATE_ZONE RECORD_COUNT; do
             # Extract just the zone ID from the full path
-            hosted_zone_id_clean=$(echo "$hosted_zone_id" | sed 's|/hostedzone/||')
-            hosted_zone_id_escaped=$(echo "$hosted_zone_id_clean" | sed "s/'/''/g")
-            name_escaped=$(echo "$name" | sed "s/'/''/g")
-            private_zone_escaped=$(echo "$private_zone" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO HostedZones (account, hosted_zone_id, name, private_zone, record_count) VALUES ('${ACCOUNT}', '${hosted_zone_id_escaped}', '${name_escaped}', '${private_zone_escaped}', ${record_count});"
+            HOSTED_ZONE_ID_CLEAN=$(echo "${HOSTED_ZONE_ID}" | sed 's|/hostedzone/||')
+            HOSTED_ZONE_ID_ESCAPED=$(echo "${HOSTED_ZONE_ID_CLEAN}" | sed "s/'/''/g")
+            NAME_ESCAPED=$(echo "${NAME}" | sed "s/'/''/g")
+            PRIVATE_ZONE_ESCAPED=$(echo "${PRIVATE_ZONE}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO HostedZones (account, hosted_zone_id, name, private_zone, record_count) VALUES ('${ACCOUNT}', '${HOSTED_ZONE_ID_ESCAPED}', '${NAME_ESCAPED}', '${PRIVATE_ZONE_ESCAPED}', ${RECORD_COUNT});"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

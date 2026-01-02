@@ -1,0 +1,62 @@
+__xx_cache_aws_mq_brokers_to_sqlite() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_format_columns_ansi
+    __xx_setup_commands
+    source ~/.zshrc.d/xx_functions/__xx_notify
+
+    if [ -z "${XX_CACHE_DIR}" ]; then
+        __xx_notify "Environment variable XX_CACHE_DIR is not defined, quitting"
+        return 1
+    fi
+
+    if [[ ! -n "${AWS_SESSION_TOKEN}" || ! -n "${AWS_VAULT}" ]]; then
+        __xx_notify "AWS vault is not enabled."
+        return 1
+    fi
+
+    __xx_notify "#[fg=bold]Starting to fetch AWS MQ Brokers!#[default]"
+
+    __xx_notify "Ensuring ${XX_CACHE_DIR} directory exists"
+    mkdir -p "${XX_CACHE_DIR}"
+    SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_mq.db"
+
+    local ACCOUNT="${AWS_VAULT}"
+    local REGION="${AWS_REGION}"
+
+    __xx_notify "Creating tables if not exist in SQLITE database"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS Brokers (account TEXT NOT NULL, region TEXT NOT NULL, broker_id TEXT NOT NULL, broker_name TEXT NOT NULL, broker_state TEXT NOT NULL, engine_type TEXT NOT NULL, engine_version TEXT NOT NULL, deployment_mode TEXT NOT NULL, instance_type TEXT NOT NULL, UNIQUE (account, region, broker_id));"
+    sqlite3 "${SQLITE_DATABASE_PATH}" "CREATE TABLE IF NOT EXISTS SyncLog (account TEXT NOT NULL, region TEXT NOT NULL, sync_timestamp TEXT NOT NULL, PRIMARY KEY (account, region));"
+
+    if [ -n "${SQLITE_WIPE_DATA}" ]; then
+        __xx_notify "Wipe table data"
+        sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Brokers WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+    fi
+
+    __xx_notify "Fetching MQ brokers for account: ${ACCOUNT}, region: ${REGION}"
+
+    sqlite3 "${SQLITE_DATABASE_PATH}" "DELETE FROM Brokers WHERE account = '${ACCOUNT}' AND region = '${REGION}';"
+
+    aws mq list-brokers --output json 2>/dev/null | \
+        jq -r '.BrokerSummaries[]? | [.BrokerId, .BrokerName, .BrokerState, .EngineType, .EngineVersion, .DeploymentMode, .HostInstanceType] | @tsv' | \
+        while IFS=$'\t' read -r BROKER_ID BROKER_NAME BROKER_STATE ENGINE_TYPE ENGINE_VERSION DEPLOYMENT_MODE INSTANCE_TYPE; do
+            if [[ -z "${BROKER_ID}" ]]; then
+                continue
+            fi
+
+            BROKER_ID_ESCAPED=$(echo "${BROKER_ID}" | sed "s/'/''/g")
+            BROKER_NAME_ESCAPED=$(echo "${BROKER_NAME}" | sed "s/'/''/g")
+            BROKER_STATE_ESCAPED=$(echo "${BROKER_STATE}" | sed "s/'/''/g")
+            ENGINE_TYPE_ESCAPED=$(echo "${ENGINE_TYPE}" | sed "s/'/''/g")
+            ENGINE_VERSION_ESCAPED=$(echo "${ENGINE_VERSION}" | sed "s/'/''/g")
+            DEPLOYMENT_MODE_ESCAPED=$(echo "${DEPLOYMENT_MODE}" | sed "s/'/''/g")
+            INSTANCE_TYPE_ESCAPED=$(echo "${INSTANCE_TYPE}" | sed "s/'/''/g")
+
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Brokers (account, region, broker_id, broker_name, broker_state, engine_type, engine_version, deployment_mode, instance_type) VALUES ('${ACCOUNT}', '${REGION}', '${BROKER_ID_ESCAPED}', '${BROKER_NAME_ESCAPED}', '${BROKER_STATE_ESCAPED}', '${ENGINE_TYPE_ESCAPED}', '${ENGINE_VERSION_ESCAPED}', '${DEPLOYMENT_MODE_ESCAPED}', '${INSTANCE_TYPE_ESCAPED}');"
+        done
+
+    __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"
+    SYNC_TIMESTAMP=$(${XX_GNU_DATE_COMMAND} -u +"%Y-%m-%dT%H:%M:%SZ")
+    sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SyncLog (account, region, sync_timestamp) VALUES ('${ACCOUNT}', '${REGION}', '${SYNC_TIMESTAMP}');"
+
+    __xx_notify "#[fg=bold]Finished fetching AWS MQ Brokers!#[default]"
+}

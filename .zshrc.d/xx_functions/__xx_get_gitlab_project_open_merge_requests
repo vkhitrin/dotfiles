@@ -7,6 +7,7 @@ __xx_get_gitlab_project_open_merge_requests() {
         if [ -n "${OUTPUT}" ]; then
         CONTENT="true"
         {
+            echo "Fetched $(${XX_GNU_DATE_COMMAND=} -u +'%Y-%m-%dT%H:%M:%SZ')"
             echo "ID\tPath\tDescription\tBranch\tHost"
             echo "${OUTPUT}" | awk -v h="${GITLAB_HOST}" '{print $0 "\t" h}'
         } | column -ts $'\t'

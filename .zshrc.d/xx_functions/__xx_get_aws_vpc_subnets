@@ -1,13 +1,13 @@
 __xx_get_aws_vpc_subnets() {
-    local vpc_id="$1"
-    local vpc_name="$2"
+    local VPC_ID="$1"
+    local VPC_NAME="$2"
 
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
         local FETCH_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         (
             echo "Fetched: ${FETCH_TIMESTAMP}"
             echo "SUBNET_ID^NAME^AZ^CIDR_BLOCK^AVAILABLE_IPS^PUBLIC"
-            aws ec2 describe-subnets --filters "Name=vpc-id,Values=${vpc_id}" --output json 2>/dev/null | \
+            aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" --output json 2>/dev/null | \
                 jq -r '.Subnets[] | [.SubnetId, (.Tags[]? | select(.Key=="Name") | .Value // "N/A"), .AvailabilityZone, .CidrBlock, .AvailableIpAddressCount, (.MapPublicIpOnLaunch | tostring)] | @tsv' | \
                 awk -F'\t' '{
                     subnet_id = $1

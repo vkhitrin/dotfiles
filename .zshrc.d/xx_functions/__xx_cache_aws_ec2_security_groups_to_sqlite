@@ -38,12 +38,12 @@ __xx_cache_aws_ec2_security_groups_to_sqlite() {
 
     aws ec2 describe-security-groups --output json 2>/dev/null | \
         jq -r '.SecurityGroups[] | [.GroupId, .GroupName, .Description, .VpcId] | @tsv' | \
-        while IFS=$'\t' read -r group_id group_name description vpc_id; do
-            group_id_escaped=$(echo "$group_id" | sed "s/'/''/g")
-            group_name_escaped=$(echo "$group_name" | sed "s/'/''/g")
-            description_escaped=$(echo "$description" | sed "s/'/''/g")
-            vpc_id_escaped=$(echo "$vpc_id" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SecurityGroups (account, region, group_id, group_name, description, vpc_id) VALUES ('${ACCOUNT}', '${REGION}', '${group_id_escaped}', '${group_name_escaped}', '${description_escaped}', '${vpc_id_escaped}');"
+        while IFS=$'\t' read -r GROUP_ID GROUP_NAME DESCRIPTION VPC_ID; do
+            GROUP_ID_ESCAPED=$(echo "${GROUP_ID}" | sed "s/'/''/g")
+            GROUP_NAME_ESCAPED=$(echo "${GROUP_NAME}" | sed "s/'/''/g")
+            DESCRIPTION_ESCAPED=$(echo "${DESCRIPTION}" | sed "s/'/''/g")
+            VPC_ID_ESCAPED=$(echo "${VPC_ID}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO SecurityGroups (account, region, group_id, group_name, description, vpc_id) VALUES ('${ACCOUNT}', '${REGION}', '${GROUP_ID_ESCAPED}', '${GROUP_NAME_ESCAPED}', '${DESCRIPTION_ESCAPED}', '${VPC_ID_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

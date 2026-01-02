@@ -1,12 +1,12 @@
 __xx_preview_aws_elasticache_cluster() {
-    local cluster_id="$1"
+    local CLUSTER_ID="$1"
     if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
         # Try to fetch as a replication group first (Redis cluster)
-        local repl_group=$(aws elasticache describe-replication-groups --replication-group-id "${cluster_id}" --output json 2>/dev/null)
+        local REPL_GROUP=$(aws elasticache describe-replication-groups --replication-group-id "${CLUSTER_ID}" --output json 2>/dev/null)
 
-        if [[ -n "$repl_group" && "$repl_group" != "null" ]]; then
+        if [[ -n "${REPL_GROUP}" && "${REPL_GROUP}" != "null" ]]; then
             # It's a Redis replication group
-            echo "$repl_group" | jq -r '
+            echo "${REPL_GROUP}" | jq -r '
                 .ReplicationGroups[0] |
                 "Replication Group ID: \(.ReplicationGroupId)\n" +
                 "Description: \(.Description)\n" +
@@ -41,7 +41,7 @@ __xx_preview_aws_elasticache_cluster() {
             '
         else
             # It's a standalone cache cluster (likely Memcached or standalone Redis)
-            aws elasticache describe-cache-clusters --cache-cluster-id "${cluster_id}" --show-cache-node-info --output json 2>/dev/null | \
+            aws elasticache describe-cache-clusters --cache-cluster-id "${CLUSTER_ID}" --show-cache-node-info --output json 2>/dev/null | \
                 jq -r '
                     .CacheClusters[0] |
                     "Cluster ID: \(.CacheClusterId)\n" +

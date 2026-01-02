@@ -1,0 +1,32 @@
+__xx_get_aws_lambda_functions() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_lambda.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "FUNCTION_NAME^RUNTIME^MEMORY_MB^TIMEOUT_SEC^LAST_MODIFIED^ARN"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT function_name, runtime, memory_size, timeout, last_modified, function_arn FROM Functions WHERE account = '${ACCOUNT}' AND region = '${REGION}';" | \
+                        awk -F'|' '{
+                            function_name = $1
+                            runtime = $2
+                            memory_size = $3
+                            timeout = $4
+                            last_modified = $5
+                            function_arn = $6
+                            printf "%s^%s^%s^%s^%s^%s\n", function_name, runtime, memory_size, timeout, last_modified, function_arn
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_lambda_functions_to_sqlite' to cache Lambda functions."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

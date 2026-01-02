@@ -38,13 +38,13 @@ __xx_cache_aws_acm_certificates_to_sqlite() {
 
     aws acm list-certificates --output json 2>/dev/null | \
         jq -r '.CertificateSummaryList[] | [.CertificateArn, .DomainName, .Status, .Type, (.InUse | tostring)] | @tsv' | \
-        while IFS=$'\t' read -r certificate_arn domain_name cert_status cert_type in_use; do
-            certificate_arn_escaped=$(echo "$certificate_arn" | sed "s/'/''/g")
-            domain_name_escaped=$(echo "$domain_name" | sed "s/'/''/g")
-            cert_status_escaped=$(echo "$cert_status" | sed "s/'/''/g")
-            cert_type_escaped=$(echo "$cert_type" | sed "s/'/''/g")
-            in_use_escaped=$(echo "$in_use" | sed "s/'/''/g")
-            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Certificates (account, region, certificate_arn, domain_name, cert_status, cert_type, in_use) VALUES ('${ACCOUNT}', '${REGION}', '${certificate_arn_escaped}', '${domain_name_escaped}', '${cert_status_escaped}', '${cert_type_escaped}', '${in_use_escaped}');"
+        while IFS=$'\t' read -r CERTIFICATE_ARN DOMAIN_NAME CERT_STATUS CERT_TYPE IN_USE; do
+            CERTIFICATE_ARN_ESCAPED=$(echo "${CERTIFICATE_ARN}" | sed "s/'/''/g")
+            DOMAIN_NAME_ESCAPED=$(echo "${DOMAIN_NAME}" | sed "s/'/''/g")
+            CERT_STATUS_ESCAPED=$(echo "${CERT_STATUS}" | sed "s/'/''/g")
+            CERT_TYPE_ESCAPED=$(echo "${CERT_TYPE}" | sed "s/'/''/g")
+            IN_USE_ESCAPED=$(echo "${IN_USE}" | sed "s/'/''/g")
+            sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR REPLACE INTO Certificates (account, region, certificate_arn, domain_name, cert_status, cert_type, in_use) VALUES ('${ACCOUNT}', '${REGION}', '${CERTIFICATE_ARN_ESCAPED}', '${DOMAIN_NAME_ESCAPED}', '${CERT_STATUS_ESCAPED}', '${CERT_TYPE_ESCAPED}', '${IN_USE_ESCAPED}');"
         done
 
     __xx_notify "Creating 'SyncLog' table if not exists in SQLITE database"

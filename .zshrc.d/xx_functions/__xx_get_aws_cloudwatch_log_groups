@@ -1,0 +1,36 @@
+__xx_get_aws_cloudwatch_log_groups() {
+    if [[ -n "${AWS_SESSION_TOKEN}" && -n "${AWS_VAULT}" ]]; then
+        local SQLITE_DATABASE_PATH="${XX_CACHE_DIR}/aws_cloudwatch_logs.db"
+        local ACCOUNT="${AWS_VAULT}"
+        local REGION="${AWS_REGION}"
+
+        if [[ -f "${SQLITE_DATABASE_PATH}" ]]; then
+            local CACHE_TIMESTAMP=$(sqlite3 -column "${SQLITE_DATABASE_PATH}" "SELECT sync_timestamp FROM SyncLog WHERE account = '${ACCOUNT}' AND region = '${REGION}';" 2>/dev/null)
+            if [[ -n "${CACHE_TIMESTAMP}" ]]; then
+                echo "Last cached: ${CACHE_TIMESTAMP}"
+                (
+                    echo "LOG_GROUP_NAME^RETENTION_DAYS^STORED_MB^CREATION_TIME"
+                    sqlite3 "${SQLITE_DATABASE_PATH}" "SELECT log_group_name, retention_days, stored_bytes, creation_time FROM LogGroups WHERE account = '${ACCOUNT}' AND region = '${REGION}' ORDER BY creation_time DESC;" | \
+                        awk -F'|' '{
+                            log_group_name = $1
+                            retention_days = $2
+                            stored_bytes = $3
+                            creation_time = $4
+                            stored_mb = sprintf("%.2f", stored_bytes / 1048576)
+                            if (retention_days == 0) {
+                                retention_display = "Never"
+                            } else {
+                                retention_display = retention_days " days"
+                            }
+                            printf "%s^%s^%s^%s\n", log_group_name, retention_display, stored_mb, creation_time
+                        }'
+                ) | __xx_format_columns_ansi "^"
+                return
+            fi
+        fi
+
+        echo "No cache found. Run '__xx_cache_aws_cloudwatch_log_groups_to_sqlite' to cache CloudWatch log groups."
+    else
+        echo "AWS vault is not enabled."
+    fi
+}

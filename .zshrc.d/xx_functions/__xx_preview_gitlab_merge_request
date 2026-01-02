@@ -21,8 +21,8 @@ function __xx_preview_gitlab_merge_request() {
     for CONFIG_FILE in $(find "${HOME}/.config/glab-cli/" -name 'config.yml'); do
         local TEST_CONFIG_DIR=$(dirname ${CONFIG_FILE})
         # Test if this config works
-        local test_result=$(GLAB_CONFIG_DIR="${TEST_CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab --repo "${GITLAB_PROJECT}" mr view "${GITLAB_MERGE_REQUEST_ID}" --comments=false 2>/dev/null | head -1)
-        if [[ -n "${test_result}" ]]; then
+        local TEST_RESULT=$(GLAB_CONFIG_DIR="${TEST_CONFIG_DIR}" GITLAB_HOST="${GITLAB_HOST}" glab --repo "${GITLAB_PROJECT}" mr view "${GITLAB_MERGE_REQUEST_ID}" --comments=false 2>/dev/null | head -1)
+        if [[ -n "${TEST_RESULT}" ]]; then
             CONFIG_FOUND=true
             CONFIG_DIR="${TEST_CONFIG_DIR}"
             break
