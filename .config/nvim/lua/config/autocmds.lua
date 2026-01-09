@@ -84,6 +84,8 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.opt_local.number = false
 		vim.o.swapfile = false
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
 		vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
 			pattern = "*",
 			command = "silent! write",
@@ -92,31 +94,64 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_user_command("LspCapabilities", function()
-    local curBuf = vim.api.nvim_get_current_buf()
-    local clients = vim.lsp.get_active_clients({ bufnr = curBuf })
+	local curBuf = vim.api.nvim_get_current_buf()
+	local clients = vim.lsp.get_clients({ bufnr = curBuf })
 
-    for _, client in pairs(clients) do
-        if client.name ~= "null-ls" then
-            local capAsList = {}
-            for key, value in pairs(client.server_capabilities) do
-                if value and key:find("Provider") then
-                    local capability = key:gsub("Provider$", "")
-                    table.insert(capAsList, "- " .. capability)
-                end
-            end
-            table.sort(capAsList)
-            local msg = "LSP Server: " .. client.name .. "\n" .. table.concat(capAsList, "\n")
-            vim.notify(msg, "trace", {
-                on_open = function(win)
-                    local buf = vim.api.nvim_win_get_buf(win)
-                    vim.api.nvim_buf_set_option(buf, "filetype", "markdown")
-                end,
-                timeout = 14000,
-            })
-            vim.fn.setreg("+", "Capabilities = " .. vim.inspect(client.server_capabilities))
-        end
-    end
+	for _, client in pairs(clients) do
+		if client.name ~= "null-ls" then
+			local capAsList = {}
+			for key, value in pairs(client.server_capabilities) do
+				if value and key:find("Provider") then
+					local capability = key:gsub("Provider$", "")
+					table.insert(capAsList, "- " .. capability)
+				end
+			end
+			table.sort(capAsList)
+			local msg = "LSP Server: " .. client.name .. "\n" .. table.concat(capAsList, "\n")
+			vim.notify(msg, "trace", {
+				on_open = function(win)
+					local buf = vim.api.nvim_win_get_buf(win)
+					vim.api.nvim_buf_set_option(buf, "filetype", "markdown")
+				end,
+				timeout = 14000,
+			})
+			vim.fn.setreg("+", "Capabilities = " .. vim.inspect(client.server_capabilities))
+		end
+	end
 end, {})
+
+local RemoveComments = function()
+	local ts = vim.treesitter
+	local bufnr = vim.api.nvim_get_current_buf()
+	local ft = vim.bo[bufnr].filetype
+	local lang = ts.language.get_lang(ft) or ft
+
+	local ok, parser = pcall(ts.get_parser, bufnr, lang)
+	if not ok then
+		return vim.notify("No parser for " .. ft, vim.log.levels.WARN)
+	end
+
+	local tree = parser:parse()[1]
+	local root = tree:root()
+	local query = ts.query.parse(lang, "(comment) @comment")
+
+	local ranges = {}
+	for _, node in query:iter_captures(root, bufnr, 0, -1) do
+		table.insert(ranges, { node:range() })
+	end
+
+	table.sort(ranges, function(a, b)
+		if a[1] == b[1] then
+			return a[2] < b[2]
+		end
+		return a[1] > b[1]
+	end)
+
+	for _, r in ipairs(ranges) do
+		vim.api.nvim_buf_set_text(bufnr, r[1], r[2], r[3], r[4], {})
+	end
+end
+vim.api.nvim_create_user_command("RemoveComments", RemoveComments, {})
 
 -- Custom filetype detection
 vim.filetype.add({

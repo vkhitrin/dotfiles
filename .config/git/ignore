@@ -3,8 +3,6 @@
 # gitlab-ci-local
 .gitlab-ci-local
 .gitlab-ci-local.yml
-# vectorcode
-.vectorcode
 # neovim
 .config/nvim/lua/settings/private
 # local binaries
@@ -13,3 +11,5 @@
 ~/.zshrc.d/fzf
 # opencode and plugins
 .opencode/swarm.db
+# opencode swarm
+.hive/

@@ -1,5 +1,5 @@
 ---
-theme: catppuccin-mocha-yellow
+theme: catppuccin-mocha-blue
 layout: horizontal
 response:
   prettify_json: true

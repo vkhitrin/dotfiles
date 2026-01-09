@@ -1,18 +1,18 @@
 return {
-    settings = {
-        Lua = {
-            runtime = {
-                version = "LuaJIT",
-            },
-            diagnostics = {
-                globals = { "vim" },
-            },
-            telmetry = {
-                enable = false,
-            },
-            workspace = {
-                checkThirdParty = false,
-            },
-        },
-    },
+	settings = {
+		Lua = {
+			runtime = {
+				version = "LuaJIT",
+			},
+			diagnostics = {
+				globals = { "vim", "Snacks" },
+			},
+			telmetry = {
+				enable = false,
+			},
+			workspace = {
+				checkThrdParty = true,
+			},
+		},
+	},
 }

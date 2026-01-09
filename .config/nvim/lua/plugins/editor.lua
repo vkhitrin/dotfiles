@@ -19,6 +19,7 @@ return {
 				},
 				sources = {
 					files = { hidden = true, ignored = true },
+					grep = { hidden = true, ignored = true },
 					explorer = { hidden = true, ignored = true },
 				},
 			},
@@ -492,9 +493,15 @@ return {
 	},
 	{
 		"MagicDuck/grug-far.nvim",
-		opts = {},
+		opts = {
+			engines = { ripgrep = { extraArgs = "--hidden" } },
+		},
 		keys = {
-			{ "<leader>F", "<cmd>lua require('grug-far').toggle_instance({ instanceName='far', staticTitle='Find and Replace' })<CR>", desc = "Spectre" },
+			{
+				"<leader>F",
+				"<cmd>lua require('grug-far').toggle_instance({ instanceName='far', staticTitle='Find and Replace' })<CR>",
+				desc = "Spectre",
+			},
 		},
 	},
 	{
@@ -513,11 +520,11 @@ return {
 			workspaces = {
 				{
 					name = "Personal",
-					path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Personal",
+					path = "~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Personal",
 				},
 				{
 					name = "Work",
-					path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Work",
+					path = "~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Work",
 				},
 			},
 			completion = {

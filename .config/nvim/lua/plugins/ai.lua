@@ -2,7 +2,12 @@ return {
 	{
 		"sudo-tee/opencode.nvim",
 		opts = {
-			prefered_picker = "snacks",
+			server = {
+				url = "localhost",
+				port = 51515,
+				timeout = 5,
+			},
+			preferred_picker = "snacks",
 			ui = {
 				layout = "left",
 				icons = {
@@ -23,4 +28,15 @@ return {
 			},
 		},
 	},
+	-- {
+	-- 	"BlinkResearchLabs/blink-edit.nvim",
+	-- 	opts = {
+	-- 		llm = {
+	-- 			provider = "sweep",
+	-- 			backend = "openai",
+	-- 			url = "http://localhost:1234",
+	-- 			model = "sweep",
+	-- 		},
+	-- 	},
+	-- },
 }

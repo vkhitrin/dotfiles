@@ -44,9 +44,6 @@ vim.diagnostic.config({
 	},
 })
 
--- Enable custom LSP servers
-vim.lsp.enable("vectorcode_server")
-
 -- Neovide GUI settings
 if vim.g.neovide then
 	vim.g.neovide_floating_shadow = false

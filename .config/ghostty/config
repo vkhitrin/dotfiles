@@ -1,8 +1,4 @@
 theme = Catppuccin Mocha
-font-family = "SFMono Nerd Font"
-font-family-bold = "SFMono Nerd Font"
-font-family-italic = "SFMono Nerd Font"
-font-family-bold-italic = "SFMono Nerd Font"
 font-family = "SF Mono"
 font-family-bold = "SF Mono"
 font-family-italic = "SF Mono"
@@ -13,3 +9,6 @@ window-decoration = false
 window-padding-x = 5
 window-padding-y = 5
 mouse-scroll-multiplier = 0
+macos-option-as-alt = left
+keybind = alt+left=unbind
+keybind = alt+right=unbind
