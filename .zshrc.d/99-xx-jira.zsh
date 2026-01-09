@@ -77,9 +77,9 @@ function jinx() {
 }
 
 
-which jiratui > /dev/null 2>&1 || return
+which gojeera > /dev/null 2>&1 || return
 
 function jtui() {
-    # xx {"tags": "jira,tui", "description": "Launch jiratui", "subshell": false, "cache": false}
+    # xx {"tags": "jira,tui", "description": "Launch gojeera", "subshell": false, "cache": false}
     __xx_jira_launch_tui
 }

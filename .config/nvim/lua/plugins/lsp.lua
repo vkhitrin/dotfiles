@@ -41,16 +41,18 @@ return {
 				},
 				registries = {
 					"github:mason-org/mason-registry",
-					"github:vkhitrin/mason-registry@2025-10-25-second-silk",
+					"github:vkhitrin/mason-registry@2026-02-25-pink-fine",
 				},
 			})
 			require("mason-tool-installer").setup({
 				ensure_installed = {
 					"actionlint",
 					"ansible-language-server",
+					"ast-grep",
 					"autotools-language-server",
 					"bash-language-server",
 					"codelldb",
+					"css-lsp",
 					"esbonio",
 					"gitlab-ci-ls",
 					"gopls",
@@ -184,5 +186,20 @@ return {
 	},
 	{
 		"b0o/schemastore.nvim",
+	},
+	{
+		"jmbuhr/otter.nvim",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+		config = function()
+			vim.api.nvim_create_autocmd({ "FileType" }, {
+				pattern = { "toml" },
+				group = vim.api.nvim_create_augroup("EmbedToml", {}),
+				callback = function()
+					require("otter").activate()
+				end,
+			})
+		end,
 	},
 }

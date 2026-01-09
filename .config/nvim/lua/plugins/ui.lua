@@ -83,6 +83,7 @@ return {
 				virt_text_priority = 100,
 			},
 			current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> (<abbrev_sha>) - <summary>",
+			gh = true,
 		},
 	},
 	{
@@ -92,6 +93,21 @@ return {
 			return {
 				source = diff.gen_source.none(),
 			}
+		end,
+	},
+	{
+		"nvim-tree/nvim-web-devicons",
+		config = function()
+			require("nvim-web-devicons").setup({
+				override_by_extension = {
+					["tcss"] = {
+						icon = "󰌜",
+						color = "#42a5f5",
+						cterm_color = "75",
+						name = "Tcss",
+					},
+				},
+			})
 		end,
 	},
 	{
@@ -106,26 +122,12 @@ return {
 			},
 			sections = {
 				lualine_x = {
-					{
-						function()
-							return require("vectorcode.integrations").lualine(opts)[1]()
-						end,
-						cond = function()
-							if package.loaded["vectorcode"] == nil then
-								return false
-							else
-								return require("vectorcode.integrations").lualine(opts).cond()
-							end
-						end,
-					},
 					"encoding",
 					"fileformat",
 					"filetype",
 					{
 						function()
-							return ("%s")
-								:format(require("schema-companion").get_current_schemas() or "")
-								:sub(0, 128)
+							return ("%s"):format(require("schema-companion").get_current_schemas() or ""):sub(0, 128)
 						end,
 					},
 				},
@@ -137,7 +139,7 @@ return {
 		ft = { "opencode_output", "markdown", "markdown.floating_window" },
 		opts = {
 			anti_conceal = {
-				enabled = false,
+				enabled = true,
 			},
 			file_types = { "markdown", "opencode_output", "markdown.floating_window" },
 			completions = {
