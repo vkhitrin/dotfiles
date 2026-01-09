@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 
 # Locale
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+export LC_ALL=en_GB.UTF-8
+export LANG=en_GB.UTF-8
 
 # fzf
 export FZF_DEFAULT_OPTS=" \
@@ -67,5 +67,5 @@ if [[ -f "/opt/homebrew/bin/socktainer" && $(uname) == "Darwin" ]];then
 fi
 
 # OpenCode
-OPENCODE_DISABLE_LSP_DOWNLOAD=true
-. "$HOME/.cargo/env"
+export OPENCODE_DISABLE_LSP_DOWNLOAD=true
+export OPENCODE_EXPERIMENTAL_LSP_TOOL=false

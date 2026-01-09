@@ -48,9 +48,11 @@ return {
 				ensure_installed = {
 					"actionlint",
 					"ansible-language-server",
+					"ast-grep",
 					"autotools-language-server",
 					"bash-language-server",
 					"codelldb",
+					"css-lsp",
 					"esbonio",
 					"gitlab-ci-ls",
 					"gopls",

@@ -94,11 +94,11 @@ __xx_cache_gitlab_groups_to_sqlite() {
         (
             cd
             if [ -n "${USE_GLAB_CONFIG_DIR}" ]; then
-                GLAB_CONFIG_DIR="${USE_GLAB_CONFIG_DIR}" glab api 'groups' --hostname="${GITLAB_HOST}" 2>/dev/null | jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.name,.id,${HOST}]|@csv)' | sed "s/\"/'/g" | while IFS= read -r GROUP_DETAILS; do
+                GLAB_CONFIG_DIR="${USE_GLAB_CONFIG_DIR}" glab api 'groups' --hostname="${GITLAB_HOST}" 2>/dev/null | jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.name,.id,$host]|@csv)' | sed "s/\"/'/g" | while IFS= read -r GROUP_DETAILS; do
                     sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Groups (web_url, group_name, id, hostname) VALUES (${GROUP_DETAILS});"
                 done
             else
-                glab api 'groups' --hostname="${GITLAB_HOST}" 2>/dev/null | jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.name,.id,${HOST}]|@csv)' | sed "s/\"/'/g" | while IFS= read -r GROUP_DETAILS; do
+                glab api 'groups' --hostname="${GITLAB_HOST}" 2>/dev/null | jq -r --arg host "${GITLAB_HOST}" '(.[]| [.web_url,.name,.id,$host]|@csv)' | sed "s/\"/'/g" | while IFS= read -r GROUP_DETAILS; do
                     sqlite3 "${SQLITE_DATABASE_PATH}" "INSERT OR IGNORE INTO Groups (web_url, group_name, id, hostname) VALUES (${GROUP_DETAILS});"
                 done
             fi

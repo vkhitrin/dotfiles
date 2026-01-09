@@ -68,6 +68,7 @@ alias _backup_my_macos="mackup backup -vf && mackup link uninstall --force; cp -
 # Custom GitLab configuration
 if [[ -d "${HOME}/.config/glab-cli/work" ]];then
     alias glab-work="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work glab"
+    alias glab-work-bot="GLAB_CONFIG_DIR=${HOME}/.config/glab-cli/work-bot glab"
 fi
 
 # Custom SourceGraph configuration
@@ -99,9 +100,6 @@ if [[ -d "${HOME}/Library/Application Support/snipkit" ]]; then
     bindkey "^X^Z" snipkit-snippets-exec-widget
 fi
 
-# Jira punchout tool
-[ -f "/opt/homebrew/bin/punchout" ] && alias punchout="punchout -db-path=${HOME}/.cache/punchout/punchout.v1.db"
-
 # Google Cloud SDK Completion
 [ -f "/opt/homebrew/share/zsh/site-functions/_google_cloud_sdk" ] && source /opt/homebrew/share/zsh/site-functions/_google_cloud_sdk
 
@@ -115,6 +113,13 @@ fi
 
 # Workaround for libcosmic https://github.com/pop-os/libcosmic/discussions/860
 export XDG_DATA_DIRS="/opt/homebrew/share:${XDG_DATA_DIRS}"
+
+# opentofu
+if [ -f /opt/homebrew/bin/tofu ]; then
+    autoload -U +X bashcompinit && bashcompinit
+    complete -o nospace -C /opt/homebrew/bin/tofu tofu
+fi
+
 
 # Spacship
 SPACESHIP_PROMPT_ASYNC=true

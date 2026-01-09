@@ -1,16 +1,16 @@
 __xx_jira_launch_tui() {
     local JIRA_ITEM="${1:-}"
-    local JIRATUI_COMMAND
+    local GOJEERA_TUI_COMMAND
 
     if [[ -n "${JIRA_ITEM}" ]]; then
-        JIRATUI_COMMAND="jiratui ui --search-on-startup --focus-item-on-startup 1 --work-item-key ${JIRA_ITEM}"
+        GOJEERA_TUI_COMMAND="gojeera ui --search-on-startup --focus-item-on-startup 1 --work-item-key ${JIRA_ITEM}"
     else
-        JIRATUI_COMMAND="jiratui ui --search-on-startup --focus-item-on-startup 1 -j 1"
+        GOJEERA_TUI_COMMAND="gojeera ui --search-on-startup --focus-item-on-startup 1 -j 1"
     fi
 
     if [[ -n "${TMUX}" ]]; then
-        tmux display-popup -h 90% -w 90% -S 'fg=#89b4fa' -T '#[align=absolute-centre] JiraTUI #[align=right]' -E "${JIRATUI_COMMAND}"
+        tmux display-popup -h 90% -w 90% -S 'fg=#89b4fa' -T '#[align=absolute-centre] gojeera #[align=right]' -E "${GOJEERA_TUI_COMMAND}"
     else
-        zsh -i -c "${JIRATUI_COMMAND}"
+        zsh -i -c "${GOJEERA_TUI_COMMAND}"
     fi
 }

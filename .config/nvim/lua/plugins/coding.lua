@@ -4,24 +4,23 @@ return {
 		lazy = false,
 		branch = "main",
 		build = ":TSUpdate",
-		config = function()
-			require("nvim-treesitter").install({
+		opts = {
+			ensure_installed = {
 				"awk",
 				"bash",
-                "bicep",
+				"bicep",
 				"c",
 				"cmake",
 				"comment",
 				"csv",
+				"css",
 				"diff",
 				"dockerfile",
-				"ghactions",
 				"go",
 				"gotmpl",
 				"graphql",
 				"groovy",
 				"hcl",
-				"helm",
 				"html",
 				"http",
 				"ini",
@@ -31,7 +30,6 @@ return {
 				"jq",
 				"json",
 				"json5",
-				"jsonc",
 				"just",
 				"lua",
 				"luadoc",
@@ -55,15 +53,14 @@ return {
 				"xml",
 				"yaml",
 				"zsh",
-			})
-
-			require("nvim-treesitter.parsers").ghactions = {
-				install_info = {
-					url = "https://github.com/rmuir/tree-sitter-ghactions",
-					queries = "queries",
-				},
-			}
-		end,
+			},
+			highlight = {
+				enable = true,
+			},
+			indent = {
+				enable = true,
+			},
+		},
 	},
 	{
 		"Saghen/blink.cmp",
@@ -93,7 +90,8 @@ return {
 						)
 						if vim.fn.getcwd():find("Work/GitLab", 1, true) then
 							table.insert(args, 1, original_command)
-							table.insert(args, 1, "GLAB_CONFIG_DIR=/Users/vkhitrin/.config/glab-cli/work")
+							local home = os.getenv("HOME") or vim.fn.expand("~")
+							table.insert(args, 1, "GLAB_CONFIG_DIR=" .. home .. "/.config/glab-cli/work")
 						end
 						return args
 					end,
@@ -136,7 +134,7 @@ return {
 					},
 				},
 				sources = {
-					default = { "lsp", "path", "buffer", "snippets", "git", "env" },
+					default = { "lazydev", "lsp", "path", "buffer", "snippets", "git", "env" },
 					providers = {
 						git = {
 							module = "blink-cmp-git",
@@ -165,6 +163,11 @@ return {
 								return ctx.trigger.initial_kind ~= "trigger_character"
 							end,
 						},
+						lazydev = {
+							name = "LazyDev",
+							module = "lazydev.integrations.blink",
+							score_offset = 100,
+						},
 					},
 				},
 				fuzzy = { implementation = "prefer_rust_with_warning" },
@@ -192,33 +195,15 @@ return {
 		opts = {},
 	},
 	{
-		"obsidian-nvim/obsidian.nvim",
-		version = "*",
-		lazy = true,
-		ft = "markdown",
-		opts = {
-			workspaces = {
-				{
-					name = "Personal",
-					path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Personal",
-				},
-				{
-					name = "Work",
-					path = "~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian/Work",
-				},
-			},
-			completion = {
-				nvim_cmp = false,
-				blink = true,
-			},
-			picker = {
-				name = "snacks.pick",
-			},
-			ui = { enable = false },
-			legacy_commands = false,
-		},
+		"mfussenegger/nvim-dap",
 	},
 	{
-		"mfussenegger/nvim-dap",
+		"folke/lazydev.nvim",
+		ft = "lua",
+		opts = {
+			library = {
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		},
 	},
 }

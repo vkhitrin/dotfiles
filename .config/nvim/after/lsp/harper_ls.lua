@@ -1,7 +1,7 @@
 return {
-    settings = {
-        ["harper-ls"] = {
-            userDictPath = "",
-        },
-    },
+	settings = {
+		["harper-ls"] = {
+			userDictPath = "",
+		},
+	},
 }

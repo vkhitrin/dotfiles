@@ -7,7 +7,7 @@ function kctx() {
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
         BIND_OPTIONS+="--bind=ctrl-u:execute-silent(rm -rf ~/.kube/kubesess/cache/)+reload(__xx_get_kubernetes_contexts)"
         BIND_OPTIONS+="--bind=ctrl-r:reload:(__xx_get_kubernetes_contexts)"
-        BIND_OPTIONS+="--bind=enter:become(kubesess -v {} context)"
+        BIND_OPTIONS+="--bind=enter:become(kubesess context -v {})"
         TEXT_PROMPT="CTRL-R: Refresh | CTRL-U: Unset Current Context | ENTER: Set Context"
     else
         BIND_OPTIONS+="--bind=start:unbind(enter)"

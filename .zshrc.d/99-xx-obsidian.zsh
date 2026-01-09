@@ -8,7 +8,7 @@ function obsx() {
         NOTES_TEXT_PROMPT+=" | CTRL+O: Open Note"
         INITIAL_PREVIEW="ENTER: Browse Vault Content | CTRL+O: Open Vault"
     fi
-    __xx_get_obsidian_vaults ~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian | fzf --header-lines=1 \
+    __xx_get_obsidian_vaults "${HOME}/Library/Mobile Documents/iCloud~md~obsidian" | fzf --header-lines=1 \
         --delimiter '\s\s+' \
         --info=inline \
         --layout=reverse-list \

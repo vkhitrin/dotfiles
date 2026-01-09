@@ -2,7 +2,7 @@ return {
 	{
 		"sudo-tee/opencode.nvim",
 		opts = {
-			prefered_picker = "snacks",
+			preferred_picker = "snacks",
 			ui = {
 				layout = "left",
 				icons = {
@@ -23,4 +23,15 @@ return {
 			},
 		},
 	},
+	-- {
+	-- 	"BlinkResearchLabs/blink-edit.nvim",
+	-- 	opts = {
+	-- 		llm = {
+	-- 			provider = "sweep",
+	-- 			backend = "openai",
+	-- 			url = "http://localhost:1234",
+	-- 			model = "sweep",
+	-- 		},
+	-- 	},
+	-- },
 }
