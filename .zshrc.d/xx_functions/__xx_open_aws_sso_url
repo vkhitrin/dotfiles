@@ -1,6 +1,35 @@
 __xx_open_aws_sso_url() {
     local AWS_PROFILE="${1}"
     local URL
-    URL=$(initool get "${HOME}/.aws/config" "profile ${AWS_PROFILE}" "sso_start_url" -v)
+    URL=$(awk -v profile_name="${AWS_PROFILE}" '
+        function trim(value) {
+            sub(/^[[:space:]]+/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            return value
+        }
+
+        /^\[/ {
+            current_section = $0
+            sub(/^\[/, "", current_section)
+            sub(/\]$/, "", current_section)
+            current_section = trim(current_section)
+
+            if (current_section ~ /^profile[[:space:]]+/) {
+                sub(/^profile[[:space:]]+/, "", current_section)
+            }
+
+            in_target_profile = (current_section == profile_name)
+            next
+        }
+
+        in_target_profile && /^[[:space:]]*[^#;[:space:]][^=]*=/ {
+            key_name = trim(substr($0, 1, index($0, "=") - 1))
+
+            if (key_name == "sso_start_url") {
+                print trim(substr($0, index($0, "=") + 1))
+                exit
+            }
+        }
+    ' "${HOME}/.aws/config")
     echo -n "${URL}"
 }

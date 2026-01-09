@@ -1,0 +1,7 @@
+[user]
+    email = "vadim.khitrin@plainid.com"
+    signingkey = B71D938682EB84F9
+[commit]
+    gpgsign = true
+[tag]
+    gpgSign = true

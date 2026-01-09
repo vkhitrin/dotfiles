@@ -30,6 +30,8 @@ opt.foldcolumn = "0"
 opt.conceallevel = 0
 opt.winborder = "single"
 opt.syntax = "on"
+opt.spell = true
+opt.spelllang = { "en" }
 
 -- LSP Diagnostics
 vim.diagnostic.config({
@@ -43,9 +45,6 @@ vim.diagnostic.config({
 		},
 	},
 })
-
--- Enable custom LSP servers
-vim.lsp.enable("vectorcode_server")
 
 -- Neovide GUI settings
 if vim.g.neovide then

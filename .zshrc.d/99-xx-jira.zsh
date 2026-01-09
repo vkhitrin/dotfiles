@@ -60,12 +60,13 @@ function jirx() {
 }
 
 function jinx() {
-    # xx {"tags": "jira", "description": "Display Jira notifications", "subshell": false, "cache": true}
-    __xx_get_jira_notifications | fzf --ansi --header-lines=2 --info=inline \
+    # xx {"tags": "jira", "description": "Display active Jira notifications live", "subshell": false, "cache": false}
+    __xx_get_jira_notifications | fzf --ansi --header-lines=1 --info=inline \
         --bind="start:unbind(ctrl-v,ctrl-t,enter)" \
-        --bind="ctrl-r:execute-silent(source ~/.zshrc.d/xx_functions/__xx_cache_jira_notifications_to_sqlite;__xx_cache_jira_notifications_to_sqlite)+reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_notifications;__xx_get_jira_notifications)" \
+        --bind="ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_notifications;__xx_get_jira_notifications)" \
         --bind="ctrl-o:execute-silent(source ~/.zshrc.d/xx_functions/__xx_open_jira_notification;__xx_open_jira_notification {8})" \
         --bind="ctrl-a:execute-silent(source ~/.zshrc.d/xx_functions/__xx_acknowledge_jira_notification;__xx_acknowledge_jira_notification {8})+reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_notifications;__xx_get_jira_notifications)" \
+        --bind="alt-a:execute-silent(source ~/.zshrc.d/xx_functions/__xx_acknowledge_all_jira_notifications;__xx_acknowledge_all_jira_notifications)+reload(source ~/.zshrc.d/xx_functions/__xx_get_jira_notifications;__xx_get_jira_notifications)" \
         --bind="ctrl-p:toggle-preview" \
         --preview-window="right:70%:hidden:wrap" \
         --preview="source ~/.zshrc.d/xx_functions/__xx_preview_jira_notification; __xx_preview_jira_notification {8}" \
@@ -73,13 +74,13 @@ function jinx() {
         --prompt="> Filter " \
         --layout=reverse-list \
         --border-label ' Jira Notifications ' --color 'border:#89b4fa,label:#89b4fa,header:#89b4fa:bold,header:#89b4fa' \
-        --header 'CTRL+O: Open in Browser | CTRL+A: Acknowledge | CTRL+P: Toggle Preview | CTRL+R: Refresh Cache' --tmux 80%
+        --header 'CTRL+O: Open in Browser | CTRL+A: Acknowledge | ALT+A: Acknowledge All | CTRL+P: Toggle Preview | CTRL+R: Refresh Live' --tmux 80%
 }
 
 
-which jiratui > /dev/null 2>&1 || return
+which gojeera > /dev/null 2>&1 || return
 
 function jtui() {
-    # xx {"tags": "jira,tui", "description": "Launch jiratui", "subshell": false, "cache": false}
+    # xx {"tags": "jira,tui", "description": "Launch gojeera", "subshell": false, "cache": false}
     __xx_jira_launch_tui
 }

@@ -1,0 +1,101 @@
+__xx_get_jira_notifications_live_json() {
+    source ~/.zshrc.d/xx_functions/__xx_setup_commands
+    __xx_setup_commands
+
+    local KEYCHAIN_SERVICE="JIRA_UI_TENANT_SESSION_TOKEN"
+    local JIRA_CONFIG="${HOME}/.config/.jira/.config.yml"
+    local JIRA_INSTANCE
+    local JSON_VALUE
+    local COOKIE_VALUE
+    local COOKIE_EXPIRATION_EPOCH
+    local NOW_EPOCH
+
+    if [[ ! -f "${JIRA_CONFIG}" ]]; then
+        echo "Error: Jira config file not found at ${JIRA_CONFIG}." >&2
+        return 1
+    fi
+
+    JIRA_INSTANCE=$(grep '^server:' "${JIRA_CONFIG}" | awk '{print $2}')
+    if [[ -z "${JIRA_INSTANCE}" ]]; then
+        echo "Error: Failed to read Jira instance from ${JIRA_CONFIG}." >&2
+        return 1
+    fi
+
+    JSON_VALUE="$(security find-generic-password -l ${KEYCHAIN_SERVICE} -w 2>/dev/null)"
+    if [[ -z "${JSON_VALUE}" ]]; then
+        echo "Error: Failed to fetch ${KEYCHAIN_SERVICE}." >&2
+        return 1
+    fi
+
+    COOKIE_VALUE=$(echo "${JSON_VALUE}" | jq -r '.value')
+    COOKIE_EXPIRATION_EPOCH=$(echo "${JSON_VALUE}" | jq -r '.expiresAt')
+    NOW_EPOCH=$(date +%s)
+
+    if (( NOW_EPOCH >= COOKIE_EXPIRATION_EPOCH )); then
+        echo "Error: Token expired. Please refresh ${KEYCHAIN_SERVICE} in keychain." >&2
+        return 1
+    fi
+
+    __xx_fetch_jira_notification_category() {
+        local CATEGORY="$1"
+        local CATEGORY_OVERRIDE="$2"
+        local API_URL="${JIRA_INSTANCE}/gateway/api/notification-log/api/3/notification-groups?category=${CATEGORY}&limit=25"
+
+        local RESPONSE
+        RESPONSE=$(curl -sS --compressed "${API_URL}" \
+            -X 'GET' \
+            -H 'accept: */*' \
+            -H "cookie: tenant.session.token=${COOKIE_VALUE}" \
+            -H "referer: ${JIRA_INSTANCE}/jira/notifications" \
+            -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36' \
+            -H 'x-app-name: jira-frontend')
+
+        if ! echo "${RESPONSE}" | jq -e '.groups' >/dev/null 2>&1; then
+            return 1
+        fi
+
+        echo "${RESPONSE}" | jq -c --arg category_override "${CATEGORY_OVERRIDE}" '
+            [
+              .groups[]? as $group
+              | $group.notifications[]?
+              | . + {group_id: $group.id}
+              | if (.category == null and $category_override != "") then
+                    .category = $category_override
+                else
+                    .
+                end
+            ]
+        '
+    }
+
+    local DIRECT_NOTIFICATIONS='[]'
+    local WATCHED_NOTIFICATIONS='[]'
+    local DIRECT_STATUS=1
+    local WATCHED_STATUS=1
+
+    DIRECT_NOTIFICATIONS=$(__xx_fetch_jira_notification_category "direct" "")
+    DIRECT_STATUS=$?
+
+    WATCHED_NOTIFICATIONS=$(__xx_fetch_jira_notification_category "none" "watched")
+    WATCHED_STATUS=$?
+
+    if [[ ${DIRECT_STATUS} -ne 0 ]]; then
+        DIRECT_NOTIFICATIONS='[]'
+    fi
+
+    if [[ ${WATCHED_STATUS} -ne 0 ]]; then
+        WATCHED_NOTIFICATIONS='[]'
+    fi
+
+    if [[ ${DIRECT_STATUS} -ne 0 && ${WATCHED_STATUS} -ne 0 ]]; then
+        echo "Error: Failed to fetch active Jira notifications live." >&2
+        return 1
+    fi
+
+    jq -s '
+        add
+        | map(select((.readState // "") == "unread"))
+        | sort_by(.timestamp // "")
+        | reverse
+    ' <(echo "${DIRECT_NOTIFICATIONS}") <(echo "${WATCHED_NOTIFICATIONS}")
+}

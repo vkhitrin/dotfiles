@@ -1,0 +1,13 @@
+__xx_copy_path() {
+    local MODE="${1}"
+    local ROOT_PATH="${2}"
+    local SELECTED_PATH="${3}"
+    local OUTPUT_PATH="${SELECTED_PATH:A}"
+
+    if [[ "${MODE}" == "relative" ]]; then
+        local RESOLVED_ROOT_PATH="${ROOT_PATH:A}"
+        OUTPUT_PATH="${OUTPUT_PATH#${RESOLVED_ROOT_PATH}/}"
+    fi
+
+    printf '%s' "${OUTPUT_PATH}" | "${XX_CLIPBOARD_COMMAND}"
+}

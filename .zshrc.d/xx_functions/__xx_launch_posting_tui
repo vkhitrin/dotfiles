@@ -1,0 +1,9 @@
+__xx_launch_posting_tui() {
+    local POSTING_COMMAND='posting'
+
+    if [[ -n "${TMUX}" ]]; then
+        tmux display-popup -h 90% -w 90% -S 'fg=#89b4fa' -T '#[align=absolute-centre] posting #[align=right]' -E "${POSTING_COMMAND}"
+    else
+        zsh -i -c "${POSTING_COMMAND}"
+    fi
+}

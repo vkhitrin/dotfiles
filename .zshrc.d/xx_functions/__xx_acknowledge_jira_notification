@@ -68,13 +68,6 @@ __xx_acknowledge_jira_notification() {
 
     if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
         echo "Notification ${NOTIFICATION_ID} marked as READ"
-
-        # Update local cache if it exists
-        if [[ -f "${XX_CACHE_DIR}/jira.db" ]]; then
-            sqlite3 "${XX_CACHE_DIR}/jira.db" \
-                "UPDATE Notifications SET read_state='read' WHERE id='${NOTIFICATION_ID}';" 2>/dev/null
-        fi
-
         return 0
     else
         echo "Error: Failed to acknowledge notification (HTTP ${HTTP_CODE})"

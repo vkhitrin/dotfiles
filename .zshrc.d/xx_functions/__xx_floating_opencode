@@ -1,0 +1,52 @@
+__xx_floating_opencode() {
+    emulate -L zsh  # Local options for speed
+    local DIR="${1}"
+    local TMUX_SESSION="xx-opencode-session"
+
+    local tmux_info current_session width height
+    tmux_info=$(tmux display-message -p '#S;#{window_width};#{window_height}' 2>/dev/null) || return 1
+    
+    current_session="${tmux_info%%;*}"
+    tmux_info="${tmux_info#*;}"
+    width="${tmux_info%%;*}"
+    height="${tmux_info#*;}"
+    
+    if [[ "$current_session" == "$TMUX_SESSION" ]]; then
+        tmux kill-session -t "$TMUX_SESSION"
+        return 0
+    fi
+    
+    case "$current_session" in
+        xx-*-session|popup) return 1 ;;
+    esac
+
+    if tmux list-sessions 2>/dev/null | grep -q "$TMUX_SESSION"; then
+        tmux kill-session -t "$TMUX_SESSION"
+        return 0
+    fi
+
+    local popup_width=$((width * 40 / 100))
+    local popup_height=$height
+    local pos_x=$width
+    local pos_y=0
+
+    [[ $pos_x -lt 0 ]] && pos_x=0
+
+    if nc -z localhost 51515 >/dev/null 2>&1; then
+        local dir_flag=""
+        [[ -n "$DIR" ]] && dir_flag="--dir $DIR"
+        
+        tmux popup -d "#{pane_current_path}" \
+            -S 'fg=#b4befe' \
+            -T '#[align=absolute-centre] OpenCode #[align=right]' \
+            -w "$popup_width" -h "$popup_height" \
+            -x "$pos_x" -y "$pos_y" \
+            -E "tmux new-session -s $TMUX_SESSION \"/opt/homebrew/bin/gum spin --spinner dot --title 'Loading opencode...' -- sleep 0.3; clear; exec /opt/homebrew/bin/opencode attach $dir_flag http://localhost:51515\" \; set-option status off"
+    else
+        tmux display-message -d 1000 "opencode server is not running"
+    fi
+}
+
+if [[ "${(%):-%x}" == "$0" || -n "$ZSH_EVAL_CONTEXT" ]]; then
+    __xx_floating_opencode "$@"
+fi

@@ -1,0 +1,110 @@
+{
+  "Gojeera Panel Note": {
+    "prefix": "gnote",
+    "body": [
+      "> [!NOTE]",
+      "> ${1:note}"
+    ],
+    "description": "ADF panel: info"
+  },
+  "Gojeera Panel Tip": {
+    "prefix": "gtip",
+    "body": [
+      "> [!TIP]",
+      "> ${1:tip}"
+    ],
+    "description": "ADF panel: success"
+  },
+  "Gojeera Panel Important": {
+    "prefix": "gimportant",
+    "body": [
+      "> [!IMPORTANT]",
+      "> ${1:important}"
+    ],
+    "description": "ADF panel: note"
+  },
+  "Gojeera Panel Warning": {
+    "prefix": "gwarn",
+    "body": [
+      "> [!WARNING]",
+      "> ${1:warning}"
+    ],
+    "description": "ADF panel: warning"
+  },
+  "Gojeera Panel Caution": {
+    "prefix": "gcaution",
+    "body": [
+      "> [!CAUTION]",
+      "> ${1:caution}"
+    ],
+    "description": "ADF panel: error"
+  },
+  "Gojeera Mention": {
+    "prefix": "gmention",
+    "body": "[@${1:Display Name}](${2:https://example.atlassian.net}/jira/people/${3:account_id})",
+    "description": "ADF mention link"
+  },
+  "Gojeera Date": {
+    "prefix": "gdate",
+    "body": "`[date]${1:2026-03-29}`",
+    "description": "ADF date badge"
+  },
+  "Gojeera Status Neutral": {
+    "prefix": "gstatusn",
+    "body": "`[status:n]${1:Todo}`",
+    "description": "ADF neutral status badge"
+  },
+  "Gojeera Status Error": {
+    "prefix": "gstatusr",
+    "body": "`[status:r]${1:Blocked}`",
+    "description": "ADF error status badge"
+  },
+  "Gojeera Status Primary": {
+    "prefix": "gstatusb",
+    "body": "`[status:b]${1:In Progress}`",
+    "description": "ADF primary status badge"
+  },
+  "Gojeera Status Success": {
+    "prefix": "gstatusg",
+    "body": "`[status:g]${1:Done}`",
+    "description": "ADF success status badge"
+  },
+  "Gojeera Status Warning": {
+    "prefix": "gstatusy",
+    "body": "`[status:y]${1:Needs Review}`",
+    "description": "ADF warning status badge"
+  },
+  "Gojeera Status Accent": {
+    "prefix": "gstatusp",
+    "body": "`[status:p]${1:Planned}`",
+    "description": "ADF accent status badge"
+  },
+  "Gojeera Status Teal": {
+    "prefix": "gstatust",
+    "body": "`[status:t]${1:Info}`",
+    "description": "ADF teal status badge"
+  },
+  "Gojeera Decision Decided": {
+    "prefix": "gdecisiond",
+    "body": "> `[decision:d]${1:Decision}`",
+    "description": "ADF decided item"
+  },
+  "Gojeera Decision Acknowledged": {
+    "prefix": "gdecisiona",
+    "body": "> `[decision:a]${1:Acknowledged}`",
+    "description": "ADF acknowledged item"
+  },
+  "Gojeera Decision Discussion": {
+    "prefix": "gdecisionu",
+    "body": "> `[decision:u]${1:Discussion}`",
+    "description": "ADF discussion item"
+  },
+  "Gojeera Single Cell Table": {
+    "prefix": "gtable1",
+    "body": [
+      "| ${1:Cell} |",
+      "|-|"
+    ],
+    "description": "ADF single-cell table workaround"
+  }
+}

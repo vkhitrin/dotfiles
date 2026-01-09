@@ -1,17 +1,86 @@
 __xx_construct_aws_profiles_mapping() {
-    AWS_VAULT_LIST=$(aws-vault list | sed -e '1,3d')
-    (
-        echo "Profile,Account ID,Role"
-        for PROFILE in $(aws configure list-profiles | grep -v default); do
-            PROFILE_ACCOUNT_ID=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_account_id" -v)
-            PROFILE_ROLE=$(initool get "${HOME}/.aws/config" "profile ${PROFILE}" "sso_role_name" -v)
-            PROFILE_SESSION=$(echo "${AWS_VAULT_LIST}" | grep "${PROFILE}" | awk '{print $3}')
+    local AWS_VAULT_LIST
+    local AWS_CONFIG_PROFILES
 
-            if [ "$PROFILE_SESSION" = "-" ]; then
-                PROFILE_SESSION=" "
+    AWS_VAULT_LIST=$(aws-vault list 2>/dev/null | sed -e '1,3d')
+    AWS_CONFIG_PROFILES=$(awk '
+        function trim(value) {
+            sub(/^[[:space:]]+/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            return value
+        }
+
+        function flush_profile() {
+            if (current_profile != "") {
+                print current_profile "," profile_account_id "," profile_role_name
+            }
+        }
+
+        BEGIN {
+            current_profile = ""
+            profile_account_id = ""
+            profile_role_name = ""
+        }
+
+        /^\[/ {
+            flush_profile()
+
+            current_section = $0
+            sub(/^\[/, "", current_section)
+            sub(/\]$/, "", current_section)
+            current_section = trim(current_section)
+
+            if (current_section == "default" || current_section !~ /^profile[[:space:]]+/) {
+                current_profile = ""
+                profile_account_id = ""
+                profile_role_name = ""
+                next
+            }
+
+            sub(/^profile[[:space:]]+/, "", current_section)
+            current_profile = current_section
+            profile_account_id = ""
+            profile_role_name = ""
+            next
+        }
+
+        current_profile != "" && /^[[:space:]]*[^#;[:space:]][^=]*=/ {
+            key_name = trim(substr($0, 1, index($0, "=") - 1))
+            key_value = trim(substr($0, index($0, "=") + 1))
+
+            if (key_name == "sso_account_id") {
+                profile_account_id = key_value
+            } else if (key_name == "sso_role_name") {
+                profile_role_name = key_value
+            }
+        }
+
+        END {
+            flush_profile()
+        }
+    ' "${HOME}/.aws/config")
+
+    (
+        local -A profile_sessions
+        local profile_name
+        local profile_account_id
+        local profile_role
+        local profile_session
+
+        while read -r profile_name _ profile_session _; do
+            [ -n "${profile_name}" ] || continue
+            profile_sessions["${profile_name}"]="${profile_session}"
+        done <<< "${AWS_VAULT_LIST}"
+
+        echo "Profile,Account ID,Role"
+        while IFS=',' read -r profile_name profile_account_id profile_role; do
+            [ -n "${profile_name}" ] || continue
+            profile_session="${profile_sessions[${profile_name}]:--}"
+            if [ "${profile_session}" = "-" ]; then
+                profile_session=" "
             fi
 
-            echo "${PROFILE},${PROFILE_ACCOUNT_ID},${PROFILE_ROLE},${PROFILE_SESSION}" | awk -F ',' '
+            echo "${profile_name},${profile_account_id},${profile_role},${profile_session}" | awk -F ',' '
             {
               output = $1 "," $2 "," $3;
               if ($4 ~ / /)
@@ -19,6 +88,6 @@ __xx_construct_aws_profiles_mapping() {
               else
                 printf "\033[33m%s\033[0m\n", output;
             }'
-        done
+        done <<< "${AWS_CONFIG_PROFILES}"
     ) | awk 'NR==1 {print toupper($0); next} {print}' | __xx_format_columns_ansi ','
 }

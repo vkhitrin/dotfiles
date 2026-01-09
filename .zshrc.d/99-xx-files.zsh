@@ -2,10 +2,13 @@ function gpx() {
     # xx {"tags": "git,shell", "description": "Navigate to local git projects", "subshell": "PARTIAL", "cache": false}
     local STARTING_PATH="${1:-${HOME}/Projects/}"
     local REFRESH_CACHE="${2:-false}"
+    local RESOLVED_STARTING_PATH="${STARTING_PATH:A}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="CTRL+O: Browse | CTRL+T: Open In New Tmux Window | CTRL+R: Refresh Cache | CTRL+P: Toggle Preview"
+    local TEXT_PROMPT="CTRL+O: Browse | CTRL+T: Open In New Tmux Window | CTRL+B: Copy Relative Path | CTRL+F: Copy Full Path | CTRL+R: Refresh Cache | CTRL+P: Toggle Preview"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
     BIND_OPTIONS+="--bind=ctrl-o:execute-silent(cd {}; git open)"
+    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_path; __xx_copy_path relative \"${RESOLVED_STARTING_PATH}\" \"{r}\")"
+    BIND_OPTIONS+="--bind=ctrl-f:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_path; __xx_copy_path full \"${RESOLVED_STARTING_PATH}\" \"{r}\")"
     BIND_OPTIONS+="--bind=ctrl-r:reload(source ~/.zshrc.d/xx_functions/__xx_get_git_directories; __xx_get_git_directories '${STARTING_PATH}' true 2>/dev/null)"
     BIND_OPTIONS+="--bind=ctrl-p:toggle-preview"
     BIND_OPTIONS+="--preview-window=right:70%:hidden:wrap"
@@ -34,10 +37,12 @@ function cdx() {
     else
         STARTING_PATH="${PWD}"
     fi
+    local RESOLVED_STARTING_PATH="${STARTING_PATH:A}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window | CTRL+B: Copy Relative Path"
+    local TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window | CTRL+B: Copy Relative Path | CTRL+F: Copy Full Path"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d -c {})"
-    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${XX_CLIPBOARD_COMMAND})"
+    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_path; __xx_copy_path relative \"${RESOLVED_STARTING_PATH}\" \"{r}\")"
+    BIND_OPTIONS+="--bind=ctrl-f:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_path; __xx_copy_path full \"${RESOLVED_STARTING_PATH}\" \"{r}\")"
     BIND_OPTIONS+="--bind=start:unbind(ctrl-d)"
     if [ ! -z "${TMUX}" ]; then
         BIND_OPTIONS+="--bind=delete:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; cdx)"
@@ -68,10 +73,12 @@ function fdx() {
     else
         STARTING_PATH="${PWD}"
     fi
+    local RESOLVED_STARTING_PATH="${STARTING_PATH:A}"
     local BIND_OPTIONS=()
-    local TEXT_PROMPT="CTRL+T: Edit File In New Tmux Window | CTRL+B: Copy Relative Path"
+    local TEXT_PROMPT="CTRL+T: Edit File In New Tmux Window | CTRL+B: Copy Relative Path | CTRL+F: Copy Full Path"
     BIND_OPTIONS+="--bind=ctrl-t:execute-silent(tmux new-window -d ${EDITOR} {})"
-    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(echo {} | ${XX_CLIPBOARD_COMMAND})"
+    BIND_OPTIONS+="--bind=ctrl-b:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_path; __xx_copy_path relative \"${RESOLVED_STARTING_PATH}\" \"{r}\")"
+    BIND_OPTIONS+="--bind=ctrl-f:execute-silent(source ~/.zshrc.d/xx_functions/__xx_copy_path; __xx_copy_path full \"${RESOLVED_STARTING_PATH}\" \"{r}\")"
     BIND_OPTIONS+="--bind=start:unbind(ctrl-d)"
     if [ ! -z "${TMUX}" ]; then
         BIND_OPTIONS+="--bind=delete:become(source ~/.zshrc.d/xx_functions/__xx_delete_path; __xx_delete_path {};source ~/.zshrc.d/99-xx-files.zsh; fdx)"
@@ -83,11 +90,11 @@ function fdx() {
     else
         BIND_OPTIONS+="--bind=start:unbind(enter)"
     fi
-    local SELECTED_DIR=$(fd --full-path -H -t f "${STARTING_PATH}" | fzf \
+    local SELECTED_FILE=$(fzf \
         --border-label " Files Under '$(basename ${STARTING_PATH})' " \
         --info=inline --color 'border:#f38ba8,label:#f38ba8,header:#f38ba8' \
         --prompt "> Filter " --header "${TEXT_PROMPT}" --scheme=path \
         ${BIND_OPTIONS[@]}
     )
-    [ ! -z ${SELECTED_DIR} ] && ${EDITOR} "${SELECTED_DIR}"
+    [ ! -z ${SELECTED_FILE} ] && ${EDITOR} "${SELECTED_FILE}"
 }

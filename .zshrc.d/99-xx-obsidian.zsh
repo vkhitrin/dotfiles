@@ -1,6 +1,6 @@
 function obsx() {
     # xx {"tags": "obsidian", "description": "View Obsidian notes", "subshell": "PARTIAL", "cache": false}
-    local EXTRA_BIND_OPTIONS="ctrl-t:execute-silent(tmux new-window -d \"\$EDITOR {2}\"),ctrl-d:become(obsidian-cli daily --vault {3}),ctrl-n:become(obsidian-cli create --vault {3} $(uuidgen))"
+    local EXTRA_BIND_OPTIONS="ctrl-t:execute-silent(tmux new-window -d \"\$EDITOR {2}\"),ctrl-d:become(notesmd-cli daily --vault {3}),ctrl-n:become(obsidian-cli create --vault {3} $(uuidgen))"
     local NOTES_TEXT_PROMPT="CTRL+T: Open Directory In New Tmux Window | CTRL+D: New Daily Note | CTRL+N: New Note | CTRL+P: Toggle Preview"
     local INITIAL_PREVIEW="ENTER: Browse Vault Content"
     if [[ ! -n ${XX_CALLBACK_FROM_TMUX} ]]; then
@@ -8,7 +8,7 @@ function obsx() {
         NOTES_TEXT_PROMPT+=" | CTRL+O: Open Note"
         INITIAL_PREVIEW="ENTER: Browse Vault Content | CTRL+O: Open Vault"
     fi
-    __xx_get_obsidian_vaults ~/.iCloudDrive/OperatingSystems/Cross-Platform/Obsidian | fzf --header-lines=1 \
+    __xx_get_obsidian_vaults "${HOME}/Library/Mobile Documents/iCloud~md~obsidian" | fzf --header-lines=1 \
         --delimiter '\s\s+' \
         --info=inline \
         --layout=reverse-list \

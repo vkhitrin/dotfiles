@@ -1,0 +1,11 @@
+{
+  "name": "gojeera-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": "md.gojeera",
+        "path": "./gojeera.md.json"
+      }
+    ]
+  }
+}

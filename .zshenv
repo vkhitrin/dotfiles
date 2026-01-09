@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 
 # Locale
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+export LC_ALL=en_GB.UTF-8
+export LANG=en_GB.UTF-8
 
 # fzf
 export FZF_DEFAULT_OPTS=" \
@@ -34,9 +34,6 @@ export CLOUDSDK_PYTHON_SITEPACKAGES=1
 ## Unset account, each shell should define the required account
 export CLOUDSDK_CORE_ACCOUNT=""
 
-# ChromaDB
-export ANONYMIZED_TELEMETRY="False"
-
 # Azure
 export AZURE_CORE_COLLECT_TELEMETRY="false"
 
@@ -59,13 +56,8 @@ if [ -d "${HOME}/.zshrc.d/xx_functions" ]; then
     done
 fi
 
-# If socktainer exists and running in macOS
-if [[ -f "/opt/homebrew/bin/socktainer" && $(uname) == "Darwin" ]];then
-    export DOCKER_HOST=unix://${HOME}/.socktainer/container.sock
-    export DOCKER_BUILDKIT=0
-    export TESTCONTAINERS_RYUK_DISABLED=true
-fi
-
-# OpenCode
-OPENCODE_DISABLE_LSP_DOWNLOAD=true
-. "$HOME/.cargo/env"
+# # If socktainer exists and running in macOS
+# if [[ -f "/opt/homebrew/bin/socktainer" && $(uname) == "Darwin" ]];then
+#     export DOCKER_BUILDKIT=0
+#     export TESTCONTAINERS_RYUK_DISABLED=true
+# fi

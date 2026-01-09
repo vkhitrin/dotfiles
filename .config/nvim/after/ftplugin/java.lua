@@ -2,7 +2,7 @@ local config = {
 	cmd = {
 		"jdtls",
 		"--java-executable",
-		"/Library/Java/JavaVirtualMachines/temurin-24.jdk/Contents/Home/bin/java",
+		"/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home/bin/java",
 		"--jvm-arg="
 			.. string.format("-javaagent:%s", vim.fn.expand("$HOME/.local/share/nvim/mason/packages/jdtls/lombok.jar")),
 	},
@@ -17,13 +17,17 @@ local config = {
 						default = true,
 					},
 					{
-						name = "JavaSE-24",
-						path = "/Library/Java/JavaVirtualMachines/temurin-24.jdk/Contents/Home",
+						name = "JavaSE-21",
+						path = "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+						default = true,
+					},
+					{
+						name = "JavaSE-25",
+						path = "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home",
 					},
 				},
 			},
 		},
 	},
 }
--- require("lspconfig").jdtls.setup({ config })
 vim.lsp.config("jdtls", config)
